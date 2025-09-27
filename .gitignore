@@ -1,0 +1,62 @@
+############################################################
+# Clean .gitignore
+# Purpose: Exclude dependencies, build outputs, secrets, temp, tooling
+############################################################
+
+# Node dependencies
+node_modules/
+
+# Build / Output
+dist/
+dist-ssr/
+.vercel/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+secret*.json
+turso-db.json
+turso-db-token.json
+
+# Databases / ORM / Prisma
+.prisma/
+prisma/client/
+*.db
+*.sqlite
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Local overrides & temp files
+*.local.*
+*.swp
+*.tmp
+*.orig
+tmp-*.js
+
+# IDE / Editor / OS
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Internal tooling artifacts
+.serena/
+
+# Coverage
+coverage/
+
+# (Optional) generated code placeholder
+# src/generated/
+
+############################################################

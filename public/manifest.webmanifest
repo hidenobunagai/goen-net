@@ -1,0 +1,19 @@
+{
+  "name": "Goen Net - GroWith",
+  "short_name": "GoenNet",
+  "description": "Offline-capable access to the Goen Net - GroWith platform.",
+  "lang": "ja",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1b2c6b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
