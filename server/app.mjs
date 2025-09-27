@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { Resend } from 'resend';
+import { csrf } from 'lusca';
 
 // --- Turso (libSQL) client --------------------------------------------------
 let tursoUrlSource = null;
@@ -369,6 +370,7 @@ app.use(rateLimit({
 }));
 app.use(express.json({ limit: '64kb' })); // limit payload size (DoS mitigation)
 app.use(cookieParser());
+app.use(csrf());
 
 // Allow same-origin requests; if CORS_ORIGIN defined allow credentials
 const corsOrigin = process.env.CORS_ORIGIN;
