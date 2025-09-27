@@ -6,10 +6,10 @@ import rateLimit from 'express-rate-limit';
 import { OAuth2Client } from 'google-auth-library';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { Resend } from 'resend';
 
 // --- Turso (libSQL) client --------------------------------------------------
-// Accept common env var aliases to reduce misconfiguration risk in deployments
 let tursoUrlSource = null;
 let tursoAuthSource = null;
 let tursoUrlRaw = null;
@@ -429,10 +429,15 @@ function issueSession(res, payload) {
     iss: 'goen-net',
     aud: 'goen-net-web'
   }, SESSION_SECRET, { algorithm: 'HS256', expiresIn: '7d' });
-  res.cookie('session', token, {
+
+  // Encrypt the token before setting in cookie
+  const encryptedToken = encrypt(token);
+
+  res.cookie('session', encryptedToken, {
     httpOnly: true,
     sameSite: 'strict', // stronger CSRF protection
     secure: isProd,
+
     path: '/',
     maxAge: 7 * 24 * 3600 * 1000,
   });
@@ -442,7 +447,13 @@ function issueSession(res, payload) {
 function decodeSession(req) {
   const raw = req.cookies?.session;
   if (!raw) return null;
-  try { return jwt.verify(raw, SESSION_SECRET); } catch { return null; }
+  try {
+    // Decrypt the token from the cookie, then verify JWT
+    const decryptedToken = decrypt(raw);
+    return jwt.verify(decryptedToken, SESSION_SECRET);
+  } catch {
+    return null;
+  }
 }
 
 // ---------------- Standardized response helpers ---------------------------
