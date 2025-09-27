@@ -109,25 +109,51 @@ const Home: React.FC = () => {
     return () => controller.abort()
   }, [loadNextSession])
 
+  // Only allow safe URLs in anchor tags to defend against XSS and protocol abuse.
+  const sanitizeUrl = (raw: string): string | null => {
+    try {
+      const url = new URL(raw, 'https://example.com') // base for relative URLs
+      // Allow only http: and https:
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        // Remove control characters
+        return url.href.replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
+
   const renderLocation = (value: string): React.ReactNode => {
     const text = (value || '').trim()
     if (!text) return 'Location TBD'
+    // Case 1: Already a complete http(s):// URL
     if (/^https?:\/\//i.test(text)) {
-      return <a href={text} target="_blank" rel="noopener noreferrer">{text}</a>
+      const trusted = sanitizeUrl(text)
+      if (trusted)
+        return <a href={trusted} target="_blank" rel="noopener noreferrer">{text}</a>
+      return text
     }
+    // Case 2: Looks like a domain or "www." URL, construct https://
     if (/^www\.[^\s]+$/i.test(text) || /^[\w.-]+\.[a-z]{2,}[^\s]*$/i.test(text)) {
       const url = `https://${text}`
-      return <a href={url} target="_blank" rel="noopener noreferrer">{text}</a>
+      const trusted = sanitizeUrl(url)
+      if (trusted)
+        return <a href={trusted} target="_blank" rel="noopener noreferrer">{text}</a>
+      return text
     }
+    // Case 3: Contains a http(s):// URL inside of text
     const match = text.match(/https?:\/\/\S+/i)
     if (!match || match.index == null) return text
     const url = match[0]
+    const trusted = sanitizeUrl(url)
+    if (!trusted) return text
     const prefix = text.slice(0, match.index)
     const suffix = text.slice(match.index + url.length)
     return (
       <>
         {prefix}
-        <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
+        <a href={trusted} target="_blank" rel="noopener noreferrer">{url}</a>
         {suffix}
       </>
     )
