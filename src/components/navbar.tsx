@@ -1,0 +1,316 @@
+"use client";
+
+import MenuIcon from "@mui/icons-material/Menu";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import ListSubheader from "@mui/material/ListSubheader";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import { alpha, useTheme } from "@mui/material/styles";
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { MouseEvent, ReactNode, useCallback, useState } from "react";
+
+const primaryLinks = [
+  { label: "Updates", path: "/updates" },
+  { label: "Prioritization", path: "/prioritization" },
+];
+
+const worksheetLinks = [
+  { label: "Presenter", path: "/worksheets/presenter" },
+  { label: "Coach", path: "/worksheets/coach" },
+  { label: "Observer", path: "/worksheets/observer" },
+];
+
+const documentationLinks = [
+  { label: "Moderator", path: "/documentation/moderator" },
+];
+
+type NavLink = {
+  label: string;
+  path: string;
+};
+
+function useActiveChecker() {
+  const pathname = usePathname();
+  return useCallback(
+    (path: string) => {
+      if (!pathname) return false;
+      return pathname === path || pathname.startsWith(`${path}/`);
+    },
+    [pathname]
+  );
+}
+
+export function Navbar() {
+  const router = useRouter();
+  const isActive = useActiveChecker();
+  const { status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const theme = useTheme();
+
+  const [anchorNav, setAnchorNav] = useState<HTMLElement | null>(null);
+  const [anchorWorksheet, setAnchorWorksheet] = useState<HTMLElement | null>(
+    null
+  );
+  const [anchorDocs, setAnchorDocs] = useState<HTMLElement | null>(null);
+
+  const handleOpenNav = (event: MouseEvent<HTMLElement>) => {
+    setAnchorNav(event.currentTarget);
+  };
+  const handleCloseNav = () => setAnchorNav(null);
+
+  const handleOpenWorksheet = (event: MouseEvent<HTMLElement>) => {
+    setAnchorWorksheet(event.currentTarget);
+  };
+  const handleCloseWorksheet = () => setAnchorWorksheet(null);
+
+  const handleOpenDocs = (event: MouseEvent<HTMLElement>) => {
+    setAnchorDocs(event.currentTarget);
+  };
+  const handleCloseDocs = () => setAnchorDocs(null);
+
+  const navigateAndClose = (path: string, closer: () => void) => {
+    closer();
+    router.push(path);
+  };
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/signin" });
+  };
+
+  const renderLinkButton = ({ label, path }: NavLink) => {
+    const active = isActive(path);
+    return (
+      <Button
+        key={path}
+        color="inherit"
+        onClick={() => router.push(path)}
+        sx={{
+          position: "relative",
+          fontWeight: 600,
+          borderRadius: 999,
+          px: 2.5,
+          py: 0.75,
+          letterSpacing: "0.02em",
+          bgcolor: active
+            ? alpha(theme.palette.common.white, 0.16)
+            : "transparent",
+          color: "inherit",
+          transition: "background-color 0.2s ease, transform 0.2s ease",
+          "&:hover": {
+            bgcolor: alpha(theme.palette.common.white, 0.22),
+            transform: "translateY(-1px)",
+          },
+        }}
+      >
+        {label}
+      </Button>
+    );
+  };
+
+  const mobileMenuContent: ReactNode = isAuthenticated ? (
+    [
+      ...primaryLinks.map(({ path, label }) => (
+        <MenuItem
+          key={`mobile-nav-${path}`}
+          selected={isActive(path)}
+          onClick={() => navigateAndClose(path, handleCloseNav)}
+        >
+          {label}
+        </MenuItem>
+      )),
+      <Divider key="mobile-divider-worksheets" sx={{ my: 0.5 }} />,
+      <ListSubheader key="mobile-subheader-worksheets" disableSticky>
+        Worksheets
+      </ListSubheader>,
+      ...worksheetLinks.map((link) => (
+        <MenuItem
+          key={`mobile-worksheet-${link.path}`}
+          selected={isActive(link.path)}
+          onClick={() => navigateAndClose(link.path, handleCloseNav)}
+        >
+          {link.label}
+        </MenuItem>
+      )),
+      <ListSubheader key="mobile-subheader-docs" disableSticky>
+        Documentation
+      </ListSubheader>,
+      ...documentationLinks.map((link) => (
+        <MenuItem
+          key={`mobile-docs-${link.path}`}
+          selected={isActive(link.path)}
+          onClick={() => navigateAndClose(link.path, handleCloseNav)}
+        >
+          {link.label}
+        </MenuItem>
+      )),
+      <Divider key="mobile-divider-signout" sx={{ my: 0.5 }} />,
+      <MenuItem key="mobile-sign-out" onClick={handleSignOut}>
+        Sign Out
+      </MenuItem>,
+    ]
+  ) : (
+    <MenuItem
+      onClick={() => navigateAndClose("/signin", handleCloseNav)}
+      key="mobile-sign-in"
+    >
+      Sign In
+    </MenuItem>
+  );
+  return (
+    <AppBar position="static" color="primary">
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ gap: 1.5, py: 1 }}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+              <Typography
+                variant="h6"
+                component="span"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  display: "inline-flex",
+                  alignItems: "center",
+                }}
+              >
+                Goen Net
+              </Typography>
+            </Link>
+          </Box>
+
+          <IconButton
+            color="inherit"
+            sx={{ display: { xs: "inline-flex", md: "none" } }}
+            onClick={handleOpenNav}
+            aria-label="Open navigation menu"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorNav}
+            open={Boolean(anchorNav)}
+            onClose={handleCloseNav}
+            keepMounted
+            sx={{ display: { xs: "block", md: "none" } }}
+          >
+            {mobileMenuContent}
+          </Menu>
+
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              gap: 1.5,
+              alignItems: "center",
+            }}
+          >
+            {isAuthenticated ? (
+              <>
+                {primaryLinks.map(renderLinkButton)}
+                <Button
+                  color="inherit"
+                  onClick={handleOpenWorksheet}
+                  sx={{
+                    fontWeight: 600,
+                    borderRadius: 999,
+                    px: 2.5,
+                    bgcolor: alpha(theme.palette.common.white, 0.08),
+                    "&:hover": {
+                      bgcolor: alpha(theme.palette.common.white, 0.16),
+                    },
+                  }}
+                >
+                  Worksheets
+                </Button>
+                <Menu
+                  anchorEl={anchorWorksheet}
+                  open={Boolean(anchorWorksheet)}
+                  onClose={handleCloseWorksheet}
+                  keepMounted
+                >
+                  {worksheetLinks.map((link) => (
+                    <MenuItem
+                      key={link.path}
+                      selected={isActive(link.path)}
+                      onClick={() =>
+                        navigateAndClose(link.path, handleCloseWorksheet)
+                      }
+                    >
+                      {link.label}
+                    </MenuItem>
+                  ))}
+                </Menu>
+
+                <Button
+                  color="inherit"
+                  onClick={handleOpenDocs}
+                  sx={{
+                    fontWeight: 600,
+                    borderRadius: 999,
+                    px: 2.5,
+                    bgcolor: alpha(theme.palette.common.white, 0.08),
+                    "&:hover": {
+                      bgcolor: alpha(theme.palette.common.white, 0.16),
+                    },
+                  }}
+                >
+                  Documentation
+                </Button>
+                <Menu
+                  anchorEl={anchorDocs}
+                  open={Boolean(anchorDocs)}
+                  onClose={handleCloseDocs}
+                  keepMounted
+                >
+                  {documentationLinks.map((link) => (
+                    <MenuItem
+                      key={link.path}
+                      selected={isActive(link.path)}
+                      onClick={() =>
+                        navigateAndClose(link.path, handleCloseDocs)
+                      }
+                    >
+                      {link.label}
+                    </MenuItem>
+                  ))}
+                </Menu>
+
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleSignOut}
+                  sx={{
+                    bgcolor: alpha(theme.palette.secondary.main, 0.95),
+                    color: "#ffffff",
+                    px: 3,
+                    "&:hover": {
+                      bgcolor: theme.palette.secondary.main,
+                    },
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button
+                color="secondary"
+                variant="contained"
+                onClick={() => router.push("/signin")}
+                sx={{ px: 3 }}
+              >
+                Sign In
+              </Button>
+            )}
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
+  );
+}

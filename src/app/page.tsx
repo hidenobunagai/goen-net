@@ -1,0 +1,425 @@
+import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
+import { authOptions } from "@/lib/auth";
+import { getNextSession } from "@/lib/turso";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import Container from "@mui/material/Container";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Unstable_Grid2";
+import { getServerSession } from "next-auth";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/signin");
+  }
+
+  const [nextSession] = await Promise.all([getNextSession()]);
+  const user = session.user;
+  const firstName = user?.name?.split(" ")[0] ?? "Member";
+
+  return (
+    <Box component="section" sx={{ position: "relative", overflow: "hidden" }}>
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(0,27,68,0.12) 0%, rgba(0,27,68,0.04) 45%, transparent 100%)",
+          pointerEvents: "none",
+        }}
+      />
+      <Container
+        maxWidth="lg"
+        sx={{ py: { xs: 5, md: 7 }, position: "relative", zIndex: 1 }}
+      >
+        <Stack spacing={{ xs: 6, md: 9 }}>
+          <Grid
+            container
+            spacing={4}
+            columns={{ xs: 1, md: 12 }}
+            alignItems="stretch"
+          >
+            <Grid size={{ xs: 1, md: 7 }}>
+              <Stack spacing={2.5} sx={{ pr: { md: 4 } }}>
+                <Typography
+                  variant="h2"
+                  component="h1"
+                  sx={{ fontWeight: 700 }}
+                >
+                  Everything builds toward our next session, {firstName}.
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Align on priorities, surface decisions, and arrive prepared to
+                  move the circle forward. Start by reviewing your peers’ latest
+                  updates so everyone arrives ready for the conversation.
+                </Typography>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={2}
+                  sx={{ pt: 1 }}
+                >
+                  <Button
+                    component={Link}
+                    href="/updates"
+                    variant="contained"
+                    color="secondary"
+                    sx={{ px: 3 }}
+                  >
+                    Prepare updates
+                  </Button>
+                </Stack>
+              </Stack>
+            </Grid>
+            <Grid size={{ xs: 1, md: 5 }}>
+              <Card
+                elevation={3}
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  p: { xs: 1, sm: 1.5 },
+                }}
+              >
+                <NextSessionCard initial={nextSession} />
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Card
+            sx={{
+              p: { xs: 3, md: 4 },
+              backgroundImage:
+                "linear-gradient(160deg, rgba(255,255,255,0.96), rgba(0,27,68,0.08))",
+            }}
+          >
+            <Stack spacing={3}>
+              <Stack spacing={1} sx={{ maxWidth: 760 }}>
+                <Typography
+                  variant="overline"
+                  color="primary"
+                  sx={{ letterSpacing: "0.18em" }}
+                >
+                  Workspace at a glance
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                  One private hub for our eight-person circle
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Everything on this site is built to help us prepare, run, and
+                  follow through on Goen Net sessions without digging through
+                  email threads or spreadsheets.
+                </Typography>
+              </Stack>
+              <Grid container spacing={3} columns={{ xs: 1, md: 12 }}>
+                <Grid size={{ xs: 1, md: 4 }}>
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Share signal-rich updates
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Capture highlights, tag the timeframe, and vote so the
+                      facilitator instantly sees where the energy is.
+                    </Typography>
+                  </Stack>
+                </Grid>
+                <Grid size={{ xs: 1, md: 4 }}>
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Shape the agenda together
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Use prioritization to bubble up topics that need deep
+                      discussion before we walk into the room.
+                    </Typography>
+                  </Stack>
+                </Grid>
+                <Grid size={{ xs: 1, md: 4 }}>
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Capture commitments automatically
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Decisions, owners, and follow-ups stay connected to the
+                      session so we can check progress next time without
+                      rebuilding context.
+                    </Typography>
+                  </Stack>
+                </Grid>
+              </Grid>
+            </Stack>
+          </Card>
+
+          <Card sx={{ p: { xs: 3, md: 4 } }}>
+            <Stack spacing={3}>
+              <Stack spacing={1}>
+                <Typography
+                  variant="overline"
+                  color="primary"
+                  sx={{ letterSpacing: "0.18em" }}
+                >
+                  Session rhythm
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  How to use the app before, during, and after we meet
+                </Typography>
+              </Stack>
+              <Stack spacing={2.5}>
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      minWidth: 36,
+                      textAlign: "center",
+                      borderRadius: 999,
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
+                      py: 0.5,
+                    }}
+                  >
+                    1
+                  </Typography>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Before the session
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Submit or refresh your update, add supporting links, and
+                      vote on priorities so the facilitator can finalize the
+                      flow.
+                    </Typography>
+                  </Stack>
+                </Stack>
+                <Divider flexItem sx={{ my: 0 }} />
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      minWidth: 36,
+                      textAlign: "center",
+                      borderRadius: 999,
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
+                      py: 0.5,
+                    }}
+                  >
+                    2
+                  </Typography>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      During the session
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Track the agenda live, capture decisions in the update
+                      threads, and record new actions directly from the room.
+                    </Typography>
+                  </Stack>
+                </Stack>
+                <Divider flexItem sx={{ my: 0 }} />
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      minWidth: 36,
+                      textAlign: "center",
+                      borderRadius: 999,
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
+                      py: 0.5,
+                    }}
+                  >
+                    3
+                  </Typography>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      After we wrap
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Add follow-up notes, confirm owners, and schedule
+                      check-ins so nothing slips between sessions.
+                    </Typography>
+                  </Stack>
+                </Stack>
+                <Divider flexItem sx={{ my: 0 }} />
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      minWidth: 36,
+                      textAlign: "center",
+                      borderRadius: 999,
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
+                      py: 0.5,
+                    }}
+                  >
+                    4
+                  </Typography>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Staying aligned between sessions
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Use votes and comments to nudge momentum mid-cycle and
+                      help each other stay accountable.
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Stack>
+            </Stack>
+          </Card>
+
+          <Grid container spacing={3} columns={{ xs: 1, md: 12 }}>
+            <Grid size={{ xs: 1, md: 4 }}>
+              <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
+                <Stack spacing={1.5}>
+                  <Typography
+                    variant="overline"
+                    color="primary"
+                    sx={{ letterSpacing: "0.18em" }}
+                  >
+                    Tools
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Updates workspace
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Draft your update, paste links, mark anything urgent, and
+                    see how the votes evolve as teammates weigh in.
+                  </Typography>
+                  <Button
+                    component={Link}
+                    href="/updates"
+                    variant="text"
+                    sx={{ alignSelf: "flex-start" }}
+                  >
+                    Go to Updates
+                  </Button>
+                </Stack>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 1, md: 4 }}>
+              <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
+                <Stack spacing={1.5}>
+                  <Typography
+                    variant="overline"
+                    color="primary"
+                    sx={{ letterSpacing: "0.18em" }}
+                  >
+                    Tools
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Prioritization board
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Score urgency and commitment, lock the running order, and
+                    keep everyone on the same slide during facilitation.
+                  </Typography>
+                  <Button
+                    component={Link}
+                    href="/prioritization"
+                    variant="text"
+                    sx={{ alignSelf: "flex-start" }}
+                  >
+                    Open Prioritization
+                  </Button>
+                </Stack>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 1, md: 4 }}>
+              <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
+                <Stack spacing={1.5}>
+                  <Typography
+                    variant="overline"
+                    color="primary"
+                    sx={{ letterSpacing: "0.18em" }}
+                  >
+                    Tools
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Worksheets & playbooks
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Lean on ready-to-run scripts and prompts tailored to each
+                    role so facilitation feels consistent across sessions.
+                  </Typography>
+                  <Button
+                    component={Link}
+                    href="/documentation/moderator"
+                    variant="text"
+                    sx={{ alignSelf: "flex-start" }}
+                  >
+                    View guides
+                  </Button>
+                </Stack>
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Card sx={{ p: { xs: 3, md: 4 } }}>
+            <Stack spacing={2.5}>
+              <Stack spacing={1}>
+                <Typography
+                  variant="overline"
+                  color="primary"
+                  sx={{ letterSpacing: "0.18em" }}
+                >
+                  Roles & preparation
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  Arrive clear on how you’ll contribute
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Choose the worksheet for the role you’ll play this meeting to
+                  streamline prep and keep conversations sharp.
+                </Typography>
+              </Stack>
+              <Grid container spacing={2} columns={{ xs: 1, sm: 3 }}>
+                <Grid size={{ xs: 1 }}>
+                  <Button
+                    component={Link}
+                    href="/worksheets/presenter"
+                    variant="outlined"
+                    fullWidth
+                  >
+                    Presenter Worksheet
+                  </Button>
+                </Grid>
+                <Grid size={{ xs: 1 }}>
+                  <Button
+                    component={Link}
+                    href="/worksheets/coach"
+                    variant="outlined"
+                    fullWidth
+                  >
+                    Coach Worksheet
+                  </Button>
+                </Grid>
+                <Grid size={{ xs: 1 }}>
+                  <Button
+                    component={Link}
+                    href="/worksheets/observer"
+                    variant="outlined"
+                    fullWidth
+                  >
+                    Observer Worksheet
+                  </Button>
+                </Grid>
+              </Grid>
+            </Stack>
+          </Card>
+        </Stack>
+      </Container>
+    </Box>
+  );
+}
