@@ -70,7 +70,7 @@ export default async function Home() {
                     href="/updates"
                     variant="contained"
                     color="secondary"
-                    sx={{ px: 3 }}
+                    sx={{ px: 3, color: "secondary.contrastText" }}
                   >
                     Prepare updates
                   </Button>

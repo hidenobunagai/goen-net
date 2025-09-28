@@ -472,8 +472,8 @@ export function UpdatesBoard({
                       px: 1.5,
                       py: 0.5,
                       borderRadius: 999,
-                      bgcolor: "primary.light",
-                      color: "primary.dark",
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
                       fontWeight: 700,
                       fontSize: "0.95rem",
                       letterSpacing: 0.3,
@@ -484,6 +484,7 @@ export function UpdatesBoard({
                       gap: 0.25,
                       maxWidth: "100%",
                       wordBreak: "break-word",
+                      boxShadow: "0 10px 20px rgba(0, 27, 68, 0.16)",
                     }}
                     title={item.by}
                   >

@@ -96,7 +96,6 @@ export function Navbar() {
         sx={{
           position: "relative",
           fontWeight: 600,
-          borderRadius: 999,
           px: 2.5,
           py: 0.75,
           letterSpacing: "0.02em",
@@ -219,11 +218,18 @@ export function Navbar() {
                   onClick={handleOpenWorksheet}
                   sx={{
                     fontWeight: 600,
-                    borderRadius: 999,
                     px: 2.5,
-                    bgcolor: alpha(theme.palette.common.white, 0.08),
+                    py: 0.75,
+                    letterSpacing: "0.02em",
+                    color: "inherit",
+                    transition:
+                      "background-color 0.2s ease, transform 0.2s ease",
+                    bgcolor: anchorWorksheet
+                      ? alpha(theme.palette.common.white, 0.16)
+                      : "transparent",
                     "&:hover": {
-                      bgcolor: alpha(theme.palette.common.white, 0.16),
+                      bgcolor: alpha(theme.palette.common.white, 0.22),
+                      transform: "translateY(-1px)",
                     },
                   }}
                 >
@@ -253,11 +259,18 @@ export function Navbar() {
                   onClick={handleOpenDocs}
                   sx={{
                     fontWeight: 600,
-                    borderRadius: 999,
                     px: 2.5,
-                    bgcolor: alpha(theme.palette.common.white, 0.08),
+                    py: 0.75,
+                    letterSpacing: "0.02em",
+                    color: "inherit",
+                    transition:
+                      "background-color 0.2s ease, transform 0.2s ease",
+                    bgcolor: anchorDocs
+                      ? alpha(theme.palette.common.white, 0.16)
+                      : "transparent",
                     "&:hover": {
-                      bgcolor: alpha(theme.palette.common.white, 0.16),
+                      bgcolor: alpha(theme.palette.common.white, 0.22),
+                      transform: "translateY(-1px)",
                     },
                   }}
                 >

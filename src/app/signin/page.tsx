@@ -15,10 +15,13 @@ export default function SignInPage() {
       sx={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         bgcolor: "background.default",
         px: 2,
+        pt: { xs: 10, md: 14 },
+        pb: { xs: 6, md: 10 },
       }}
     >
       <Paper
