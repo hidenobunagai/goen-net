@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const randomUUIDMock = vi.fn(() => "test-id");
+
 vi.mock("next-auth", () => ({
   getServerSession: vi.fn(),
+}));
+
+vi.mock("crypto", () => ({
+  randomUUID: randomUUIDMock,
+  default: { randomUUID: randomUUIDMock },
 }));
 
 vi.mock("@/lib/updates", () => ({
@@ -133,6 +140,7 @@ describe("/api/updates route", () => {
       user: { email: "user@example.com", name: "User" },
     } as never);
     vi.mocked(requireJson).mockResolvedValueOnce({
+      title: "Update title",
       update: "text",
       when: 1,
       category: 0,
@@ -155,6 +163,7 @@ describe("/api/updates route", () => {
       user: { email: "user@example.com", name: "User" },
     } as never);
     vi.mocked(requireJson).mockResolvedValueOnce({
+      title: "Update title",
       update: "text",
       when: 1,
       category: 0,
@@ -168,7 +177,7 @@ describe("/api/updates route", () => {
       category: 0,
       urgent: false,
       uid: "user@example.com",
-      title: "text",
+      title: "Update title",
       body: "text",
       when: 1 as const,
       createdAt: new Date().toISOString(),
@@ -197,6 +206,7 @@ describe("/api/updates route", () => {
       user: { email: "user@example.com", name: "User" },
     } as never);
     vi.mocked(requireJson).mockResolvedValueOnce({
+      title: "Fallback title",
       update: "text",
       when: -1,
       category: 1,
@@ -220,7 +230,7 @@ describe("/api/updates route", () => {
       category: 1,
       urgent: true,
       uid: "user@example.com",
-      title: "text",
+      title: "Fallback title",
       body: "text",
       when: -1,
       votes: 0,

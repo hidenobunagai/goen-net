@@ -80,6 +80,12 @@ export function UpdateFormDialog({
     event.preventDefault();
     setError(null);
 
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setError("Title is required.");
+      return;
+    }
+
     if (!body.trim()) {
       setError("Update text is required.");
       return;
@@ -92,7 +98,7 @@ export function UpdateFormDialog({
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          title: title.trim() || null,
+          title: trimmedTitle,
           update: body.trim(),
           category,
           urgent,
@@ -152,11 +158,12 @@ export function UpdateFormDialog({
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 0.5 }}>
               <TextField
-                label="Title (optional)"
+                label="Title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Short title"
                 fullWidth
+                required
               />
 
               <TextField

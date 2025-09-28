@@ -116,10 +116,19 @@ export async function POST(request: Request) {
   const urgent = Boolean(
     typeof body?.urgent === "boolean" ? body.urgent : body?.priority
   );
-  const title =
-    typeof body?.title === "string" ? body.title.trim() || null : null;
+  const title = typeof body?.title === "string" ? body.title.trim() : "";
   const updateText = typeof body?.update === "string" ? body.update.trim() : "";
   const when = Number(body?.when ?? -1);
+
+  if (!title) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: { code: "INVALID_BODY", message: "Title is required." },
+      },
+      { status: 422 }
+    );
+  }
 
   if (!updateText) {
     return NextResponse.json(
