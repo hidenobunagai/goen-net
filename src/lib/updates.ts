@@ -92,6 +92,118 @@ function fallbackToMemoryOnError(error: unknown): boolean {
   return true;
 }
 
+type UsersTableSchema = {
+  idColumn: string;
+  emailColumn?: string;
+  nameColumn?: string;
+  createdAtColumn?: string;
+  updatedAtColumn?: string;
+};
+
+let cachedUsersTableSchema: UsersTableSchema | null = null;
+
+async function getUsersTableSchema(): Promise<UsersTableSchema> {
+  if (cachedUsersTableSchema) {
+    return cachedUsersTableSchema;
+  }
+
+  const result = await execute("PRAGMA table_info('users')");
+  const rows = (result?.rows ?? []) as Array<
+    Record<string, unknown> | unknown[]
+  >;
+  const columnMap = new Map<string, string>();
+
+  for (const row of rows) {
+    const name = extractColumnName(row);
+    if (name) {
+      columnMap.set(name.toLowerCase(), name);
+    }
+  }
+
+  if (columnMap.size === 0) {
+    throw new Error("[updates] users table is missing or has no columns");
+  }
+
+  const idColumn =
+    columnMap.get("uid") ?? columnMap.get("id") ?? columnMap.get("user_id");
+
+  if (!idColumn) {
+    throw new Error("[updates] users table is missing an id or uid column");
+  }
+
+  const schema: UsersTableSchema = {
+    idColumn,
+    emailColumn: pickColumn(columnMap, [
+      "email",
+      "email_address",
+      "user_email",
+    ]),
+    nameColumn: pickColumn(columnMap, ["name", "display_name", "full_name"]),
+    createdAtColumn: pickColumn(columnMap, [
+      "created_at",
+      "created_on",
+      "createdat",
+      "createdAt",
+      "created",
+    ]),
+    updatedAtColumn: pickColumn(columnMap, [
+      "updated_at",
+      "updated_on",
+      "updatedat",
+      "updatedAt",
+      "updated",
+      "modified_at",
+      "modifiedon",
+    ]),
+  };
+
+  cachedUsersTableSchema = schema;
+  return schema;
+}
+
+function extractColumnName(row: unknown): string | null {
+  if (!row) {
+    return null;
+  }
+
+  if (Array.isArray(row)) {
+    const value = row[1];
+    if (typeof value === "string") {
+      return value;
+    }
+    if (value != null) {
+      return String(value);
+    }
+    return null;
+  }
+
+  if (typeof row === "object") {
+    const record = row as Record<string, unknown>;
+    const value = record.name;
+    if (typeof value === "string") {
+      return value;
+    }
+    if (value != null) {
+      return String(value);
+    }
+  }
+
+  return null;
+}
+
+function pickColumn(
+  columnMap: Map<string, string>,
+  candidates: string[]
+): string | undefined {
+  for (const candidate of candidates) {
+    const column = columnMap.get(candidate.toLowerCase());
+    if (column) {
+      return column;
+    }
+  }
+  return undefined;
+}
+
 async function ensureUserProfile(uid: string, name: string): Promise<void> {
   if (shouldUseMemory()) {
     return;
@@ -100,15 +212,64 @@ async function ensureUserProfile(uid: string, name: string): Promise<void> {
   const safeName = name?.trim() || uid;
 
   try {
-    await execute(
-      `INSERT INTO users (uid, email, name, created_at, updated_at)
-       VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))
-       ON CONFLICT(uid) DO UPDATE SET
-         email = excluded.email,
-         name = excluded.name,
-         updated_at = datetime('now')`,
-      [uid, uid, safeName]
-    );
+    const schema = await getUsersTableSchema();
+    const args: (string | null)[] = [uid];
+    const insertColumns: string[] = [schema.idColumn];
+    const insertValues: string[] = ["?1"];
+
+    const addArgument = (
+      columnName: string | undefined,
+      value: string | null
+    ) => {
+      if (!columnName) {
+        return;
+      }
+      args.push(value);
+      insertColumns.push(columnName);
+      insertValues.push(`?${args.length}`);
+    };
+
+    addArgument(schema.emailColumn, uid);
+    addArgument(schema.nameColumn, safeName);
+
+    if (schema.createdAtColumn) {
+      insertColumns.push(schema.createdAtColumn);
+      insertValues.push("datetime('now')");
+    }
+
+    if (schema.updatedAtColumn) {
+      insertColumns.push(schema.updatedAtColumn);
+      insertValues.push("datetime('now')");
+    }
+
+    const assignments: string[] = [];
+
+    if (schema.emailColumn) {
+      assignments.push(
+        `${schema.emailColumn} = excluded.${schema.emailColumn}`
+      );
+    }
+
+    if (schema.nameColumn) {
+      assignments.push(`${schema.nameColumn} = excluded.${schema.nameColumn}`);
+    }
+
+    if (schema.updatedAtColumn) {
+      assignments.push(`${schema.updatedAtColumn} = datetime('now')`);
+    }
+
+    const conflictClause =
+      assignments.length > 0
+        ? `ON CONFLICT(${schema.idColumn}) DO UPDATE SET ${assignments.join(
+            ", "
+          )}`
+        : `ON CONFLICT(${schema.idColumn}) DO NOTHING`;
+
+    const sql = `INSERT INTO users (${insertColumns.join(", ")})
+VALUES (${insertValues.join(", ")})
+${conflictClause}`;
+
+    await execute(sql, args as InArgs);
   } catch (error) {
     console.error("[updates] Failed to ensure user profile", error);
     throw error;
