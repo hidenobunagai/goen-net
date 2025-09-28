@@ -1,61 +1,77 @@
-## Goen Net Next.js 移行プロジェクト
+# Goen Net
 
-Vite + React ベースで構築されていた Goen Net を、Next.js（App Router）＋ NextAuth（Google 認証）＋ Turso（LibSQL）へ段階的に移行するための新しいコードベースです。
+Goen Net is a supportive mentoring network for visionary leaders who are committed to creating and innovating society. Modeled after EO Forum, it brings together 7–10 peers who meet quarterly to reflect on their work and lives, disclose real challenges, and learn from one another through candid, experience-based sharing. The structure emphasizes trust, punctuality, and absolute confidentiality so members can grow through self-awareness, gain practical perspectives for resolving issues, and build lasting bonds with fellow leaders.
 
-現段階では以下を実装済みです。
+## ✨ Key Capabilities
 
-- **Next.js 15 App Router 構成** - `src/app/` ベースのルーティング。
-- **NextAuth (Google)** - `src/app/api/auth/[...nextauth]/route.ts` と `src/app/signin/page.tsx` による認証フロー。
-- **Turso クライアントユーティリティ** - `src/lib/turso.ts` からサーバー用クライアントを取得。
-- **保護されたトップページのサンプル** - `src/app/page.tsx` がサーバーサイドでセッションを検証し、認証済みユーザーだけに情報を表示。
+- **Updates board** – Capture member updates, flag urgent items, and surface the latest activity in real time.
+- **Prioritization workflow** – Drag-and-drop prioritization queues backed by consistent scoring rules.
+- **Meeting worksheets** – Moderator, presenter, observer, and coach worksheets that guide every role through the agenda.
+- **Authenticated workspace** – Google sign-in via NextAuth keeps private data scoped to your organization only.
+- **Turso-backed persistence** – A LibSQL database stores updates, votes, and meeting metadata with low-latency reads.
 
-## セットアップ手順
+## 🧰 Tech Stack
 
-1. 依存関係をインストールします。
+- Next.js 15 (App Router, React Server Components, Turbopack)
+- TypeScript + React 19
+- NextAuth with Google OAuth2 provider
+- Turso (LibSQL) for transactional storage
+- MUI 5 for design system components
+- Vitest + Playwright for automated testing
+- ESLint 9 for linting
 
-   ```bash
+## 🚀 Getting Started
+
+1. **Install dependencies**
+
+   ```powershell
    npm install
    ```
 
-2. `.env.example` を `.env.local` にコピーし、値を設定します。
+2. **Create your environment file**
 
-   ```bash
-   cp .env.example .env.local
+   ```powershell
+   Copy-Item .env.example .env.local
    ```
 
-   必須項目:
+   | Variable                                    | Description                                                        |
+   | ------------------------------------------- | ------------------------------------------------------------------ |
+   | `NEXTAUTH_URL`                              | Base URL of the app (e.g. `http://localhost:3000` in development). |
+   | `NEXTAUTH_SECRET`                           | Random 32+ character string used to sign NextAuth tokens.          |
+   | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth credentials from the Google Cloud Console.                   |
+   | `TURSO_DB_URL` / `TURSO_DB_AUTH_TOKEN`      | Connection details for the Turso database.                         |
 
-   - **NEXTAUTH_URL**: 開発時は `http://localhost:3000`
-   - **NEXTAUTH_SECRET**: 任意のランダム文字列（`openssl rand -base64 32` などで生成）
-   - **GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET**: Google Cloud Console で OAuth クライアントを作成して取得
-   - **TURSO_DB_URL / TURSO_DB_AUTH_TOKEN**: 既存 Turso プロジェクトの値を流用
+3. **Run the development server**
 
-3. 開発サーバーを起動します。
-
-   ```bash
+   ```powershell
    npm run dev
    ```
 
-   `http://localhost:3000` にアクセスすると、未認証時は `/signin` へリダイレクトされ、Google サインイン後にトップページへ戻ります。
+   The app listens on `http://localhost:3000`. Unauthenticated users are redirected to `/signin` and sent back once Google sign-in succeeds.
 
-## ディレクトリ構成（抜粋）
+## 📁 Project Structure (excerpt)
 
-- `src/app/layout.tsx` — アプリ全体のレイアウト。`NextAuthSessionProvider` をラップしています。
-- `src/app/page.tsx` — 認証ガード付きのトップページ例。
-- `src/app/signin/page.tsx` — Google サインインボタンを提供するクライアントコンポーネント。
-- `src/app/api/auth/[...nextauth]/route.ts` — NextAuth の API ルート。
-- `src/lib/auth.ts` — `NextAuthOptions` の定義。
-- `src/lib/turso.ts` — Turso クライアント取得ヘルパー。
-- `src/components/session-provider.tsx` — `SessionProvider` ラッパー。
-- `src/components/sign-out-button.tsx` — サインアウトボタン。
+- `src/app/` – App Router entry point, layouts, and page routes.
+- `src/app/(protected)/` – Authenticated areas including updates, prioritization, documentation, and worksheets.
+- `src/app/api/` – Route handlers for authentication, sessions, and data APIs.
+- `src/components/` – Shared UI elements such as the navbar, session provider, and sign-out button.
+- `src/lib/` – Server utilities for auth, Turso client access, and helper functions.
+- `tests/` – Vitest API tests and Playwright end-to-end suites.
 
-## 今後の移行タスク例
+## 🧪 Testing and Linting
 
-- **ルーティング移行**: 既存 SPA (`src/components/` 以下) の各ページを Next.js のルートへ置き換え。
-- **API/サーバー処理の統合**: 既存 `server/` の Express API を Next.js Route Handlers, Server Actions, Edge Functions へ移行。
-- **UI コンポーネント整理**: Vite プロジェクトのスタイル・アセットを `app/` ルーターに最適化した形で再配置。
-- **Turso クエリ実装**: `src/lib/turso.ts` のユーティリティを用いてサーバーコンポーネントから DB にアクセスする実装を追加。
+- `npm run lint` – Run ESLint across the project.
+- `npm run test:updates` – Execute Vitest API suites.
+- `npm run test:playwright` – Launch Playwright end-to-end tests (requires `PLAYWRIGHT_TEST_EMAIL` and `PLAYWRIGHT_TEST_PASSWORD`).
 
-## デプロイについて
+## ☁️ Deployment
 
-Vercel へのデプロイを想定しています。`NEXTAUTH_URL` を本番 URL に設定し、Turso の接続情報を環境変数として登録してください。Google OAuth のリダイレクト URI も同様に本番 URL に合わせて更新する必要があります。
+The project is optimized for Vercel. Configure the same environment variables (`NEXTAUTH_*`, `GOOGLE_CLIENT_*`, `TURSO_*`) in your Vercel project. Update your Google OAuth redirect URIs to match the production domain before going live.
+
+## 🤝 Contributing
+
+1. Fork and clone the repository.
+2. Create a feature branch.
+3. Run linting and tests before opening a pull request.
+
+Issues and suggestions are welcome—please include as much context as possible to keep iterations fast.
