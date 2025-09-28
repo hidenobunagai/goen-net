@@ -1,6 +1,5 @@
 "use client";
 
-import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Chip } from "@mui/material";
 
 export type UpdateStatusBadgeProps = {
@@ -14,12 +13,16 @@ export function UpdateStatusBadge({ urgent }: UpdateStatusBadgeProps) {
 
   return (
     <Chip
-      icon={<PriorityHighIcon fontSize="small" />}
-      label="Urgent"
+      label="!"
       size="small"
       color="warning"
       variant="filled"
-      sx={{ fontWeight: 700 }}
+      sx={{
+        fontWeight: 800,
+        fontSize: "0.9rem",
+        minWidth: 32,
+        letterSpacing: 0.5,
+      }}
     />
   );
 }

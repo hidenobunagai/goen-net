@@ -475,17 +475,17 @@ export function UpdatesBoard({
                       bgcolor: "primary.light",
                       color: "primary.dark",
                       fontWeight: 700,
-                      fontSize: "0.9rem",
-                      letterSpacing: 0.4,
-                      lineHeight: 1.2,
+                      fontSize: "0.95rem",
+                      letterSpacing: 0.3,
+                      lineHeight: 1.3,
                       display: "inline-flex",
                       alignItems: "center",
-                      columnGap: 0.5,
-                      maxWidth: { xs: "100%", sm: 280 },
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
+                      flexWrap: "wrap",
+                      gap: 0.25,
+                      maxWidth: "100%",
+                      wordBreak: "break-word",
                     }}
+                    title={item.by}
                   >
                     {item.by}
                   </Box>
@@ -499,6 +499,7 @@ export function UpdatesBoard({
                     <UpdateStatusBadge urgent={item.urgent} />
                     <UpdateVoteButton
                       viewerHasVoted={item.viewerHasVoted}
+                      votes={item.votes}
                       disabled={votePending}
                       onToggle={() => {
                         void handleToggleVote(item);
