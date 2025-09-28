@@ -60,20 +60,11 @@ export default async function Home() {
                   move the circle forward. Start by reviewing your peers’ latest
                   updates so everyone arrives ready for the conversation.
                 </Typography>
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={2}
-                  sx={{ pt: 1 }}
-                >
-                  <Button
-                    component={Link}
-                    href="/updates"
-                    variant="contained"
-                    color="secondary"
-                    sx={{ px: 3, color: "secondary.contrastText" }}
-                  >
-                    Prepare updates
-                  </Button>
+                <Stack spacing={1.5} sx={{ pt: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Already updated? Jump straight into prioritization or visit
+                    the worksheets below when you’re ready.
+                  </Typography>
                 </Stack>
               </Stack>
             </Grid>

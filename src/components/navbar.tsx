@@ -165,7 +165,7 @@ export function Navbar() {
     </MenuItem>
   );
   return (
-    <AppBar position="static" color="primary">
+    <AppBar position="static" color="primary" square sx={{ borderRadius: 0 }}>
       <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ gap: 1.5, py: 1 }}>
           <Box sx={{ flexGrow: 1 }}>
