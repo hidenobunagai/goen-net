@@ -16,8 +16,23 @@ import {
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useMemo, useState } from "react";
+import CryptoJS from "crypto-js";
 
 const STORAGE_KEY = "worksheet_coach_v1";
+const ENCRYPTION_KEY = "worksheet-very-secret-key"; // TODO: Replace with secure, user-specific key in production
+
+function encrypt(text: string): string {
+  return CryptoJS.AES.encrypt(text, ENCRYPTION_KEY).toString();
+}
+
+function decrypt(ciphertext: string): string {
+  try {
+    const bytes = CryptoJS.AES.decrypt(ciphertext, ENCRYPTION_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  } catch {
+    return "";
+  }
+}
 
 type ConfidentialLevel = "HIGH" | "MEDIUM" | "NORMAL" | "";
 
@@ -38,7 +53,9 @@ function readInitialForm(): CoachForm {
 
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as CoachForm) : {};
+    if (!raw) return {};
+    const decrypted = decrypt(raw);
+    return decrypted ? (JSON.parse(decrypted) as CoachForm) : {};
   } catch (error) {
     console.warn("Failed to parse coach worksheet state", error);
     return {};
@@ -73,7 +90,8 @@ export function CoachWorksheet() {
   const handleSave = () => {
     if (typeof window === "undefined") return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      const encrypted = encrypt(JSON.stringify(form));
+      window.localStorage.setItem(STORAGE_KEY, encrypted);
     } catch (error) {
       console.warn("Failed to persist coach worksheet", error);
     }
