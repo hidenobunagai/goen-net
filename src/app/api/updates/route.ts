@@ -1,5 +1,5 @@
-import { authOptions } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getOptionalUserSession } from "@/lib/session";
 import type { UpdateRecord } from "@/lib/updates";
 import {
   deleteAllUpdates,
@@ -9,11 +9,10 @@ import {
 } from "@/lib/updates";
 import { JsonBodyError, requireJson } from "@/lib/utils";
 import { randomUUID } from "crypto";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalUserSession();
   if (!session) {
     return NextResponse.json(
       {
@@ -85,7 +84,7 @@ type CreateUpdatePayload = {
 };
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalUserSession();
   if (!session) {
     return NextResponse.json(
       {
@@ -227,7 +226,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE() {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalUserSession();
   if (!session) {
     return NextResponse.json(
       {

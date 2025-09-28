@@ -1,6 +1,5 @@
-import { authOptions } from "@/lib/auth";
+import { getOptionalUserSession } from "@/lib/session";
 import { UpdateNotFoundError, upsertVote } from "@/lib/updates";
-import { getServerSession } from "next-auth";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -9,7 +8,7 @@ export async function POST(
   context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalUserSession();
   if (!session) {
     return NextResponse.json(
       {
@@ -70,7 +69,7 @@ export async function DELETE(
   context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalUserSession();
   if (!session) {
     return NextResponse.json(
       {

@@ -1,10 +1,9 @@
-import { authOptions } from "@/lib/auth";
+import { getOptionalUserSession } from "@/lib/session";
 import { getNextSession, upsertNextSession } from "@/lib/turso";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalUserSession();
   if (!session) {
     return NextResponse.json(
       {
@@ -36,7 +35,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalUserSession();
   if (!session) {
     return NextResponse.json(
       {

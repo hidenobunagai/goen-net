@@ -1,5 +1,5 @@
 import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
-import { authOptions } from "@/lib/auth";
+import { requireUserSession } from "@/lib/session";
 import { getNextSession } from "@/lib/turso";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -9,16 +9,10 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect("/signin");
-  }
+  const session = await requireUserSession();
 
   const [nextSession] = await Promise.all([getNextSession()]);
   const user = session.user;

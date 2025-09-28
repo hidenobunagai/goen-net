@@ -246,7 +246,7 @@ export function CoachWorksheet() {
       setForm(decrypted);
       setLoadError(null);
       setSaveStatus(null);
-    } catch (error) {
+    } catch {
       setLoadError("Unable to unlock saved notes right now.");
     } finally {
       setUnlocking(false);

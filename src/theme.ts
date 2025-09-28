@@ -35,7 +35,7 @@ const theme = createTheme({
     divider: outline,
   },
   shape: {
-    borderRadius: 18,
+    borderRadius: 8,
   },
   typography: {
     fontFamily: "'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
@@ -84,18 +84,18 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          borderRadius: 999,
-          paddingInline: 20,
+          borderRadius: 10,
+          paddingInline: 18,
         },
         containedPrimary: {
-          boxShadow: "0 16px 32px rgba(0, 27, 68, 0.28)",
+          boxShadow: "0 10px 20px rgba(0, 27, 68, 0.18)",
           ":hover": {
-            boxShadow: "0 18px 36px rgba(0, 27, 68, 0.32)",
+            boxShadow: "0 12px 24px rgba(0, 27, 68, 0.24)",
           },
         },
         outlined: {
           borderWidth: 2,
-          paddingInline: 20,
+          paddingInline: 18,
         },
       },
     },
@@ -105,9 +105,9 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 20,
+          borderRadius: 12,
           border: `1px solid ${alpha(primaryMain, 0.08)}`,
-          boxShadow: "0 24px 45px rgba(15, 23, 42, 0.08)",
+          boxShadow: "0 16px 32px rgba(15, 23, 42, 0.08)",
         },
       },
     },
@@ -117,10 +117,10 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 22,
+          borderRadius: 14,
           border: `1px solid ${alpha(primaryMain, 0.08)}`,
           backgroundImage:
-            "linear-gradient(155deg, rgba(255,255,255,0.96), rgba(236, 240, 250, 0.9))",
+            "linear-gradient(155deg, rgba(255,255,255,0.98), rgba(236, 240, 250, 0.92))",
         },
       },
     },
@@ -128,7 +128,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 600,
-          borderRadius: 999,
+          borderRadius: 8,
         },
       },
     },
