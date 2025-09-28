@@ -92,6 +92,29 @@ function fallbackToMemoryOnError(error: unknown): boolean {
   return true;
 }
 
+async function ensureUserProfile(uid: string, name: string): Promise<void> {
+  if (shouldUseMemory()) {
+    return;
+  }
+
+  const safeName = name?.trim() || uid;
+
+  try {
+    await execute(
+      `INSERT INTO users (uid, email, name, created_at, updated_at)
+       VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))
+       ON CONFLICT(uid) DO UPDATE SET
+         email = excluded.email,
+         name = excluded.name,
+         updated_at = datetime('now')`,
+      [uid, uid, safeName]
+    );
+  } catch (error) {
+    console.error("[updates] Failed to ensure user profile", error);
+    throw error;
+  }
+}
+
 function toTimestamp(value: string): number {
   const parsed = Date.parse(value);
   return Number.isNaN(parsed) ? 0 : parsed;
@@ -349,6 +372,7 @@ export async function insertUpdate(params: {
     params.when,
   ];
   try {
+    await ensureUserProfile(params.uid, params.by);
     await execute(
       `INSERT INTO updates (id, by_name, category, priority, uid, title, body, when_value, created_at, updated_at)
        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, datetime('now'), datetime('now'))`,
