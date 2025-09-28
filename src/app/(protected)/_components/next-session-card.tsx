@@ -282,7 +282,7 @@ export function NextSessionCard({
                 required
               />
               <Grid container spacing={2} columns={{ xs: 1, sm: 2 }}>
-                <Grid size={1}>
+                <Grid xs={1}>
                   <TextField
                     label="Start time"
                     type="time"
@@ -298,7 +298,7 @@ export function NextSessionCard({
                     required
                   />
                 </Grid>
-                <Grid size={1}>
+                <Grid xs={1}>
                   <TextField
                     label="End time (optional)"
                     type="time"

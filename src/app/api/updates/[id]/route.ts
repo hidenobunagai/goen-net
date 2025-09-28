@@ -1,12 +1,14 @@
 import { authOptions } from "@/lib/auth";
 import { deleteUpdate, getUpdateById } from "@/lib/updates";
 import { getServerSession } from "next-auth";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json(
@@ -33,7 +35,7 @@ export async function GET(
   }
 
   try {
-    const update = await getUpdateById(params.id, viewerId);
+    const update = await getUpdateById(id, viewerId);
     if (!update) {
       return NextResponse.json(
         {
@@ -64,9 +66,10 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json(
@@ -93,7 +96,7 @@ export async function DELETE(
   }
 
   try {
-    const deleted = await deleteUpdate(params.id, uid);
+    const deleted = await deleteUpdate(id, uid);
     if (!deleted) {
       return NextResponse.json(
         {

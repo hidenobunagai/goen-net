@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:updates": "vitest --run tests/api",
-    "test:playwright": "playwright test"
+    "test:playwright": "playwright test",
+    "postinstall": "node ./scripts/postinstall.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",

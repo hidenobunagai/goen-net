@@ -46,7 +46,7 @@ export default async function Home() {
             columns={{ xs: 1, md: 12 }}
             alignItems="stretch"
           >
-            <Grid size={{ xs: 1, md: 7 }}>
+            <Grid xs={1} md={7}>
               <Stack spacing={2.5} sx={{ pr: { md: 4 } }}>
                 <Typography
                   variant="h2"
@@ -77,7 +77,7 @@ export default async function Home() {
                 </Stack>
               </Stack>
             </Grid>
-            <Grid size={{ xs: 1, md: 5 }}>
+            <Grid xs={1} md={5}>
               <Card
                 elevation={3}
                 sx={{
@@ -118,7 +118,7 @@ export default async function Home() {
                 </Typography>
               </Stack>
               <Grid container spacing={3} columns={{ xs: 1, md: 12 }}>
-                <Grid size={{ xs: 1, md: 4 }}>
+                <Grid xs={1} md={4}>
                   <Stack spacing={1}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       Share signal-rich updates
@@ -129,7 +129,7 @@ export default async function Home() {
                     </Typography>
                   </Stack>
                 </Grid>
-                <Grid size={{ xs: 1, md: 4 }}>
+                <Grid xs={1} md={4}>
                   <Stack spacing={1}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       Shape the agenda together
@@ -140,7 +140,7 @@ export default async function Home() {
                     </Typography>
                   </Stack>
                 </Grid>
-                <Grid size={{ xs: 1, md: 4 }}>
+                <Grid xs={1} md={4}>
                   <Stack spacing={1}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       Capture commitments automatically
@@ -280,7 +280,7 @@ export default async function Home() {
           </Card>
 
           <Grid container spacing={3} columns={{ xs: 1, md: 12 }}>
-            <Grid size={{ xs: 1, md: 4 }}>
+            <Grid xs={1} md={4}>
               <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
                 <Stack spacing={1.5}>
                   <Typography
@@ -308,7 +308,7 @@ export default async function Home() {
                 </Stack>
               </Card>
             </Grid>
-            <Grid size={{ xs: 1, md: 4 }}>
+            <Grid xs={1} md={4}>
               <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
                 <Stack spacing={1.5}>
                   <Typography
@@ -336,7 +336,7 @@ export default async function Home() {
                 </Stack>
               </Card>
             </Grid>
-            <Grid size={{ xs: 1, md: 4 }}>
+            <Grid xs={1} md={4}>
               <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
                 <Stack spacing={1.5}>
                   <Typography
@@ -385,7 +385,7 @@ export default async function Home() {
                 </Typography>
               </Stack>
               <Grid container spacing={2} columns={{ xs: 1, sm: 3 }}>
-                <Grid size={{ xs: 1 }}>
+                <Grid xs={1}>
                   <Button
                     component={Link}
                     href="/worksheets/presenter"
@@ -395,7 +395,7 @@ export default async function Home() {
                     Presenter Worksheet
                   </Button>
                 </Grid>
-                <Grid size={{ xs: 1 }}>
+                <Grid xs={1}>
                   <Button
                     component={Link}
                     href="/worksheets/coach"
@@ -405,7 +405,7 @@ export default async function Home() {
                     Coach Worksheet
                   </Button>
                 </Grid>
-                <Grid size={{ xs: 1 }}>
+                <Grid xs={1}>
                   <Button
                     component={Link}
                     href="/worksheets/observer"

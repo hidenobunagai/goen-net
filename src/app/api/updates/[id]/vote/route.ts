@@ -1,12 +1,14 @@
 import { authOptions } from "@/lib/auth";
 import { UpdateNotFoundError, upsertVote } from "@/lib/updates";
 import { getServerSession } from "next-auth";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export async function POST(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json(
@@ -33,7 +35,7 @@ export async function POST(
   }
 
   try {
-    const result = await upsertVote(params.id, uid, true);
+    const result = await upsertVote(id, uid, true);
     return NextResponse.json({
       ok: true,
       votes: result.votes,
@@ -64,9 +66,10 @@ export async function POST(
 }
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json(
@@ -93,7 +96,7 @@ export async function DELETE(
   }
 
   try {
-    const result = await upsertVote(params.id, uid, false);
+    const result = await upsertVote(id, uid, false);
     return NextResponse.json({
       ok: true,
       votes: result.votes,
