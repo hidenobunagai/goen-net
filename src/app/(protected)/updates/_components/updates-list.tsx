@@ -476,10 +476,15 @@ export function UpdatesBoard({
                       color: "primary.dark",
                       fontWeight: 700,
                       fontSize: "0.9rem",
-                      letterSpacing: 0.3,
-                      maxWidth: "100%",
-                      wordBreak: "break-word",
-                      lineHeight: 1.3,
+                      letterSpacing: 0.4,
+                      lineHeight: 1.2,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      columnGap: 0.5,
+                      maxWidth: { xs: "100%", sm: 280 },
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                   >
                     {item.by}

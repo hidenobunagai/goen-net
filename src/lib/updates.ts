@@ -204,6 +204,375 @@ function pickColumn(
   return undefined;
 }
 
+type UpdatesTableSchema = {
+  idColumn: string;
+  byNameColumn?: string;
+  categoryColumn?: string;
+  priorityColumn?: string;
+  urgentColumn?: string;
+  uidColumn?: string;
+  titleColumn?: string;
+  bodyColumn?: string;
+  whenValueColumn?: string;
+  createdAtColumn?: string;
+  updatedAtColumn?: string;
+};
+
+type UpdateVotesTableSchema = {
+  idColumn: string;
+  updateIdColumn: string;
+  uidColumn: string;
+  createdAtColumn?: string;
+  updatedAtColumn?: string;
+};
+
+let cachedUpdatesTableSchema: UpdatesTableSchema | null = null;
+let cachedUpdateVotesTableSchema: UpdateVotesTableSchema | null = null;
+
+async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
+  if (cachedUpdatesTableSchema) {
+    return cachedUpdatesTableSchema;
+  }
+
+  const result = await execute("PRAGMA table_info('updates')");
+  const rows = (result?.rows ?? []) as Array<
+    Record<string, unknown> | unknown[]
+  >;
+  const columnMap = new Map<string, string>();
+
+  for (const row of rows) {
+    const name = extractColumnName(row);
+    if (name) {
+      columnMap.set(name.toLowerCase(), name);
+    }
+  }
+
+  if (columnMap.size === 0) {
+    throw new Error("[updates] updates table is missing or has no columns");
+  }
+
+  const idColumn =
+    pickColumn(columnMap, ["id", "update_id"]) ?? columnMap.get("id");
+
+  if (!idColumn) {
+    throw new Error("[updates] updates table is missing an id column");
+  }
+
+  const schema: UpdatesTableSchema = {
+    idColumn,
+    byNameColumn: pickColumn(columnMap, [
+      "by_name",
+      "byname",
+      "author",
+      "author_name",
+      "authorname",
+    ]),
+    categoryColumn: pickColumn(columnMap, [
+      "category",
+      "category_id",
+      "categoryid",
+    ]),
+    priorityColumn: pickColumn(columnMap, [
+      "priority",
+      "priority_level",
+      "prioritylevel",
+    ]),
+    urgentColumn: pickColumn(columnMap, [
+      "urgent",
+      "is_urgent",
+      "urgent_flag",
+      "urgentflag",
+    ]),
+    uidColumn: pickColumn(columnMap, [
+      "uid",
+      "user_id",
+      "userid",
+      "user_uid",
+      "useruid",
+    ]),
+    titleColumn: pickColumn(columnMap, ["title", "headline", "subject"]),
+    bodyColumn: pickColumn(columnMap, [
+      "body",
+      "text",
+      "content",
+      "description",
+      "details",
+    ]),
+    whenValueColumn: pickColumn(columnMap, [
+      "when_value",
+      "when",
+      "timeframe",
+      "period",
+    ]),
+    createdAtColumn: pickColumn(columnMap, [
+      "created_at",
+      "created_on",
+      "createdat",
+      "createdAt",
+      "created",
+    ]),
+    updatedAtColumn: pickColumn(columnMap, [
+      "updated_at",
+      "updated_on",
+      "updatedat",
+      "updatedAt",
+      "updated",
+      "modified_at",
+      "modifiedon",
+    ]),
+  };
+
+  cachedUpdatesTableSchema = schema;
+  return schema;
+}
+
+async function getUpdateVotesTableSchema(): Promise<UpdateVotesTableSchema> {
+  if (cachedUpdateVotesTableSchema) {
+    return cachedUpdateVotesTableSchema;
+  }
+
+  const result = await execute("PRAGMA table_info('update_votes')");
+  const rows = (result?.rows ?? []) as Array<
+    Record<string, unknown> | unknown[]
+  >;
+  const columnMap = new Map<string, string>();
+
+  for (const row of rows) {
+    const name = extractColumnName(row);
+    if (name) {
+      columnMap.set(name.toLowerCase(), name);
+    }
+  }
+
+  if (columnMap.size === 0) {
+    throw new Error(
+      "[updates] update_votes table is missing or has no columns"
+    );
+  }
+
+  const idColumn = pickColumn(columnMap, ["id", "vote_id", "voteid"]);
+  const updateIdColumn = pickColumn(columnMap, [
+    "update_id",
+    "updateid",
+    "update",
+  ]);
+  const uidColumn = pickColumn(columnMap, ["uid", "user_id", "userid"]);
+
+  if (!idColumn || !updateIdColumn || !uidColumn) {
+    throw new Error(
+      "[updates] update_votes table is missing required columns (id/update_id/uid)"
+    );
+  }
+
+  const schema: UpdateVotesTableSchema = {
+    idColumn,
+    updateIdColumn,
+    uidColumn,
+    createdAtColumn: pickColumn(columnMap, [
+      "created_at",
+      "created_on",
+      "createdat",
+      "created",
+    ]),
+    updatedAtColumn: pickColumn(columnMap, [
+      "updated_at",
+      "updated_on",
+      "updatedat",
+      "updated",
+    ]),
+  };
+
+  cachedUpdateVotesTableSchema = schema;
+  return schema;
+}
+
+function toRecord(row: unknown): Record<string, unknown> | null {
+  if (!row || Array.isArray(row) || typeof row !== "object") {
+    return null;
+  }
+  return row as Record<string, unknown>;
+}
+
+function getValue(
+  row: Record<string, unknown>,
+  columnName: string | undefined
+): unknown {
+  if (!columnName) {
+    return undefined;
+  }
+  return row[columnName];
+}
+
+function getStringValue(
+  row: Record<string, unknown>,
+  columnName: string | undefined,
+  fallback: string | null = null
+): string | null {
+  const value = getValue(row, columnName);
+  if (value == null) {
+    return fallback;
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  return String(value);
+}
+
+function getNumberValue(
+  row: Record<string, unknown>,
+  columnName: string | undefined
+): number | null {
+  const value = getValue(row, columnName);
+  if (value == null) {
+    return null;
+  }
+  if (typeof value === "number") {
+    return Number.isNaN(value) ? null : value;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function getStringFromKey(
+  row: Record<string, unknown>,
+  key: string
+): string | null {
+  const value = row[key];
+  if (value == null) {
+    return null;
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  return String(value);
+}
+
+function getNumberFromKey(
+  row: Record<string, unknown>,
+  key: string
+): number | null {
+  const value = row[key];
+  if (value == null) {
+    return null;
+  }
+  if (typeof value === "number") {
+    return Number.isNaN(value) ? null : value;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function createPlaceholders(startIndex: number, count: number): string {
+  return Array.from(
+    { length: count },
+    (_, index) => `?${startIndex + index}`
+  ).join(", ");
+}
+
+type VoteSummary = {
+  votes: number;
+  viewerHasVoted: boolean;
+};
+
+async function getVoteSummaries(
+  viewerId: string,
+  updateIds: string[]
+): Promise<Map<string, VoteSummary>> {
+  const summaries = new Map<string, VoteSummary>();
+
+  if (updateIds.length === 0) {
+    return summaries;
+  }
+
+  const votesSchema = await getUpdateVotesTableSchema();
+  const placeholders = createPlaceholders(2, updateIds.length);
+  const sql = `SELECT ${votesSchema.updateIdColumn} AS update_id,
+    COUNT(${votesSchema.idColumn}) AS votes,
+    SUM(CASE WHEN ${votesSchema.uidColumn} = ?1 THEN 1 ELSE 0 END) AS viewer_has_voted
+    FROM update_votes
+    WHERE ${votesSchema.updateIdColumn} IN (${placeholders})
+    GROUP BY ${votesSchema.updateIdColumn}`;
+  const args: (string | number)[] = [viewerId, ...updateIds];
+  const result = await execute(sql, args as InArgs);
+
+  for (const row of result.rows ?? []) {
+    const record = toRecord(row);
+    if (!record) {
+      continue;
+    }
+    const updateId =
+      getStringFromKey(record, "update_id") ??
+      getStringFromKey(record, votesSchema.updateIdColumn);
+    if (!updateId) {
+      continue;
+    }
+    const votes =
+      getNumberFromKey(record, "votes") ??
+      getNumberFromKey(record, `count(${votesSchema.idColumn})`) ??
+      0;
+    const viewerHasVotedCount =
+      getNumberFromKey(record, "viewer_has_voted") ??
+      getNumberFromKey(record, "viewerHasVoted") ??
+      0;
+    summaries.set(updateId, {
+      votes: Number(votes ?? 0),
+      viewerHasVoted: Number(viewerHasVotedCount ?? 0) > 0,
+    });
+  }
+
+  return summaries;
+}
+
+function toUpdateRecord(
+  row: Record<string, unknown>,
+  schema: UpdatesTableSchema,
+  viewerId: string,
+  votes: Map<string, VoteSummary>
+): UpdateRecord | null {
+  const id = getStringValue(row, schema.idColumn, null);
+  if (!id) {
+    return null;
+  }
+
+  const body = getStringValue(row, schema.bodyColumn, "") ?? "";
+  const titleRaw = getStringValue(row, schema.titleColumn, "") ?? "";
+  const title = titleRaw.trim() || body.slice(0, 80) || "Untitled";
+  const by = getStringValue(row, schema.byNameColumn, "Unknown");
+  const uid = getStringValue(row, schema.uidColumn, "") ?? "";
+  const categoryValueRaw = getNumberValue(row, schema.categoryColumn);
+  const categoryValue = categoryValueRaw != null ? Number(categoryValueRaw) : 0;
+  const normalizedCategory =
+    categoryValue === 0 || categoryValue === 1 || categoryValue === 2
+      ? (categoryValue as UpdateCategory)
+      : 0;
+  const urgentSource =
+    getNumberValue(row, schema.urgentColumn) ??
+    getNumberValue(row, schema.priorityColumn) ??
+    0;
+  const whenRaw = getNumberValue(row, schema.whenValueColumn) ?? -1;
+  const createdAtValue =
+    getStringValue(row, schema.createdAtColumn) ??
+    getStringValue(row, schema.updatedAtColumn) ??
+    new Date().toISOString();
+
+  const voteSummary = votes.get(id) ?? { votes: 0, viewerHasVoted: false };
+
+  return {
+    id,
+    by: by ?? "Unknown",
+    category: normalizedCategory,
+    urgent: Number(urgentSource ?? 0) > 0,
+    uid,
+    title,
+    body,
+    when: Number(whenRaw) > 0 ? 1 : -1,
+    createdAt: createdAtValue,
+    votes: Number(voteSummary.votes ?? 0),
+    viewerHasVoted: Boolean(voteSummary.viewerHasVoted),
+    viewerIsOwner: uid === viewerId,
+  };
+}
+
 async function ensureUserProfile(uid: string, name: string): Promise<void> {
   if (shouldUseMemory()) {
     return;
@@ -393,58 +762,40 @@ export async function fetchUpdates(
     return fetchUpdatesFromMemory(viewerId, { limit, offset });
   }
 
-  const args: InArgs = [viewerId, limit, offset];
+  const schema = await getUpdatesTableSchema();
+
+  const orderBy =
+    schema.createdAtColumn ?? schema.updatedAtColumn ?? schema.idColumn;
+
   try {
     const result = await execute(
-      `WITH ranked_updates AS (
-       SELECT
-         u.id,
-         u.by_name AS by,
-         u.category,
-         COALESCE(u.urgent, u.priority) AS urgent,
-         u.uid,
-         COALESCE(NULLIF(u.title, ''), SUBSTR(u.body, 1, 80), 'Untitled') AS title,
-         u.body,
-         u.when_value AS when_value,
-         u.created_at,
-         COUNT(v.id) AS votes,
-         SUM(CASE WHEN v.uid = ?1 THEN 1 ELSE 0 END) AS viewer_has_voted
-       FROM updates u
-       LEFT JOIN update_votes v ON v.update_id = u.id
-       GROUP BY u.id
-     )
-     SELECT
-       id,
-       by,
-       category,
-       urgent,
-       uid,
-       title,
-       body,
-       when_value,
-       created_at,
-       votes,
-       viewer_has_voted
-     FROM ranked_updates
-     ORDER BY created_at DESC
-     LIMIT ?2 OFFSET ?3`,
-      args
+      `SELECT * FROM updates ORDER BY ${orderBy} DESC LIMIT ?1 OFFSET ?2`,
+      [limit, offset] as InArgs
     );
 
-    return (result.rows ?? []).map((row) => ({
-      id: String(row.id),
-      by: String(row.by),
-      category: Number(row.category) as UpdateCategory,
-      urgent: Number(row.urgent ?? row.priority ?? 0) === 1,
-      uid: String(row.uid),
-      title: String(row.title),
-      body: String(row.body ?? ""),
-      when: Number(row.when_value) === 1 ? 1 : -1,
-      createdAt: String(row.created_at),
-      votes: Number(row.votes ?? 0),
-      viewerHasVoted: Number(row.viewer_has_voted ?? 0) > 0,
-      viewerIsOwner: String(row.uid) === viewerId,
-    }));
+    const records: Record<string, unknown>[] = [];
+    for (const row of result.rows ?? []) {
+      const record = toRecord(row);
+      if (record) {
+        records.push(record);
+      }
+    }
+
+    const updateIds = records
+      .map((record) => getStringValue(record, schema.idColumn) ?? null)
+      .filter((id): id is string => Boolean(id));
+
+    const voteSummaries = await getVoteSummaries(viewerId, updateIds);
+
+    const updates: UpdateRecord[] = [];
+    for (const record of records) {
+      const update = toUpdateRecord(record, schema, viewerId, voteSummaries);
+      if (update) {
+        updates.push(update);
+      }
+    }
+
+    return updates;
   } catch (error) {
     if (fallbackToMemoryOnError(error)) {
       return fetchUpdatesFromMemory(viewerId, { limit, offset });
@@ -461,44 +812,27 @@ export async function getUpdateById(
     return getUpdateFromMemory(id, viewerId);
   }
 
+  const schema = await getUpdatesTableSchema();
+
   try {
     const result = await execute(
-      `SELECT
-       u.id,
-       u.by_name AS by,
-       u.category,
-  COALESCE(u.urgent, u.priority) AS urgent,
-       u.uid,
-       COALESCE(NULLIF(u.title, ''), SUBSTR(u.body, 1, 80), 'Untitled') AS title,
-       u.body,
-       u.when_value,
-       u.created_at,
-       COUNT(v.id) AS votes,
-       SUM(CASE WHEN v.uid = ?2 THEN 1 ELSE 0 END) AS viewer_has_voted
-     FROM updates u
-     LEFT JOIN update_votes v ON v.update_id = u.id
-     WHERE u.id = ?1
-     GROUP BY u.id`,
-      [id, viewerId]
+      `SELECT * FROM updates WHERE ${schema.idColumn} = ?1 LIMIT 1`,
+      [id] as InArgs
     );
 
     const row = result.rows?.[0];
-    if (!row) return null;
+    const record = toRecord(row);
+    if (!record) {
+      return null;
+    }
 
-    return {
-      id: String(row.id),
-      by: String(row.by),
-      category: Number(row.category) as UpdateCategory,
-      urgent: Number(row.urgent ?? row.priority ?? 0) === 1,
-      uid: String(row.uid),
-      title: String(row.title),
-      body: String(row.body ?? ""),
-      when: Number(row.when_value) === 1 ? 1 : -1,
-      createdAt: String(row.created_at),
-      votes: Number(row.votes ?? 0),
-      viewerHasVoted: Number(row.viewer_has_voted ?? 0) > 0,
-      viewerIsOwner: String(row.uid) === viewerId,
-    };
+    const rowId = getStringValue(record, schema.idColumn) ?? id;
+    const voteSummaries = await getVoteSummaries(
+      viewerId,
+      rowId ? [rowId] : []
+    );
+    const update = toUpdateRecord(record, schema, viewerId, voteSummaries);
+    return update;
   } catch (error) {
     if (fallbackToMemoryOnError(error)) {
       return getUpdateFromMemory(id, viewerId);
@@ -522,23 +856,59 @@ export async function insertUpdate(params: {
     return;
   }
 
-  const args: InArgs = [
-    params.id,
-    params.by,
-    params.category,
-    params.urgent ? 1 : 0,
-    params.uid,
-    params.title,
-    params.body,
-    params.when,
-  ];
   try {
     await ensureUserProfile(params.uid, params.by);
-    await execute(
-      `INSERT INTO updates (id, by_name, category, priority, uid, title, body, when_value, created_at, updated_at)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, datetime('now'), datetime('now'))`,
-      args
-    );
+
+    const schema = await getUpdatesTableSchema();
+
+    const columns: string[] = [];
+    const values: string[] = [];
+    const args: (string | number | null)[] = [];
+
+    const pushValue = (
+      columnName: string | undefined,
+      value: string | number | null
+    ) => {
+      if (!columnName) {
+        return;
+      }
+      columns.push(columnName);
+      args.push(value);
+      values.push(`?${args.length}`);
+    };
+
+    pushValue(schema.idColumn, params.id);
+    pushValue(schema.byNameColumn, params.by);
+    pushValue(schema.categoryColumn, params.category);
+
+    const urgentValue = params.urgent ? 1 : 0;
+    if (schema.priorityColumn) {
+      pushValue(schema.priorityColumn, urgentValue);
+    }
+    if (schema.urgentColumn && schema.urgentColumn !== schema.priorityColumn) {
+      pushValue(schema.urgentColumn, urgentValue);
+    }
+
+    pushValue(schema.uidColumn, params.uid);
+    pushValue(schema.titleColumn, params.title ?? null);
+    pushValue(schema.bodyColumn, params.body);
+    pushValue(schema.whenValueColumn, params.when);
+
+    if (schema.createdAtColumn) {
+      columns.push(schema.createdAtColumn);
+      values.push("datetime('now')");
+    }
+
+    if (schema.updatedAtColumn) {
+      columns.push(schema.updatedAtColumn);
+      values.push("datetime('now')");
+    }
+
+    const sql = `INSERT INTO updates (${columns.join(
+      ", "
+    )}) VALUES (${values.join(", ")})`;
+
+    await execute(sql, args as InArgs);
   } catch (error) {
     if (fallbackToMemoryOnError(error)) {
       insertUpdateIntoMemory(params);
@@ -553,11 +923,15 @@ export async function deleteUpdate(id: string, uid: string): Promise<boolean> {
     return deleteUpdateFromMemory(id, uid);
   }
 
+  const schema = await getUpdatesTableSchema();
+  const hasUidColumn = Boolean(schema.uidColumn);
+
   try {
-    const result = await execute(
-      `DELETE FROM updates WHERE id = ?1 AND uid = ?2`,
-      [id, uid]
-    );
+    const sql = hasUidColumn
+      ? `DELETE FROM updates WHERE ${schema.idColumn} = ?1 AND ${schema.uidColumn} = ?2`
+      : `DELETE FROM updates WHERE ${schema.idColumn} = ?1`;
+    const args: (string | number)[] = hasUidColumn ? [id, uid] : [id];
+    const result = await execute(sql, args as InArgs);
     return (result.rowsAffected ?? 0) > 0;
   } catch (error) {
     if (fallbackToMemoryOnError(error)) {
@@ -592,34 +966,46 @@ export async function upsertVote(
     return upsertVoteInMemory(updateId, uid, voting);
   }
 
+  const votesSchema = await getUpdateVotesTableSchema();
+
   try {
     if (voting) {
-      await execute(
-        `INSERT INTO update_votes (id, update_id, uid, created_at)
-         VALUES (?1, ?2, ?3, datetime('now'))
-         ON CONFLICT (update_id, uid) DO NOTHING`,
-        [randomUUID(), updateId, uid]
-      );
+      const columns = [
+        votesSchema.idColumn,
+        votesSchema.updateIdColumn,
+        votesSchema.uidColumn,
+      ];
+      const values = ["?1", "?2", "?3"];
+      const args: (string | number | null)[] = [randomUUID(), updateId, uid];
+
+      if (votesSchema.createdAtColumn) {
+        columns.push(votesSchema.createdAtColumn);
+        values.push("datetime('now')");
+      }
+
+      if (votesSchema.updatedAtColumn) {
+        columns.push(votesSchema.updatedAtColumn);
+        values.push("datetime('now')");
+      }
+
+      const insertSql = `INSERT INTO update_votes (${columns.join(", ")})
+VALUES (${values.join(", ")})
+ON CONFLICT (${votesSchema.updateIdColumn}, ${
+        votesSchema.uidColumn
+      }) DO NOTHING`;
+
+      await execute(insertSql, args as InArgs);
     } else {
-      await execute(
-        `DELETE FROM update_votes WHERE update_id = ?1 AND uid = ?2`,
-        [updateId, uid]
-      );
+      const deleteSql = `DELETE FROM update_votes WHERE ${votesSchema.updateIdColumn} = ?1 AND ${votesSchema.uidColumn} = ?2`;
+      await execute(deleteSql, [updateId, uid] as InArgs);
     }
 
-    const result = await execute(
-      `SELECT
-         COUNT(id) AS votes,
-         SUM(CASE WHEN uid = ?2 THEN 1 ELSE 0 END) AS viewer_has_voted
-       FROM update_votes
-       WHERE update_id = ?1`,
-      [updateId, uid]
-    );
+    const summary = await getVoteSummaries(uid, [updateId]);
+    const info = summary.get(updateId) ?? { votes: 0, viewerHasVoted: voting };
 
-    const row = result.rows?.[0] ?? {};
     return {
-      votes: Number(row.votes ?? 0),
-      viewerHasVoted: Number(row.viewer_has_voted ?? 0) > 0,
+      votes: Number(info.votes ?? 0),
+      viewerHasVoted: Boolean(info.viewerHasVoted),
     };
   } catch (error) {
     if (fallbackToMemoryOnError(error)) {
