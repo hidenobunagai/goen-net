@@ -26,13 +26,23 @@ async function fileExists(filePath) {
 
 async function patchLicense() {
   try {
-    const original = await fs.readFile(hranaLicensePath, "utf8");
-    const moduleSource = `/*\n${original}\n*/\nexport default ${JSON.stringify(
-      original
+    const current = await fs.readFile(hranaLicensePath, "utf8");
+
+    let sourceForModule = current;
+    if (current.includes("export default")) {
+      if (await fileExists(backupPath)) {
+        sourceForModule = await fs.readFile(backupPath, "utf8");
+      } else {
+        return;
+      }
+    }
+
+    const moduleSource = `/*\n${sourceForModule}\n*/\nexport default ${JSON.stringify(
+      sourceForModule
     )};\n`;
 
     if (!(await fileExists(backupPath))) {
-      await fs.writeFile(backupPath, original, "utf8");
+      await fs.writeFile(backupPath, sourceForModule, "utf8");
     }
 
     await fs.writeFile(hranaLicensePath, moduleSource, "utf8");
