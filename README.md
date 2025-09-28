@@ -34,12 +34,19 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
    Copy-Item .env.example .env.local
    ```
 
-   | Variable                                    | Description                                                        |
-   | ------------------------------------------- | ------------------------------------------------------------------ |
-   | `NEXTAUTH_URL`                              | Base URL of the app (e.g. `http://localhost:3000` in development). |
-   | `NEXTAUTH_SECRET`                           | Random 32+ character string used to sign NextAuth tokens.          |
-   | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth credentials from the Google Cloud Console.                   |
-   | `TURSO_DB_URL` / `TURSO_DB_AUTH_TOKEN`      | Connection details for the Turso database.                         |
+   | Variable                                     | Description                                                                                                               |
+   | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+   | `NEXTAUTH_URL`                               | Base URL of the app (e.g. `http://localhost:3000` during development).                                                    |
+   | `NEXTAUTH_SECRET`                            | Random 32+ character string used to sign NextAuth sessions.                                                               |
+   | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`  | OAuth credentials from the Google Cloud Console.                                                                          |
+   | `ALLOWED_EMAILS`                             | Comma- or whitespace-separated list of Google accounts permitted to sign in. Leave blank to allow any Google account.     |
+   | `TURSO_DATABASE_URL` / `TURSO_DB_AUTH_TOKEN` | Connection details for the Turso (LibSQL) database. `TURSO_DB_URL` is also accepted if you prefer that naming convention. |
+
+   **Optional helpers**
+
+   | Variable            | Description                                                                                     |
+   | ------------------- | ----------------------------------------------------------------------------------------------- |
+   | `DEGRADE_TO_MEMORY` | Set to `1` to bypass Turso and use the in-memory datastore instead (helpful for local testing). |
 
 3. **Run the development server**
 
@@ -66,7 +73,7 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 
 ## ☁️ Deployment
 
-The project is optimized for Vercel. Configure the same environment variables (`NEXTAUTH_*`, `GOOGLE_CLIENT_*`, `TURSO_*`) in your Vercel project. Update your Google OAuth redirect URIs to match the production domain before going live.
+The project is optimized for Vercel. Configure every required variable from the table above (`NEXTAUTH_*`, `GOOGLE_CLIENT_*`, `ALLOWED_EMAILS`, and your preferred `TURSO_*` names) in the Vercel dashboard. Optional helpers such as `DEGRADE_TO_MEMORY` are rarely needed in production. Update your Google OAuth redirect URIs to match the production domain before going live.
 
 ## 🤝 Contributing
 
