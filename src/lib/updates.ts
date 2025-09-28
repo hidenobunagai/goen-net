@@ -68,14 +68,45 @@ function shouldUseMemory(): boolean {
   return memoryStore.fallbackEnabled || !isTursoConfigured();
 }
 
+function isRecoverableDatabaseError(error: unknown): boolean {
+  if (error instanceof TursoUnavailableError) {
+    return true;
+  }
+
+  if (
+    error &&
+    typeof error === "object" &&
+    "name" in error &&
+    typeof (error as { name?: unknown }).name === "string" &&
+    ((error as { name: string }).name === "LibsqlError" ||
+      (error as { name: string }).name === "HranaError")
+  ) {
+    return true;
+  }
+
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("no such table") ||
+      message.includes("not authorized") ||
+      message.includes("unauthorized") ||
+      message.includes("invalid database") ||
+      message.includes("connection closed") ||
+      message.includes("timed out") ||
+      message.includes("network error")
+    );
+  }
+
+  return false;
+}
+
 function fallbackToMemoryOnError(error: unknown): boolean {
   if (shouldUseMemory()) {
     return true;
   }
 
   const allowFallback =
-    error instanceof TursoUnavailableError ||
-    process.env.NODE_ENV !== "production";
+    isRecoverableDatabaseError(error) || process.env.NODE_ENV !== "production";
 
   if (!allowFallback) {
     return false;
