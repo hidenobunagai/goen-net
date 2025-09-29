@@ -4,41 +4,45 @@
 
 :root {
   color-scheme: light;
-  --background: #f4f6fb;
-  --foreground: #1b1e29;
-  --accent: #c7322f;
-  --primary: #001b44;
+  --background: #f8f9fa;
+  --foreground: #1a202c;
+  --accent: #e60012;
+  --primary: #003366;
 
   /* Standard shadcn/ui theme variables */
-  --background: 225 25% 97%; /* #f4f6fb */
-  --foreground: 214 15% 12%; /* #1b1e29 */
-  --primary: 212 100% 13%; /* #001b44 */
+  --background: 210 20% 98%; /* #F8F9FA */
+  --foreground: 213 30% 15%; /* #1a202c */
+  --primary: 210 100% 20%; /* #003366 */
   --primary-foreground: 0 0% 100%;
-  --secondary: 4 78% 49%; /* #c7322f */
+  --secondary: 357 100% 45%; /* #E60012 */
   --secondary-foreground: 0 0% 100%;
-  --muted: 225 15% 92%;
-  --muted-foreground: 214 10% 50%;
-  --accent: 4 78% 49%; /* #c7322f */
+  --muted: 210 15% 94%;
+  --muted-foreground: 213 15% 45%;
+  --accent: 357 100% 45%; /* #E60012 */
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --border: 225 15% 87%;
-  --input: 225 15% 87%;
-  --ring: 212 100% 13%; /* #001b44 */
+  --border: 214 15% 91%;
+  --input: 214 15% 91%;
+  --ring: 210 100% 20%; /* #003366 */
   --card: 0 0% 100%;
-  --card-foreground: 214 15% 12%;
+  --card-foreground: 213 30% 15%;
   --popover: 0 0% 100%;
-  --popover-foreground: 214 15% 12%;
-  --radius: 0.5rem;
+  --popover-foreground: 213 30% 15%;
+  --radius: 0.75rem;
 }
 
 body {
   background: radial-gradient(
       circle at 0% 0%,
-      rgba(0, 27, 68, 0.05),
-      transparent 55%
+      rgba(0, 51, 102, 0.04),
+      transparent 60%
     ),
-    radial-gradient(circle at 100% 0%, rgba(199, 50, 47, 0.04), transparent 50%),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(230, 0, 18, 0.03),
+      transparent 60%
+    ),
     var(--background);
   color: var(--foreground);
   margin: 0;
@@ -46,6 +50,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 a {
@@ -58,6 +63,17 @@ a:hover {
 }
 
 ::selection {
-  background-color: rgba(199, 50, 47, 0.2);
+  background-color: rgba(230, 0, 18, 0.2);
   color: var(--primary);
+}
+
+/* スムーズスクロール */
+html {
+  scroll-behavior: smooth;
+}
+
+/* フォーカス時のアウトライン */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

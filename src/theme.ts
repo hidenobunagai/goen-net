@@ -1,14 +1,15 @@
 import { alpha, createTheme } from "@mui/material/styles";
 
-const primaryMain = "#001b44";
-const primaryDark = "#001030";
-const primaryLight = "#1e3b7a";
-const accentMain = "#c7322f";
-const accentDark = "#a12724";
-const accentLight = "#f0625e";
-const canvas = "#f4f6fb";
-const surface = "#ffffff";
-const outline = "#d5d9e3";
+// グロービススタイルのカラーパレット
+const primaryMain = "#003366"; // 深い知的な青
+const primaryDark = "#002244";
+const primaryLight = "#0055AA";
+const accentMain = "#E60012"; // グロービスレッド
+const accentDark = "#CC0010";
+const accentLight = "#FF3340";
+const canvas = "#F8F9FA"; // 柔らかいグレー背景
+const surface = "#FFFFFF";
+const outline = "#E1E4E8";
 
 const theme = createTheme({
   palette: {
@@ -35,25 +36,28 @@ const theme = createTheme({
     divider: outline,
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 12,
   },
   typography: {
-    fontFamily: "'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-    h1: { fontWeight: 700, letterSpacing: "0.02em" },
-    h2: { fontWeight: 700, letterSpacing: "0.015em" },
-    h3: { fontWeight: 700 },
-    h4: { fontWeight: 700 },
-    h5: { fontWeight: 600 },
-    h6: { fontWeight: 600 },
-    subtitle1: { fontWeight: 500 },
-    button: { fontWeight: 600 },
+    fontFamily:
+      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+    h1: { fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.2 },
+    h2: { fontWeight: 700, letterSpacing: "-0.015em", lineHeight: 1.3 },
+    h3: { fontWeight: 700, letterSpacing: "-0.01em", lineHeight: 1.4 },
+    h4: { fontWeight: 700, lineHeight: 1.4 },
+    h5: { fontWeight: 600, lineHeight: 1.5 },
+    h6: { fontWeight: 600, lineHeight: 1.5 },
+    subtitle1: { fontWeight: 500, lineHeight: 1.6 },
+    body1: { lineHeight: 1.7 },
+    body2: { lineHeight: 1.6 },
+    button: { fontWeight: 600, letterSpacing: "0.02em" },
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
           backgroundImage:
-            "radial-gradient(circle at 0% 0%, rgba(0, 27, 68, 0.06), transparent 55%), radial-gradient(circle at 100% 0%, rgba(199, 50, 47, 0.05), transparent 45%)",
+            "radial-gradient(circle at 0% 0%, rgba(0, 51, 102, 0.04), transparent 60%), radial-gradient(circle at 100% 100%, rgba(230, 0, 18, 0.03), transparent 60%)",
         },
       },
     },
@@ -63,10 +67,10 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          backgroundImage:
-            "linear-gradient(135deg, rgba(0, 27, 68, 0.92), rgba(14, 56, 125, 0.9))",
-          backdropFilter: "blur(8px)",
-          borderBottom: `1px solid ${alpha(primaryLight, 0.35)}`,
+          backgroundImage: "linear-gradient(135deg, #003366 0%, #0055AA 100%)",
+          backdropFilter: "blur(12px)",
+          borderBottom: `1px solid ${alpha("#FFFFFF", 0.1)}`,
+          boxShadow: "0 2px 12px rgba(0, 51, 102, 0.08)",
         },
       },
     },
@@ -79,23 +83,39 @@ const theme = createTheme({
     },
     MuiButton: {
       defaultProps: {
-        disableElevation: true,
+        disableElevation: false,
       },
       styleOverrides: {
         root: {
           textTransform: "none",
-          borderRadius: 10,
-          paddingInline: 18,
+          borderRadius: 8,
+          paddingInline: 24,
+          paddingBlock: 10,
+          fontSize: "0.95rem",
+          fontWeight: 600,
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         },
         containedPrimary: {
-          boxShadow: "0 10px 20px rgba(0, 27, 68, 0.18)",
+          boxShadow: "0 4px 12px rgba(0, 51, 102, 0.15)",
           ":hover": {
-            boxShadow: "0 12px 24px rgba(0, 27, 68, 0.24)",
+            transform: "translateY(-2px)",
+            boxShadow: "0 8px 24px rgba(0, 51, 102, 0.25)",
+          },
+        },
+        containedSecondary: {
+          boxShadow: "0 4px 12px rgba(230, 0, 18, 0.15)",
+          ":hover": {
+            transform: "translateY(-2px)",
+            boxShadow: "0 8px 24px rgba(230, 0, 18, 0.25)",
           },
         },
         outlined: {
-          borderWidth: 2,
-          paddingInline: 18,
+          borderWidth: 1.5,
+          paddingInline: 23,
+          ":hover": {
+            borderWidth: 1.5,
+            transform: "translateY(-2px)",
+          },
         },
       },
     },
@@ -117,10 +137,18 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 14,
-          border: `1px solid ${alpha(primaryMain, 0.08)}`,
+          borderRadius: 16,
+          border: `1px solid ${alpha("#E1E4E8", 0.6)}`,
           backgroundImage:
-            "linear-gradient(155deg, rgba(255,255,255,0.98), rgba(236, 240, 250, 0.92))",
+            "linear-gradient(145deg, rgba(255,255,255,1) 0%, rgba(248,249,250,0.5) 100%)",
+          boxShadow:
+            "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          ":hover": {
+            boxShadow:
+              "0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.08)",
+            transform: "translateY(-4px)",
+          },
         },
       },
     },
