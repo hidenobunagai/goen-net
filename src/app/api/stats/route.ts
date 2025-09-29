@@ -11,9 +11,11 @@ export interface StatsData {
 
 export async function GET() {
   try {
+    console.log("[API] Stats endpoint called");
     const session = await getOptionalUserSession();
 
     if (!session?.user?.email) {
+      console.log("[API] No session found, returning mock data");
       // Return mock data for unauthenticated users (shouldn't happen in protected routes)
       const stats: StatsData = {
         totalUpdates: 12,
@@ -21,9 +23,21 @@ export async function GET() {
         activeMembers: 8,
         daysToMeeting: 5,
       };
-      return NextResponse.json(stats);
+
+      const response = NextResponse.json(stats);
+      response.headers.set(
+        "Cache-Control",
+        "no-cache, no-store, must-revalidate"
+      );
+      response.headers.set("Pragma", "no-cache");
+      response.headers.set("Expires", "0");
+      return response;
     }
 
+    console.log(
+      "[API] Session found, fetching real data for:",
+      session.user.email
+    );
     // Fetch real data from database
     const updates = await fetchUpdates(session.user.email, {
       limit: 100,
@@ -45,12 +59,25 @@ export async function GET() {
       daysToMeeting: Math.max(0, daysToMeeting),
     };
 
-    return NextResponse.json(stats);
+    console.log("[API] Returning stats:", stats);
+    const response = NextResponse.json(stats);
+    response.headers.set(
+      "Cache-Control",
+      "no-cache, no-store, must-revalidate"
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
   } catch (error) {
-    console.error("Error fetching stats:", error);
-    return NextResponse.json(
+    console.error("[API] Error fetching stats:", error);
+    const response = NextResponse.json(
       { error: "Failed to fetch stats" },
       { status: 500 }
     );
+    response.headers.set(
+      "Cache-Control",
+      "no-cache, no-store, must-revalidate"
+    );
+    return response;
   }
 }

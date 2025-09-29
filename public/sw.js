@@ -1,4 +1,4 @@
-const CACHE_NAME = "goen-net-cache-v1";
+const CACHE_NAME = "goen-net-cache-v2"; // Updated version to force cache refresh
 const OFFLINE_URLS = ["/", "/manifest.webmanifest", "/app-icon.svg"]; // keep list small for now
 
 self.addEventListener("install", (event) => {
@@ -38,6 +38,12 @@ self.addEventListener("fetch", (event) => {
 
   const requestURL = new URL(request.url);
   if (requestURL.origin !== self.location.origin) {
+    return;
+  }
+
+  // Don't cache API routes - always fetch fresh
+  if (requestURL.pathname.startsWith("/api/")) {
+    event.respondWith(fetch(request));
     return;
   }
 
