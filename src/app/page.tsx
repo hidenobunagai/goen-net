@@ -11,6 +11,10 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2";
 import Link from "next/link";
 
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function Home() {
   // Temporarily use optional session to debug authentication issues
   const session = await getOptionalUserSession();
@@ -41,7 +45,10 @@ export default async function Home() {
   const firstName = user?.name?.split(" ")[0] ?? "Member";
 
   return (
-    <Box component="section" sx={{ position: "relative", overflow: "hidden", minHeight: "100vh" }}>
+    <Box
+      component="section"
+      sx={{ position: "relative", overflow: "hidden", minHeight: "100vh" }}
+    >
       <Box
         sx={{
           position: "absolute",
@@ -66,11 +73,11 @@ export default async function Home() {
               <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ pr: { md: 4 } }}>
                 <Typography
                   variant="overline"
-                  sx={{ 
+                  sx={{
                     color: "primary.main",
                     fontWeight: 700,
                     letterSpacing: "0.15em",
-                    fontSize: "0.75rem"
+                    fontSize: "0.75rem",
                   }}
                 >
                   WELCOME BACK
@@ -78,13 +85,14 @@ export default async function Home() {
                 <Typography
                   variant="h2"
                   component="h1"
-                  sx={{ 
+                  sx={{
                     fontWeight: 800,
-                    background: "linear-gradient(135deg, #003366 0%, #0055AA 100%)",
+                    background:
+                      "linear-gradient(135deg, #003366 0%, #0055AA 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    lineHeight: 1.2
+                    lineHeight: 1.2,
                   }}
                 >
                   Everything builds toward our next session, {firstName}.
