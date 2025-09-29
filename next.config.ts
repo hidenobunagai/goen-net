@@ -12,6 +12,29 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: false,
   },
+  // キャッシュ制御のためのヘッダー設定
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   serverExternalPackages: ["@libsql/client", "@libsql/hrana-client"],
   turbopack: {
     resolveAlias: {
