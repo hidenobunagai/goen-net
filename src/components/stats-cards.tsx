@@ -25,9 +25,6 @@ export function StatsCards() {
       }
       return response.json();
     },
-    staleTime: 0, // Force refetch on every mount
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
   });
 
   if (error) {
@@ -74,7 +71,7 @@ export function StatsCards() {
   ];
 
   return (
-    <div 
+    <div
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
       data-component-version="v2.0.0"
     >

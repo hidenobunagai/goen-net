@@ -2,7 +2,7 @@ import { NextSessionCard } from "@/app/(protected)/_components/next-session-card
 import { NextMeetingCard } from "@/components/meetings/next-meeting-card";
 import { StatsCards } from "@/components/stats-cards";
 import { UpdatesBoard } from "@/components/updates/updates-board";
-import { requireUserSession } from "@/lib/session";
+import { getOptionalUserSession } from "@/lib/session";
 import { getNextSession } from "@/lib/turso";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -15,10 +15,30 @@ import Grid from "@mui/material/Unstable_Grid2";
 import Link from "next/link";
 
 export default async function Home() {
-  const session = await requireUserSession();
+  // Temporarily use optional session to debug authentication issues
+  const session = await getOptionalUserSession();
+
+  // If no session, show sign-in prompt instead of crashing
+  if (!session) {
+    return (
+      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 7 } }}>
+        <Stack spacing={4} alignItems="center">
+          <Typography variant="h4">Please sign in to access Goen Net</Typography>
+          <Button
+            component={Link}
+            href="/signin"
+            variant="contained"
+            size="large"
+          >
+            Sign In
+          </Button>
+        </Stack>
+      </Container>
+    );
+  }
 
   const [nextSession] = await Promise.all([getNextSession()]);
-  const user = session.user;
+  const user = session?.user;
   const firstName = user?.name?.split(" ")[0] ?? "Member";
 
   return (
