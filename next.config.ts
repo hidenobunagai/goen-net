@@ -12,6 +12,20 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: false,
   },
+  // Force no cache for development debugging
+  headers: async () => {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
   serverExternalPackages: ["@libsql/client", "@libsql/hrana-client"],
   turbopack: {
     resolveAlias: {
