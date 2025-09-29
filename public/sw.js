@@ -1,90 +1,33 @@
-const CACHE_NAME = "goen-net-cache-v2"; // Updated version to force cache refresh
-const OFFLINE_URLS = ["/", "/manifest.webmanifest", "/app-icon.svg"]; // keep list small for now
+// Service Worker v3 - Clear all caches and unregister
+const CACHE_VERSION = "goen-net-cache-v3";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(OFFLINE_URLS))
-      .then(() => self.skipWaiting())
-  );
+  // Skip waiting to activate immediately
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
+    // Delete ALL caches
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          console.log("Deleting cache:", cacheName);
+          return caches.delete(cacheName);
+        })
+      );
+    }).then(() => {
+      // Take control of all clients immediately
+      return self.clients.claim();
+    })
   );
 });
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
-});
 
+// Don't cache anything - always fetch fresh
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  if (request.method !== "GET") {
-    return;
-  }
-
-  const requestURL = new URL(request.url);
-  if (requestURL.origin !== self.location.origin) {
-    return;
-  }
-
-  // Don't cache API routes - always fetch fresh
-  if (requestURL.pathname.startsWith("/api/")) {
-    event.respondWith(fetch(request));
-    return;
-  }
-
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request)
-        .then((response) => {
-          if (
-            !response ||
-            response.status !== 200 ||
-            response.type !== "basic"
-          ) {
-            return response;
-          }
-
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache).catch(() => {
-              // Ignore cache put errors (e.g., opaque responses)
-            });
-          });
-
-          return response;
-        })
-        .catch(async () => {
-          if (request.mode === "navigate") {
-            const cachedRoot = await caches.match("/");
-            if (cachedRoot) {
-              return cachedRoot;
-            }
-          }
-
-          return new Response("Offline", {
-            status: 503,
-            headers: { "Content-Type": "text/plain" },
-          });
-        });
+    fetch(event.request, {
+      cache: "no-store"
     })
   );
 });

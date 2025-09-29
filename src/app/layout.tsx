@@ -50,6 +50,10 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
+// Force dynamic rendering to prevent static page caching
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
