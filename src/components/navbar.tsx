@@ -156,14 +156,7 @@ export function Navbar() {
         Sign Out
       </MenuItem>,
     ]
-  ) : (
-    <MenuItem
-      onClick={() => navigateAndClose("/signin", handleCloseNav)}
-      key="mobile-sign-in"
-    >
-      Sign In
-    </MenuItem>
-  );
+  ) : null;
   return (
     <AppBar position="static" color="primary" square sx={{ borderRadius: 0 }}>
       <Container maxWidth="lg">
@@ -321,16 +314,7 @@ export function Navbar() {
                   Sign Out
                 </Button>
               </>
-            ) : (
-              <Button
-                color="secondary"
-                variant="contained"
-                onClick={() => router.push("/signin")}
-                sx={{ px: 3 }}
-              >
-                Sign In
-              </Button>
-            )}
+            ) : null}
           </Box>
         </Toolbar>
       </Container>
