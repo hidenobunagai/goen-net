@@ -56,7 +56,7 @@ export default async function Home() {
       />
       <Container
         maxWidth="lg"
-        sx={{ py: { xs: 5, md: 7 }, position: "relative", zIndex: 1 }}
+        sx={{ py: { xs: 3, sm: 4, md: 7 }, position: "relative", zIndex: 1 }}
       >
         <Stack spacing={{ xs: 6, md: 9 }}>
           {/* Stats Cards Section */}
@@ -78,12 +78,12 @@ export default async function Home() {
 
           <Grid
             container
-            spacing={4}
+            spacing={{ xs: 2, sm: 3, md: 4 }}
             columns={{ xs: 1, md: 12 }}
             alignItems="stretch"
           >
             <Grid xs={1} md={7}>
-              <Stack spacing={2.5} sx={{ pr: { md: 4 } }}>
+              <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ pr: { md: 4 } }}>
                 <Typography
                   variant="h2"
                   component="h1"
@@ -112,7 +112,7 @@ export default async function Home() {
                   sx={{
                     display: "flex",
                     flexDirection: "column",
-                    p: { xs: 1, sm: 1.5 },
+                    p: { xs: 1, sm: 1.5, md: 2 },
                   }}
                 >
                   <NextSessionCard initial={nextSession} />
@@ -126,7 +126,7 @@ export default async function Home() {
 
           {/* Recent Updates Section */}
           <Box>
-            <Stack spacing={2} sx={{ mb: 4 }}>
+            <Stack spacing={{ xs: 1.5, md: 2 }} sx={{ mb: { xs: 3, md: 4 } }}>
               <Typography
                 variant="overline"
                 color="primary"
@@ -143,12 +143,12 @@ export default async function Home() {
 
           <Card
             sx={{
-              p: { xs: 3, md: 4 },
+              p: { xs: 2, sm: 3, md: 4 },
               backgroundImage:
                 "linear-gradient(160deg, rgba(255,255,255,0.96), rgba(0,27,68,0.08))",
             }}
           >
-            <Stack spacing={3}>
+            <Stack spacing={{ xs: 2, md: 3 }}>
               <Stack spacing={1} sx={{ maxWidth: 760 }}>
                 <Typography
                   variant="overline"
@@ -166,7 +166,11 @@ export default async function Home() {
                   email threads or spreadsheets.
                 </Typography>
               </Stack>
-              <Grid container spacing={3} columns={{ xs: 1, md: 12 }}>
+              <Grid
+                container
+                spacing={{ xs: 2, md: 3 }}
+                columns={{ xs: 1, md: 12 }}
+              >
                 <Grid xs={1} md={4}>
                   <Stack spacing={1}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -205,7 +209,7 @@ export default async function Home() {
             </Stack>
           </Card>
 
-          <Card sx={{ p: { xs: 3, md: 4 } }}>
+          <Card sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
             <Stack spacing={3}>
               <Stack spacing={1}>
                 <Typography
@@ -219,7 +223,7 @@ export default async function Home() {
                   How to use the app before, during, and after we meet
                 </Typography>
               </Stack>
-              <Stack spacing={2.5}>
+              <Stack spacing={{ xs: 2, md: 2.5 }}>
                 <Stack direction="row" spacing={2} alignItems="flex-start">
                   <Typography
                     variant="h6"
@@ -328,9 +332,13 @@ export default async function Home() {
             </Stack>
           </Card>
 
-          <Grid container spacing={3} columns={{ xs: 1, md: 12 }}>
+          <Grid
+            container
+            spacing={{ xs: 2, md: 3 }}
+            columns={{ xs: 1, md: 12 }}
+          >
             <Grid xs={1} md={4}>
-              <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
+              <Card sx={{ height: "100%", p: { xs: 2, sm: 2.5, md: 3 } }}>
                 <Stack spacing={1.5}>
                   <Typography
                     variant="overline"
@@ -358,7 +366,7 @@ export default async function Home() {
               </Card>
             </Grid>
             <Grid xs={1} md={4}>
-              <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
+              <Card sx={{ height: "100%", p: { xs: 2, sm: 2.5, md: 3 } }}>
                 <Stack spacing={1.5}>
                   <Typography
                     variant="overline"
@@ -386,7 +394,7 @@ export default async function Home() {
               </Card>
             </Grid>
             <Grid xs={1} md={4}>
-              <Card sx={{ height: "100%", p: { xs: 2.5, md: 3 } }}>
+              <Card sx={{ height: "100%", p: { xs: 2, sm: 2.5, md: 3 } }}>
                 <Stack spacing={1.5}>
                   <Typography
                     variant="overline"
@@ -415,7 +423,7 @@ export default async function Home() {
             </Grid>
           </Grid>
 
-          <Card sx={{ p: { xs: 3, md: 4 } }}>
+          <Card sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
             <Stack spacing={2.5}>
               <Stack spacing={1}>
                 <Typography
@@ -433,7 +441,11 @@ export default async function Home() {
                   streamline prep and keep conversations sharp.
                 </Typography>
               </Stack>
-              <Grid container spacing={2} columns={{ xs: 1, sm: 3 }}>
+              <Grid
+                container
+                spacing={{ xs: 1.5, sm: 2 }}
+                columns={{ xs: 1, sm: 3 }}
+              >
                 <Grid xs={1}>
                   <Button
                     component={Link}

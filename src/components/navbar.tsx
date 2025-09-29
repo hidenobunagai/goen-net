@@ -167,7 +167,10 @@ export function Navbar() {
   return (
     <AppBar position="static" color="primary" square sx={{ borderRadius: 0 }}>
       <Container maxWidth="lg">
-        <Toolbar disableGutters sx={{ gap: 1.5, py: 1 }}>
+        <Toolbar
+          disableGutters
+          sx={{ gap: { xs: 1, md: 1.5 }, py: { xs: 0.75, md: 1 } }}
+        >
           <Box sx={{ flexGrow: 1 }}>
             <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
               <Typography
@@ -187,7 +190,7 @@ export function Navbar() {
 
           <IconButton
             color="inherit"
-            sx={{ display: { xs: "inline-flex", md: "none" } }}
+            sx={{ display: { xs: "inline-flex", sm: "none", md: "none" } }}
             onClick={handleOpenNav}
             aria-label="Open navigation menu"
           >
@@ -205,7 +208,7 @@ export function Navbar() {
 
           <Box
             sx={{
-              display: { xs: "none", md: "flex" },
+              display: { xs: "none", sm: "none", md: "flex" },
               gap: 1.5,
               alignItems: "center",
             }}
