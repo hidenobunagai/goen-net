@@ -36,7 +36,7 @@ const theme = createTheme({
     divider: outline,
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 4,
   },
   typography: {
     fontFamily:
@@ -88,33 +88,30 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          borderRadius: 8,
-          paddingInline: 24,
-          paddingBlock: 10,
+          borderRadius: 4,
+          paddingInline: 28,
+          paddingBlock: 12,
           fontSize: "0.95rem",
           fontWeight: 600,
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "all 0.2s ease",
         },
         containedPrimary: {
-          boxShadow: "0 4px 12px rgba(0, 51, 102, 0.15)",
+          boxShadow: "0 2px 8px rgba(0, 51, 102, 0.12)",
           ":hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 8px 24px rgba(0, 51, 102, 0.25)",
+            boxShadow: "0 2px 12px rgba(0, 51, 102, 0.2)",
           },
         },
         containedSecondary: {
-          boxShadow: "0 4px 12px rgba(230, 0, 18, 0.15)",
+          boxShadow: "0 2px 8px rgba(230, 0, 18, 0.12)",
           ":hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 8px 24px rgba(230, 0, 18, 0.25)",
+            boxShadow: "0 2px 12px rgba(230, 0, 18, 0.2)",
           },
         },
         outlined: {
           borderWidth: 1.5,
-          paddingInline: 23,
+          paddingInline: 27,
           ":hover": {
             borderWidth: 1.5,
-            transform: "translateY(-2px)",
           },
         },
       },
@@ -125,9 +122,9 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 4,
           border: `1px solid ${alpha(primaryMain, 0.08)}`,
-          boxShadow: "0 16px 32px rgba(15, 23, 42, 0.08)",
+          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
         },
       },
     },
@@ -137,17 +134,13 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 16,
-          border: `1px solid ${alpha("#E1E4E8", 0.6)}`,
-          backgroundImage:
-            "linear-gradient(145deg, rgba(255,255,255,1) 0%, rgba(248,249,250,0.5) 100%)",
-          boxShadow:
-            "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          borderRadius: 4,
+          border: `1px solid ${alpha("#E1E4E8", 0.8)}`,
+          backgroundColor: "#FFFFFF",
+          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
+          transition: "box-shadow 0.2s ease",
           ":hover": {
-            boxShadow:
-              "0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.08)",
-            transform: "translateY(-4px)",
+            boxShadow: "0 2px 8px rgba(0, 51, 102, 0.1)",
           },
         },
       },
@@ -156,7 +149,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 600,
-          borderRadius: 8,
+          borderRadius: 4,
         },
       },
     },

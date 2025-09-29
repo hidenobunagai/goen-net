@@ -33,17 +33,7 @@
 }
 
 body {
-  background: radial-gradient(
-      circle at 0% 0%,
-      rgba(0, 51, 102, 0.04),
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 100% 100%,
-      rgba(230, 0, 18, 0.03),
-      transparent 60%
-    ),
-    var(--background);
+  background: #FFFFFF;
   color: var(--foreground);
   margin: 0;
   min-height: 100vh;
