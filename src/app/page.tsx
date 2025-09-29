@@ -41,21 +41,21 @@ export default async function Home() {
   const firstName = user?.name?.split(" ")[0] ?? "Member";
 
   return (
-    <Box component="section" sx={{ position: "relative", overflow: "hidden" }}>
+    <Box component="section" sx={{ position: "relative", overflow: "hidden", minHeight: "100vh" }}>
       <Box
         sx={{
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(180deg, rgba(0,27,68,0.12) 0%, rgba(0,27,68,0.04) 45%, transparent 100%)",
+            "linear-gradient(180deg, rgba(0,51,102,0.03) 0%, transparent 50%, rgba(230,0,18,0.02) 100%)",
           pointerEvents: "none",
         }}
       />
       <Container
         maxWidth="lg"
-        sx={{ py: { xs: 3, sm: 4, md: 7 }, position: "relative", zIndex: 1 }}
+        sx={{ py: { xs: 4, sm: 6, md: 10 }, position: "relative", zIndex: 1 }}
       >
-        <Stack spacing={{ xs: 6, md: 9 }}>
+        <Stack spacing={{ xs: 7, md: 11 }}>
           <Grid
             container
             spacing={{ xs: 2, sm: 3, md: 4 }}
@@ -65,9 +65,27 @@ export default async function Home() {
             <Grid xs={1} md={7}>
               <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ pr: { md: 4 } }}>
                 <Typography
+                  variant="overline"
+                  sx={{ 
+                    color: "primary.main",
+                    fontWeight: 700,
+                    letterSpacing: "0.15em",
+                    fontSize: "0.75rem"
+                  }}
+                >
+                  WELCOME BACK
+                </Typography>
+                <Typography
                   variant="h2"
                   component="h1"
-                  sx={{ fontWeight: 700 }}
+                  sx={{ 
+                    fontWeight: 800,
+                    background: "linear-gradient(135deg, #003366 0%, #0055AA 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    lineHeight: 1.2
+                  }}
                 >
                   Everything builds toward our next session, {firstName}.
                 </Typography>
