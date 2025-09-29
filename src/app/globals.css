@@ -9,27 +9,27 @@
   --accent: #c7322f;
   --primary: #001b44;
 
-  /* shadcn/ui theme variables with GoenNet branding */
-  --shadcn-background: 225 25% 97%; /* #f4f6fb */
-  --shadcn-foreground: 214 15% 12%; /* #1b1e29 */
-  --shadcn-primary: 212 100% 13%; /* #001b44 */
-  --shadcn-primary-foreground: 0 0% 100%;
-  --shadcn-secondary: 4 78% 49%; /* #c7322f */
-  --shadcn-secondary-foreground: 0 0% 100%;
-  --shadcn-muted: 225 15% 92%;
-  --shadcn-muted-foreground: 214 10% 50%;
-  --shadcn-accent: 4 78% 49%; /* #c7322f */
-  --shadcn-accent-foreground: 0 0% 100%;
-  --shadcn-destructive: 0 84% 60%;
-  --shadcn-destructive-foreground: 0 0% 98%;
-  --shadcn-border: 225 15% 87%;
-  --shadcn-input: 225 15% 87%;
-  --shadcn-ring: 212 100% 13%; /* #001b44 */
-  --shadcn-card: 0 0% 100%;
-  --shadcn-card-foreground: 214 15% 12%;
-  --shadcn-popover: 0 0% 100%;
-  --shadcn-popover-foreground: 214 15% 12%;
-  --shadcn-radius: 0.5rem;
+  /* Standard shadcn/ui theme variables */
+  --background: 225 25% 97%; /* #f4f6fb */
+  --foreground: 214 15% 12%; /* #1b1e29 */
+  --primary: 212 100% 13%; /* #001b44 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 4 78% 49%; /* #c7322f */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 225 15% 92%;
+  --muted-foreground: 214 10% 50%;
+  --accent: 4 78% 49%; /* #c7322f */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 225 15% 87%;
+  --input: 225 15% 87%;
+  --ring: 212 100% 13%; /* #001b44 */
+  --card: 0 0% 100%;
+  --card-foreground: 214 15% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 214 15% 12%;
+  --radius: 0.5rem;
 }
 
 body {

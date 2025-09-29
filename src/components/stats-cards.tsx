@@ -41,32 +41,32 @@ export function StatsCards() {
       label: "Total Updates",
       value: stats?.totalUpdates || 0,
       icon: Activity,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      iconColor: "#2563eb", // blue-600
+      bgColor: "#eff6ff", // blue-50
     },
     {
       key: "urgentItems",
       label: "Urgent Items",
       value: stats?.urgentItems || 0,
       icon: AlertTriangle,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      iconColor: "#ea580c", // orange-600
+      bgColor: "#fff7ed", // orange-50
     },
     {
       key: "activeMembers",
       label: "Active Members",
       value: stats?.activeMembers || 0,
       icon: Users,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      iconColor: "#16a34a", // green-600
+      bgColor: "#f0fdf4", // green-50
     },
     {
       key: "daysToMeeting",
       label: "Days to Meeting",
       value: stats?.daysToMeeting || 0,
       icon: Calendar,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      iconColor: "#9333ea", // purple-600
+      bgColor: "#faf5ff", // purple-50
     },
   ];
 
@@ -78,15 +78,21 @@ export function StatsCards() {
           <Card key={stat.key} className="transition-all hover:shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
-                <div className={`${stat.bgColor} ${stat.color} p-3 rounded-lg`}>
+                <div
+                  className="p-3 rounded-lg"
+                  style={{
+                    backgroundColor: stat.bgColor,
+                    color: stat.iconColor,
+                  }}
+                >
                   <Icon className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-[hsl(var(--shadcn-muted-foreground))]">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {stat.label}
                   </p>
                   <p
-                    className="text-2xl font-bold text-[hsl(var(--shadcn-foreground))]"
+                    className="text-2xl font-bold text-foreground"
                     data-testid={`stats-${stat.key
                       .replace(/([A-Z])/g, "-$1")
                       .toLowerCase()}`}

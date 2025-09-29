@@ -10,16 +10,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[hsl(var(--shadcn-primary))] text-[hsl(var(--shadcn-primary-foreground))] hover:bg-[hsl(var(--shadcn-primary))]/90",
+          "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90",
         destructive:
-          "bg-[hsl(var(--shadcn-destructive))] text-[hsl(var(--shadcn-destructive-foreground))] hover:bg-[hsl(var(--shadcn-destructive))]/90",
+          "bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))] hover:bg-[hsl(var(--destructive))]/90",
         outline:
-          "border border-[hsl(var(--shadcn-input))] bg-[hsl(var(--shadcn-background))] hover:bg-[hsl(var(--shadcn-accent))] hover:text-[hsl(var(--shadcn-accent-foreground))]",
+          "border border-[hsl(var(--input))] bg-[hsl(var(--background))] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
         secondary:
-          "bg-[hsl(var(--shadcn-secondary))] text-[hsl(var(--shadcn-secondary-foreground))] hover:bg-[hsl(var(--shadcn-secondary))]/80",
+          "bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:bg-[hsl(var(--secondary))]/80",
         ghost:
-          "hover:bg-[hsl(var(--shadcn-accent))] hover:text-[hsl(var(--shadcn-accent-foreground))]",
-        link: "text-[hsl(var(--shadcn-primary))] underline-offset-4 hover:underline",
+          "hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
+        link: "text-[hsl(var(--primary))] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
