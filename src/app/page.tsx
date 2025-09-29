@@ -1,4 +1,4 @@
-import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
+﻿import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
 import { getOptionalUserSession } from "@/lib/session";
 import { getNextSession } from "@/lib/turso";
 import Box from "@mui/material/Box";
@@ -50,12 +50,12 @@ export default async function Home() {
         <Stack spacing={{ xs: 7, md: 11 }}>
           <Grid
             container
-            spacing={{ xs: 2, sm: 3, md: 4 }}
+            spacing={{ xs: 3, sm: 4, md: 6 }}
             columns={{ xs: 1, md: 12 }}
-            alignItems="stretch"
+            alignItems="center"
           >
             <Grid xs={1} md={7}>
-              <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ pr: { md: 4 } }}>
+              <Stack spacing={{ xs: 2.5, md: 3 }}>
                 <Typography
                   variant="overline"
                   sx={{
@@ -84,13 +84,13 @@ export default async function Home() {
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
                   Align on priorities, surface decisions, and arrive prepared to
-                  move the circle forward. Start by reviewing your peers’ latest
+                  move the circle forward. Start by reviewing your peers窶・latest
                   updates so everyone arrives ready for the conversation.
                 </Typography>
                 <Stack spacing={1.5} sx={{ pt: 1 }}>
                   <Typography variant="body2" color="text.secondary">
                     Already updated? Jump straight into prioritization or visit
-                    the worksheets below when you’re ready.
+                    the worksheets below when you窶决e ready.
                   </Typography>
                 </Stack>
               </Stack>
@@ -405,10 +405,10 @@ export default async function Home() {
                   Roles & preparation
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  Arrive clear on how you’ll contribute
+                  Arrive clear on how you窶冤l contribute
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Choose the worksheet for the role you’ll play this meeting to
+                  Choose the worksheet for the role you窶冤l play this meeting to
                   streamline prep and keep conversations sharp.
                 </Typography>
               </Stack>
