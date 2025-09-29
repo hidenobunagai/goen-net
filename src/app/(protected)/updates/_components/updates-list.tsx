@@ -707,6 +707,19 @@ export function UpdatesBoard({
         )}
       </Stack>
 
+      {/* Delete all updates button - below main content */}
+      <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          onClick={openDeleteAll}
+          disabled={updates.length === 0}
+        >
+          Delete all updates
+        </Button>
+      </Box>
+
       <Dialog
         open={deleteDialogOpen}
         onClose={cancelDelete}
@@ -799,33 +812,6 @@ export function UpdatesBoard({
           <Button onClick={handleDetailsClose}>Close</Button>
         </DialogActions>
       </Dialog>
-
-      {/* Fixed position Delete All button - bottom right */}
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 24,
-          right: 24,
-          zIndex: 1000,
-        }}
-      >
-        <Button
-          variant="outlined"
-          color="error"
-          size="small"
-          onClick={openDeleteAll}
-          disabled={updates.length === 0}
-          sx={{
-            boxShadow: 2,
-            bgcolor: "background.paper",
-            "&:hover": {
-              boxShadow: 4,
-            },
-          }}
-        >
-          Delete all updates
-        </Button>
-      </Box>
 
       {snackbar ? (
         <Snackbar
