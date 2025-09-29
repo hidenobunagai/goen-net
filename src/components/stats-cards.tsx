@@ -12,6 +12,8 @@ interface StatsData {
 }
 
 export function StatsCards() {
+  console.log("StatsCards component rendering...");
+  
   const {
     data: stats,
     isLoading,
@@ -19,18 +21,27 @@ export function StatsCards() {
   } = useQuery<StatsData>({
     queryKey: ["stats"],
     queryFn: async () => {
+      console.log("Fetching stats from /api/stats");
       const response = await fetch("/api/stats");
       if (!response.ok) {
+        console.error("Stats API error:", response.status, response.statusText);
         throw new Error("Failed to fetch stats");
       }
-      return response.json();
+      const data = await response.json();
+      console.log("Stats data received:", data);
+      return data;
     },
   });
 
+  console.log("StatsCards state:", { isLoading, error, stats });
+
   if (error) {
     return (
-      <div className="text-center p-4 text-red-600">
-        Failed to load statistics
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="col-span-full text-center p-8 text-red-600 bg-red-50 rounded-lg">
+          <p className="font-medium">Failed to load statistics</p>
+          <p className="text-sm text-red-500 mt-1">Please refresh the page to try again</p>
+        </div>
       </div>
     );
   }
@@ -39,7 +50,7 @@ export function StatsCards() {
     {
       key: "totalUpdates",
       label: "Total Updates",
-      value: stats?.totalUpdates || 0,
+      value: isLoading ? "..." : (stats?.totalUpdates || 0),
       icon: Activity,
       iconColor: "#2563eb", // blue-600
       bgColor: "#eff6ff", // blue-50
@@ -47,7 +58,7 @@ export function StatsCards() {
     {
       key: "urgentItems",
       label: "Urgent Items",
-      value: stats?.urgentItems || 0,
+      value: isLoading ? "..." : (stats?.urgentItems || 0),
       icon: AlertTriangle,
       iconColor: "#ea580c", // orange-600
       bgColor: "#fff7ed", // orange-50
@@ -55,7 +66,7 @@ export function StatsCards() {
     {
       key: "activeMembers",
       label: "Active Members",
-      value: stats?.activeMembers || 0,
+      value: isLoading ? "..." : (stats?.activeMembers || 0),
       icon: Users,
       iconColor: "#16a34a", // green-600
       bgColor: "#f0fdf4", // green-50
@@ -63,7 +74,7 @@ export function StatsCards() {
     {
       key: "daysToMeeting",
       label: "Days to Meeting",
-      value: stats?.daysToMeeting || 0,
+      value: isLoading ? "..." : (stats?.daysToMeeting || 0),
       icon: Calendar,
       iconColor: "#9333ea", // purple-600
       bgColor: "#faf5ff", // purple-50
@@ -100,7 +111,7 @@ export function StatsCards() {
                       .replace(/([A-Z])/g, "-$1")
                       .toLowerCase()}`}
                   >
-                    {isLoading ? "..." : stat.value}
+                    {stat.value}
                   </p>
                 </div>
               </div>

@@ -23,7 +23,9 @@ export default async function Home() {
     return (
       <Container maxWidth="lg" sx={{ py: { xs: 5, md: 7 } }}>
         <Stack spacing={4} alignItems="center">
-          <Typography variant="h4">Please sign in to access Goen Net</Typography>
+          <Typography variant="h4">
+            Please sign in to access Goen Net
+          </Typography>
           <Button
             component={Link}
             href="/signin"
