@@ -84,15 +84,9 @@ export default async function Home() {
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
                   Align on priorities, surface decisions, and arrive prepared to
-                  move the circle forward. Start by reviewing your peers窶・latest
+                  move the circle forward. Start by reviewing your peers&apos; latest
                   updates so everyone arrives ready for the conversation.
                 </Typography>
-                <Stack spacing={1.5} sx={{ pt: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Already updated? Jump straight into prioritization or visit
-                    the worksheets below when you窶决e ready.
-                  </Typography>
-                </Stack>
               </Stack>
             </Grid>
             <Grid xs={1} md={5}>
@@ -405,10 +399,10 @@ export default async function Home() {
                   Roles & preparation
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  Arrive clear on how you窶冤l contribute
+                  Arrive clear on how you&apos;ll contribute
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Choose the worksheet for the role you窶冤l play this meeting to
+                  Choose the worksheet for the role you&apos;ll play this meeting to
                   streamline prep and keep conversations sharp.
                 </Typography>
               </Stack>
