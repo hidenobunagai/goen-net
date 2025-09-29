@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/navbar";
 import { PWAServiceWorker } from "@/components/pwa-service-worker";
 import { NextAuthSessionProvider } from "@/components/session-provider";
+import TanStackQueryProvider from "@/components/tanstack-query-provider";
 import { ThemeRegistry } from "@/components/theme-registry";
 import Box from "@mui/material/Box";
 import type { Metadata, Viewport } from "next";
@@ -54,13 +55,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeRegistry>
-          <NextAuthSessionProvider>
-            <Navbar />
-            <Box component="main" sx={{ bgcolor: "background.default" }}>
-              {children}
-            </Box>
-            <PWAServiceWorker />
-          </NextAuthSessionProvider>
+          <TanStackQueryProvider>
+            <NextAuthSessionProvider>
+              <Navbar />
+              <Box component="main" sx={{ bgcolor: "background.default" }}>
+                {children}
+              </Box>
+              <PWAServiceWorker />
+            </NextAuthSessionProvider>
+          </TanStackQueryProvider>
         </ThemeRegistry>
       </body>
     </html>

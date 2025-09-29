@@ -6,6 +6,9 @@
 # Node dependencies
 node_modules/
 
+# Integration reference files (not part of application)
+GoenNetFork/
+
 # Build / Output
 dist/
 dist-ssr/
