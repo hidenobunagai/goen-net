@@ -1,7 +1,4 @@
 import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
-import { NextMeetingCard } from "@/components/meetings/next-meeting-card";
-import { StatsCards } from "@/components/stats-cards";
-import { UpdatesBoard } from "@/components/updates/updates-board";
 import { getOptionalUserSession } from "@/lib/session";
 import { getNextSession } from "@/lib/turso";
 import Box from "@mui/material/Box";
@@ -59,23 +56,6 @@ export default async function Home() {
         sx={{ py: { xs: 3, sm: 4, md: 7 }, position: "relative", zIndex: 1 }}
       >
         <Stack spacing={{ xs: 6, md: 9 }}>
-          {/* Stats Cards Section */}
-          <Box>
-            <Stack spacing={2} sx={{ mb: 4 }}>
-              <Typography
-                variant="overline"
-                color="primary"
-                sx={{ letterSpacing: "0.18em" }}
-              >
-                Dashboard Overview
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 600 }}>
-                Session metrics at a glance
-              </Typography>
-            </Stack>
-            <StatsCards />
-          </Box>
-
           <Grid
             container
             spacing={{ xs: 2, sm: 3, md: 4 }}
@@ -117,29 +97,9 @@ export default async function Home() {
                 >
                   <NextSessionCard initial={nextSession} />
                 </Card>
-
-                {/* New Enhanced Meeting Card */}
-                <NextMeetingCard />
               </Stack>
             </Grid>
           </Grid>
-
-          {/* Recent Updates Section */}
-          <Box>
-            <Stack spacing={{ xs: 1.5, md: 2 }} sx={{ mb: { xs: 3, md: 4 } }}>
-              <Typography
-                variant="overline"
-                color="primary"
-                sx={{ letterSpacing: "0.18em" }}
-              >
-                Latest Activity
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 600 }}>
-                Team updates and discussions
-              </Typography>
-            </Stack>
-            <UpdatesBoard />
-          </Box>
 
           <Card
             sx={{
@@ -483,10 +443,4 @@ export default async function Home() {
       </Container>
     </Box>
   );
-}
-
-{
-  `
-// Trigger Vercel deployment
-`;
 }
