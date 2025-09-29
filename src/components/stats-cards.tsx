@@ -1,6 +1,9 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Unstable_Grid2";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, AlertTriangle, Calendar, Users } from "lucide-react";
 
@@ -47,14 +50,19 @@ export function StatsCards() {
 
   if (error) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="col-span-full text-center p-8 text-red-600 bg-red-50 rounded-lg">
-          <p className="font-medium">Failed to load statistics</p>
-          <p className="text-sm text-red-500 mt-1">
-            Please refresh the page to try again
-          </p>
-        </div>
-      </div>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          p: 4,
+          bgcolor: "error.50",
+          borderRadius: 1,
+        }}
+      >
+        <Typography variant="body1" color="error.main">
+          Failed to load statistics. Please refresh the page to try again.
+        </Typography>
+      </Box>
     );
   }
 
@@ -94,43 +102,62 @@ export function StatsCards() {
   ];
 
   return (
-    <div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
-      data-component-version="v2.0.0"
+    <Grid
+      container
+      spacing={{ xs: 1, sm: 2 }}
+      columns={{ xs: 1, sm: 2, md: 4 }}
+      sx={{ mb: 3 }}
     >
       {statsConfig.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.key} className="transition-all hover:shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div
-                  className="p-3 rounded-lg"
-                  style={{
-                    backgroundColor: stat.bgColor,
-                    color: stat.iconColor,
+          <Grid xs={2} key={stat.key}>
+            <Card
+              sx={{ height: "100%", transition: "box-shadow 0.2s ease" }}
+              elevation={0}
+            >
+              <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: { xs: 1.5, sm: 2 },
                   }}
                 >
-                  <Icon className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {stat.label}
-                  </p>
-                  <p
-                    className="text-2xl font-bold text-foreground"
-                    data-testid={`stats-${stat.key
-                      .replace(/([A-Z])/g, "-$1")
-                      .toLowerCase()}`}
+                  <Box
+                    sx={{
+                      p: { xs: 1, sm: 1.5 },
+                      borderRadius: 1,
+                      bgcolor: stat.bgColor,
+                      color: stat.iconColor,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    {stat.value}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    <Icon size={20} />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500, mb: 0.5 }}
+                    >
+                      {stat.label}
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: "text.primary" }}
+                    >
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         );
       })}
-    </div>
+    </Grid>
   );
 }
