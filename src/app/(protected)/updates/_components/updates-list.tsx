@@ -64,6 +64,27 @@ const toUpdateItem = (record: UpdateRecord): UpdateItem => ({
   createdAtDate: new Date(record.createdAt),
 });
 
+// Color palette for user badges (distinct, accessible colors)
+const USER_BADGE_COLORS = [
+  "#1976d2", // blue
+  "#2e7d32", // green
+  "#ed6c02", // orange
+  "#9c27b0", // purple
+  "#d32f2f", // red
+  "#0288d1", // light blue
+  "#f57c00", // deep orange
+  "#7b1fa2", // deep purple
+  "#00796b", // teal
+  "#c62828", // dark red
+];
+
+// Deterministic color assignment based on user ID
+function getUserBadgeColor(uid: string): string {
+  if (!uid) return USER_BADGE_COLORS[0];
+  const hash = uid.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return USER_BADGE_COLORS[hash % USER_BADGE_COLORS.length];
+}
+
 export function UpdatesBoard({
   initialUpdates,
   viewerEmail,
@@ -472,8 +493,8 @@ export function UpdatesBoard({
                       px: 1.5,
                       py: 0.5,
                       borderRadius: 999,
-                      bgcolor: "primary.main",
-                      color: "primary.contrastText",
+                      bgcolor: getUserBadgeColor(item.uid),
+                      color: "white",
                       fontWeight: 700,
                       fontSize: "0.95rem",
                       letterSpacing: 0.3,
@@ -797,9 +818,23 @@ export function UpdatesBoard({
           {detailsItem ? (
             <Stack spacing={1.5}>
               <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                <Box
+                  sx={{
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 999,
+                    bgcolor: getUserBadgeColor(detailsItem.uid),
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    letterSpacing: 0.3,
+                    lineHeight: 1.3,
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
                   {detailsItem.by}
-                </Typography>
+                </Box>
                 <UpdateStatusBadge urgent={detailsItem.urgent} />
               </Stack>
               <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
