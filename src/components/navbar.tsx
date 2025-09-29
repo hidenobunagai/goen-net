@@ -299,15 +299,22 @@ export function Navbar() {
                 </Menu>
 
                 <Button
-                  color="secondary"
-                  variant="contained"
+                  color="inherit"
+                  variant="outlined"
                   onClick={handleSignOut}
                   sx={{
-                    bgcolor: alpha(theme.palette.secondary.main, 0.95),
-                    color: "#ffffff",
-                    px: 3,
+                    fontWeight: 600,
+                    px: 2.5,
+                    py: 0.75,
+                    letterSpacing: "0.02em",
+                    borderColor: alpha(theme.palette.common.white, 0.3),
+                    color: "inherit",
+                    transition:
+                      "background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease",
                     "&:hover": {
-                      bgcolor: theme.palette.secondary.main,
+                      bgcolor: alpha(theme.palette.common.white, 0.12),
+                      borderColor: alpha(theme.palette.common.white, 0.5),
+                      transform: "translateY(-1px)",
                     },
                   }}
                 >
