@@ -61,21 +61,7 @@ export default async function Home() {
             alignItems="center"
           >
             <Grid xs={1} md={5} order={{ xs: 1, md: 2 }}>
-              <Card
-                elevation={3}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  p: { xs: 1.5, sm: 2, md: 2.5 },
-                  borderRadius: { xs: 3, md: 4 },
-                  boxShadow: {
-                    xs: "0px 12px 32px rgba(0, 44, 95, 0.12)",
-                    md: "0px 16px 40px rgba(0, 44, 95, 0.18)",
-                  },
-                }}
-              >
-                <NextSessionCard initial={nextSession} />
-              </Card>
+              <NextSessionCard initial={nextSession} />
             </Grid>
             <Grid xs={1} md={7} order={{ xs: 2, md: 1 }}>
               <Stack
