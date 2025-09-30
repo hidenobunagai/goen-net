@@ -227,18 +227,6 @@ function findColumnIdByItem(
   return null;
 }
 
-function formatDate(date: Date): string {
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  } catch {
-    return date.toISOString().split("T")[0];
-  }
-}
-
 export function PrioritizationBoard() {
   const [updates, setUpdates] = useState<UpdateItem[]>([]);
   const [board, setBoard] = useState<BoardState | null>(null);
@@ -966,14 +954,11 @@ function UpdateCard({ item, isDragging }: UpdateCardProps) {
       <Stack
         direction="row"
         spacing={1}
-        justifyContent="space-between"
+        justifyContent="flex-start"
         alignItems="center"
       >
         <Typography variant="caption" color="text.secondary">
           {item.by}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {formatDate(item.createdAt)}
         </Typography>
       </Stack>
     </Paper>
