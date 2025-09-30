@@ -68,7 +68,6 @@ type UpdateItem = {
   urgent: boolean;
   when: -1 | 1;
   createdAt: Date;
-  votes: number;
 };
 
 type ColumnState = {
@@ -99,7 +98,6 @@ function toUpdateItem(record: UpdateRecord): UpdateItem {
     urgent: record.urgent,
     when: record.when,
     createdAt: new Date(record.createdAt ?? Date.now()),
-    votes: record.votes,
   };
 }
 
@@ -975,8 +973,7 @@ function UpdateCard({ item, isDragging }: UpdateCardProps) {
           {item.by}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {formatDate(item.createdAt)} · {item.votes} vote
-          {item.votes === 1 ? "" : "s"}
+          {formatDate(item.createdAt)}
         </Typography>
       </Stack>
     </Paper>

@@ -36,7 +36,6 @@ import { useTheme } from "@mui/material/styles";
 import { useCallback, useMemo, useState } from "react";
 import { UpdateFormDialog } from "./update-form-dialog";
 import { UpdateStatusBadge } from "./update-status-badge";
-import { UpdateVoteButton } from "./update-vote-button";
 
 const CATEGORIES = [
   { id: 0, label: "Work" },
@@ -105,33 +104,6 @@ export function UpdatesBoard({
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
   const [deleteAllLoading, setDeleteAllLoading] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>(null);
-  const [voteBusyIds, setVoteBusyIds] = useState<Set<string>>(() => new Set());
-
-  const setVotePending = useCallback((id: string, pending: boolean) => {
-    setVoteBusyIds((prev) => {
-      const next = new Set(prev);
-      if (pending) {
-        next.add(id);
-      } else {
-        next.delete(id);
-      }
-      return next;
-    });
-  }, []);
-
-  const updateLocalItem = useCallback(
-    (id: string, updater: (prev: UpdateItem) => UpdateItem) => {
-      setUpdates((prev) =>
-        prev.map((item) => (item.id === id ? updater(item) : item))
-      );
-      setDetailsItem((prev) => (prev && prev.id === id ? updater(prev) : prev));
-      setDeleteTarget((prev) =>
-        prev && prev.id === id ? updater(prev) : prev
-      );
-    },
-    []
-  );
-
   type ReloadResult = "success" | "preserved" | "skipped" | "error";
 
   const handleReload = useCallback(
@@ -181,9 +153,6 @@ export function UpdatesBoard({
           updated = true;
           return nextItems;
         });
-        if (updated) {
-          setVoteBusyIds(new Set());
-        }
         if (!updated && preserveExistingOnEmpty && nextItems.length === 0) {
           return "preserved";
         }
@@ -294,76 +263,6 @@ export function UpdatesBoard({
     return grouped;
   }, [filteredUpdates]);
 
-  const handleToggleVote = useCallback(
-    async (item: UpdateItem) => {
-      if (!viewerEmail) {
-        setSnackbar({ severity: "error", message: "Please sign in to vote." });
-        return;
-      }
-
-      if (voteBusyIds.has(item.id)) {
-        return;
-      }
-
-      const voting = !item.viewerHasVoted;
-      setVotePending(item.id, true);
-      updateLocalItem(item.id, (prev) => ({
-        ...prev,
-        votes: Math.max(0, prev.votes + (voting ? 1 : -1)),
-        viewerHasVoted: voting,
-      }));
-
-      try {
-        const response = await fetch(
-          `/api/updates/${encodeURIComponent(item.id)}/vote`,
-          {
-            method: voting ? "POST" : "DELETE",
-            credentials: "include",
-          }
-        );
-        const payload = await response.json().catch(() => null);
-
-        if (!response.ok || payload?.ok === false) {
-          const message =
-            payload?.error?.message ??
-            "Failed to update vote. Please try again.";
-          throw new Error(message);
-        }
-
-        const nextVotes =
-          typeof payload?.votes === "number" ? payload.votes : undefined;
-        const nextViewerHasVoted =
-          typeof payload?.viewerHasVoted === "boolean"
-            ? payload.viewerHasVoted
-            : undefined;
-
-        updateLocalItem(item.id, (prev) => ({
-          ...prev,
-          votes: typeof nextVotes === "number" ? nextVotes : prev.votes,
-          viewerHasVoted:
-            typeof nextViewerHasVoted === "boolean"
-              ? nextViewerHasVoted
-              : prev.viewerHasVoted,
-        }));
-      } catch (error) {
-        updateLocalItem(item.id, (prev) => ({
-          ...prev,
-          votes: Math.max(0, prev.votes + (voting ? -1 : 1)),
-          viewerHasVoted: !voting,
-        }));
-
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to update vote. Please try again.";
-        setSnackbar({ severity: "error", message });
-      } finally {
-        setVotePending(item.id, false);
-      }
-    },
-    [viewerEmail, voteBusyIds, setVotePending, updateLocalItem]
-  );
-
   const requestDelete = (item: UpdateItem) => {
     setDeleteTarget(item);
     setDeleteDialogOpen(true);
@@ -473,7 +372,6 @@ export function UpdatesBoard({
     return (
       <Stack spacing={1.5}>
         {items.map((item) => {
-          const votePending = voteBusyIds.has(item.id);
           return (
             <Paper
               key={item.id}
@@ -481,10 +379,6 @@ export function UpdatesBoard({
               sx={{
                 p: { xs: 2, sm: 2.5 },
                 borderRadius: 3,
-                borderColor: item.viewerHasVoted ? "primary.main" : undefined,
-                bgcolor: item.viewerHasVoted
-                  ? "action.hover"
-                  : "background.paper",
                 transition:
                   "border-color 0.2s ease, background-color 0.2s ease",
                 boxShadow: "0 18px 36px rgba(15, 23, 42, 0.08)",
@@ -529,14 +423,6 @@ export function UpdatesBoard({
                     sx={{ width: { xs: "100%", sm: "auto" } }}
                   >
                     <UpdateStatusBadge urgent={item.urgent} />
-                    <UpdateVoteButton
-                      viewerHasVoted={item.viewerHasVoted}
-                      votes={item.votes}
-                      disabled={votePending}
-                      onToggle={() => {
-                        void handleToggleVote(item);
-                      }}
-                    />
                     {item.viewerIsOwner ? (
                       <Tooltip title="Delete this update" placement="left">
                         <span>
@@ -603,8 +489,8 @@ export function UpdatesBoard({
               color="text.secondary"
               sx={{ maxWidth: 680 }}
             >
-              Share your team’s latest updates and ideas. Vote to align
-              everyone’s focus on what matters most.
+              Share your team’s latest updates and ideas to keep everyone
+              aligned on what matters most.
             </Typography>
           </Stack>
           <Stack

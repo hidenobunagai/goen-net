@@ -163,8 +163,9 @@ export default async function Home() {
                       Share signal-rich updates
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Capture highlights, tag the timeframe, and vote so the
-                      facilitator instantly sees where the energy is.
+                      Capture highlights, tag the timeframe, and spotlight what
+                      needs attention so the facilitator instantly sees where
+                      the energy is.
                     </Typography>
                   </Stack>
                 </Grid>
@@ -231,7 +232,7 @@ export default async function Home() {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Submit or refresh your update, add supporting links, and
-                      vote on priorities so the facilitator can finalize the
+                      flag priorities so the facilitator can finalize the
                       flow.
                     </Typography>
                   </Stack>
@@ -309,8 +310,8 @@ export default async function Home() {
                       Staying aligned between sessions
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Use votes and comments to nudge momentum mid-cycle and
-                      help each other stay accountable.
+                      Use quick comments and reactions to nudge momentum
+                      mid-cycle and help each other stay accountable.
                     </Typography>
                   </Stack>
                 </Stack>
@@ -338,7 +339,8 @@ export default async function Home() {
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Draft your update, paste links, mark anything urgent, and
-                    see how the votes evolve as teammates weigh in.
+                    see how the team rallies around key topics as they weigh
+                    in.
                   </Typography>
                   <Button
                     component={Link}

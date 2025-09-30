@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import {
   AlertTriangle,
-  ArrowUp,
   Clock,
   HelpCircle,
   Lightbulb,
@@ -24,8 +23,6 @@ interface Update {
   body: string;
   when: -1 | 1; // -1: past, 1: future
   createdAt: string;
-  votes: number;
-  viewerHasVoted: boolean;
   viewerIsOwner: boolean;
 }
 
@@ -150,30 +147,28 @@ export function UpdatesBoard() {
                       <Icon className={`w-4 h-4 ${categoryInfo.iconColor}`} />
                     </div>
 
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-foreground">
-                              {update.title}
-                            </h4>
-                            {update.urgent && (
-                              <Badge variant="destructive" className="text-xs">
-                                <AlertTriangle className="w-3 h-3 mr-1" />
-                                Urgent
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <User className="w-3 h-3" />
-                            <span>{update.by}</span>
-                            <span>•</span>
-                            <Clock className="w-3 h-3" />
-                            <span>{timeAgo}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {categoryInfo.label}
+                    <div className="flex-1 space-y-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-foreground">
+                            {update.title}
+                          </h4>
+                          {update.urgent && (
+                            <Badge variant="destructive" className="text-xs">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Urgent
                             </Badge>
-                          </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <User className="w-3 h-3" />
+                          <span>{update.by}</span>
+                          <span>•</span>
+                          <Clock className="w-3 h-3" />
+                          <span>{timeAgo}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {categoryInfo.label}
+                          </Badge>
                         </div>
                       </div>
 
@@ -184,29 +179,14 @@ export function UpdatesBoard() {
                       </p>
 
                       <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className={`flex items-center gap-1 text-sm ${
-                              update.viewerHasVoted
-                                ? "text-primary font-medium"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            <ArrowUp className="w-4 h-4" />
-                            <span>{update.votes}</span>
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-1 text-sm text-muted-foreground"
-                          >
-                            <MessageCircle className="w-4 h-4" />
-                            <span>Discuss</span>
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex items-center gap-1 text-sm text-muted-foreground"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span>Discuss</span>
+                        </Button>
 
                         {update.when === 1 && (
                           <Badge variant="secondary" className="text-xs">

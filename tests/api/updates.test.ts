@@ -88,8 +88,6 @@ describe("/api/updates route", () => {
         body: "Body",
         when: -1,
         createdAt: new Date().toISOString(),
-        votes: 2,
-        viewerHasVoted: false,
         viewerIsOwner: true,
       },
     ]);
@@ -181,8 +179,6 @@ describe("/api/updates route", () => {
       body: "text",
       when: 1 as const,
       createdAt: new Date().toISOString(),
-      votes: 0,
-      viewerHasVoted: false,
       viewerIsOwner: true,
     };
     vi.mocked(getUpdateById).mockResolvedValueOnce(mockRecord as never);
@@ -233,8 +229,6 @@ describe("/api/updates route", () => {
       title: "Fallback title",
       body: "text",
       when: -1,
-      votes: 0,
-      viewerHasVoted: false,
       viewerIsOwner: true,
     });
     expect(typeof body.update.createdAt).toBe("string");

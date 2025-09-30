@@ -1,6 +1,5 @@
 import { TursoUnavailableError, execute, isTursoConfigured } from "@/lib/turso";
 import type { InArgs } from "@libsql/client";
-import { randomUUID } from "crypto";
 
 export type UpdateCategory = 0 | 1 | 2;
 export type UpdateWhen = -1 | 1;
@@ -15,8 +14,6 @@ export type UpdateRecord = {
   body: string;
   when: UpdateWhen;
   createdAt: string;
-  votes: number;
-  viewerHasVoted: boolean;
   viewerIsOwner: boolean;
 };
 
@@ -42,7 +39,6 @@ type MemoryUpdate = {
   body: string;
   when: UpdateWhen;
   createdAt: string;
-  voters: Set<string>;
 };
 
 type UpdatesMemoryStore = {
@@ -218,16 +214,7 @@ type UpdatesTableSchema = {
   updatedAtColumn?: string;
 };
 
-type UpdateVotesTableSchema = {
-  idColumn: string;
-  updateIdColumn: string;
-  uidColumn: string;
-  createdAtColumn?: string;
-  updatedAtColumn?: string;
-};
-
 let cachedUpdatesTableSchema: UpdatesTableSchema | null = null;
-let cachedUpdateVotesTableSchema: UpdateVotesTableSchema | null = null;
 
 async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
   if (cachedUpdatesTableSchema) {
@@ -326,66 +313,6 @@ async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
   return schema;
 }
 
-async function getUpdateVotesTableSchema(): Promise<UpdateVotesTableSchema> {
-  if (cachedUpdateVotesTableSchema) {
-    return cachedUpdateVotesTableSchema;
-  }
-
-  const result = await execute("PRAGMA table_info('update_votes')");
-  const rows = (result?.rows ?? []) as Array<
-    Record<string, unknown> | unknown[]
-  >;
-  const columnMap = new Map<string, string>();
-
-  for (const row of rows) {
-    const name = extractColumnName(row);
-    if (name) {
-      columnMap.set(name.toLowerCase(), name);
-    }
-  }
-
-  if (columnMap.size === 0) {
-    throw new Error(
-      "[updates] update_votes table is missing or has no columns"
-    );
-  }
-
-  const idColumn = pickColumn(columnMap, ["id", "vote_id", "voteid"]);
-  const updateIdColumn = pickColumn(columnMap, [
-    "update_id",
-    "updateid",
-    "update",
-  ]);
-  const uidColumn = pickColumn(columnMap, ["uid", "user_id", "userid"]);
-
-  if (!idColumn || !updateIdColumn || !uidColumn) {
-    throw new Error(
-      "[updates] update_votes table is missing required columns (id/update_id/uid)"
-    );
-  }
-
-  const schema: UpdateVotesTableSchema = {
-    idColumn,
-    updateIdColumn,
-    uidColumn,
-    createdAtColumn: pickColumn(columnMap, [
-      "created_at",
-      "created_on",
-      "createdat",
-      "created",
-    ]),
-    updatedAtColumn: pickColumn(columnMap, [
-      "updated_at",
-      "updated_on",
-      "updatedat",
-      "updated",
-    ]),
-  };
-
-  cachedUpdateVotesTableSchema = schema;
-  return schema;
-}
-
 function toRecord(row: unknown): Record<string, unknown> | null {
   if (!row || Array.isArray(row) || typeof row !== "object") {
     return null;
@@ -433,101 +360,10 @@ function getNumberValue(
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-function getStringFromKey(
-  row: Record<string, unknown>,
-  key: string
-): string | null {
-  const value = row[key];
-  if (value == null) {
-    return null;
-  }
-  if (typeof value === "string") {
-    return value;
-  }
-  return String(value);
-}
-
-function getNumberFromKey(
-  row: Record<string, unknown>,
-  key: string
-): number | null {
-  const value = row[key];
-  if (value == null) {
-    return null;
-  }
-  if (typeof value === "number") {
-    return Number.isNaN(value) ? null : value;
-  }
-  const parsed = Number(value);
-  return Number.isNaN(parsed) ? null : parsed;
-}
-
-function createPlaceholders(startIndex: number, count: number): string {
-  return Array.from(
-    { length: count },
-    (_, index) => `?${startIndex + index}`
-  ).join(", ");
-}
-
-type VoteSummary = {
-  votes: number;
-  viewerHasVoted: boolean;
-};
-
-async function getVoteSummaries(
-  viewerId: string,
-  updateIds: string[]
-): Promise<Map<string, VoteSummary>> {
-  const summaries = new Map<string, VoteSummary>();
-
-  if (updateIds.length === 0) {
-    return summaries;
-  }
-
-  const votesSchema = await getUpdateVotesTableSchema();
-  const placeholders = createPlaceholders(2, updateIds.length);
-  const sql = `SELECT ${votesSchema.updateIdColumn} AS update_id,
-    COUNT(${votesSchema.idColumn}) AS votes,
-    SUM(CASE WHEN ${votesSchema.uidColumn} = ?1 THEN 1 ELSE 0 END) AS viewer_has_voted
-    FROM update_votes
-    WHERE ${votesSchema.updateIdColumn} IN (${placeholders})
-    GROUP BY ${votesSchema.updateIdColumn}`;
-  const args: (string | number)[] = [viewerId, ...updateIds];
-  const result = await execute(sql, args as InArgs);
-
-  for (const row of result.rows ?? []) {
-    const record = toRecord(row);
-    if (!record) {
-      continue;
-    }
-    const updateId =
-      getStringFromKey(record, "update_id") ??
-      getStringFromKey(record, votesSchema.updateIdColumn);
-    if (!updateId) {
-      continue;
-    }
-    const votes =
-      getNumberFromKey(record, "votes") ??
-      getNumberFromKey(record, `count(${votesSchema.idColumn})`) ??
-      0;
-    const viewerHasVotedCount =
-      getNumberFromKey(record, "viewer_has_voted") ??
-      getNumberFromKey(record, "viewerHasVoted") ??
-      0;
-    summaries.set(updateId, {
-      votes: Number(votes ?? 0),
-      viewerHasVoted: Number(viewerHasVotedCount ?? 0) > 0,
-    });
-  }
-
-  return summaries;
-}
-
 function toUpdateRecord(
   row: Record<string, unknown>,
   schema: UpdatesTableSchema,
-  viewerId: string,
-  votes: Map<string, VoteSummary>
+  viewerId: string
 ): UpdateRecord | null {
   const id = getStringValue(row, schema.idColumn, null);
   if (!id) {
@@ -555,8 +391,6 @@ function toUpdateRecord(
     getStringValue(row, schema.updatedAtColumn) ??
     new Date().toISOString();
 
-  const voteSummary = votes.get(id) ?? { votes: 0, viewerHasVoted: false };
-
   return {
     id,
     by: by ?? "Unknown",
@@ -567,8 +401,6 @@ function toUpdateRecord(
     body,
     when: Number(whenRaw) > 0 ? 1 : -1,
     createdAt: createdAtValue,
-    votes: Number(voteSummary.votes ?? 0),
-    viewerHasVoted: Boolean(voteSummary.viewerHasVoted),
     viewerIsOwner: uid === viewerId,
   };
 }
@@ -654,7 +486,6 @@ function toRecordFromMemory(
   item: MemoryUpdate,
   viewerId: string
 ): UpdateRecord {
-  const votes = item.voters.size;
   return {
     id: item.id,
     by: item.by,
@@ -665,8 +496,6 @@ function toRecordFromMemory(
     body: item.body,
     when: item.when,
     createdAt: item.createdAt,
-    votes,
-    viewerHasVoted: viewerId ? item.voters.has(viewerId) : false,
     viewerIsOwner: item.uid === viewerId,
   };
 }
@@ -712,7 +541,6 @@ function insertUpdateIntoMemory(params: {
     body: params.body,
     when: params.when,
     createdAt,
-    voters: new Set(),
   };
   memoryUpdates.unshift(item);
 }
@@ -730,28 +558,6 @@ function deleteAllUpdatesFromMemory(): number {
   const deleted = memoryUpdates.length;
   memoryUpdates.splice(0, memoryUpdates.length);
   return deleted;
-}
-
-function upsertVoteInMemory(
-  updateId: string,
-  uid: string,
-  voting: boolean
-): { votes: number; viewerHasVoted: boolean } {
-  const update = memoryUpdates.find((item) => item.id === updateId);
-  if (!update) {
-    throw new UpdateNotFoundError();
-  }
-
-  if (voting) {
-    update.voters.add(uid);
-  } else {
-    update.voters.delete(uid);
-  }
-
-  return {
-    votes: update.voters.size,
-    viewerHasVoted: update.voters.has(uid),
-  };
 }
 
 export async function fetchUpdates(
@@ -781,15 +587,9 @@ export async function fetchUpdates(
       }
     }
 
-    const updateIds = records
-      .map((record) => getStringValue(record, schema.idColumn) ?? null)
-      .filter((id): id is string => Boolean(id));
-
-    const voteSummaries = await getVoteSummaries(viewerId, updateIds);
-
     const updates: UpdateRecord[] = [];
     for (const record of records) {
-      const update = toUpdateRecord(record, schema, viewerId, voteSummaries);
+      const update = toUpdateRecord(record, schema, viewerId);
       if (update) {
         updates.push(update);
       }
@@ -826,12 +626,7 @@ export async function getUpdateById(
       return null;
     }
 
-    const rowId = getStringValue(record, schema.idColumn) ?? id;
-    const voteSummaries = await getVoteSummaries(
-      viewerId,
-      rowId ? [rowId] : []
-    );
-    const update = toUpdateRecord(record, schema, viewerId, voteSummaries);
+    const update = toUpdateRecord(record, schema, viewerId);
     return update;
   } catch (error) {
     if (fallbackToMemoryOnError(error)) {
@@ -952,64 +747,6 @@ export async function deleteAllUpdates(): Promise<number> {
   } catch (error) {
     if (fallbackToMemoryOnError(error)) {
       return deleteAllUpdatesFromMemory();
-    }
-    throw error;
-  }
-}
-
-export async function upsertVote(
-  updateId: string,
-  uid: string,
-  voting: boolean
-): Promise<{ votes: number; viewerHasVoted: boolean }> {
-  if (shouldUseMemory()) {
-    return upsertVoteInMemory(updateId, uid, voting);
-  }
-
-  const votesSchema = await getUpdateVotesTableSchema();
-
-  try {
-    if (voting) {
-      const columns = [
-        votesSchema.idColumn,
-        votesSchema.updateIdColumn,
-        votesSchema.uidColumn,
-      ];
-      const values = ["?1", "?2", "?3"];
-      const args: (string | number | null)[] = [randomUUID(), updateId, uid];
-
-      if (votesSchema.createdAtColumn) {
-        columns.push(votesSchema.createdAtColumn);
-        values.push("datetime('now')");
-      }
-
-      if (votesSchema.updatedAtColumn) {
-        columns.push(votesSchema.updatedAtColumn);
-        values.push("datetime('now')");
-      }
-
-      const insertSql = `INSERT INTO update_votes (${columns.join(", ")})
-VALUES (${values.join(", ")})
-ON CONFLICT (${votesSchema.updateIdColumn}, ${
-        votesSchema.uidColumn
-      }) DO NOTHING`;
-
-      await execute(insertSql, args as InArgs);
-    } else {
-      const deleteSql = `DELETE FROM update_votes WHERE ${votesSchema.updateIdColumn} = ?1 AND ${votesSchema.uidColumn} = ?2`;
-      await execute(deleteSql, [updateId, uid] as InArgs);
-    }
-
-    const summary = await getVoteSummaries(uid, [updateId]);
-    const info = summary.get(updateId) ?? { votes: 0, viewerHasVoted: voting };
-
-    return {
-      votes: Number(info.votes ?? 0),
-      viewerHasVoted: Boolean(info.viewerHasVoted),
-    };
-  } catch (error) {
-    if (fallbackToMemoryOnError(error)) {
-      return upsertVoteInMemory(updateId, uid, voting);
     }
     throw error;
   }

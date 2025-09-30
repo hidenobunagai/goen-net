@@ -8,7 +8,7 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 - **Prioritization workflow** – Drag-and-drop prioritization queues backed by consistent scoring rules.
 - **Meeting worksheets** – Moderator, presenter, observer, and coach worksheets that guide every role through the agenda.
 - **Authenticated workspace** – Google sign-in via NextAuth keeps private data scoped to your organization only.
-- **Turso-backed persistence** – A LibSQL database stores updates, votes, and meeting metadata with low-latency reads.
+- **Turso-backed persistence** – A LibSQL database stores updates and meeting metadata with low-latency reads.
 
 ## 🧰 Tech Stack
 
