@@ -2,6 +2,7 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -17,9 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
-import { useMemo, useState } from "react";
-
-const STORAGE_KEY = "worksheet_coach_v1";
+import { useEffect, useMemo, useState } from "react";
 const ENC_VERSION = "v1";
 const SALT_BYTES = 16;
 const IV_BYTES = 12;
@@ -172,11 +171,7 @@ export function CoachWorksheet() {
   useDocumentTitle("Coach Worksheet");
   const [form, setForm] = useState<CoachForm>({});
   const [passphrase, setPassphrase] = useState<string>("");
-  const [storedCipher, setStoredCipher] = useState<string | null>(() =>
-    typeof window === "undefined"
-      ? null
-      : window.localStorage.getItem(STORAGE_KEY)
-  );
+  const [storedCipher, setStoredCipher] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<{
     type: "success" | "error";
@@ -184,9 +179,64 @@ export function CoachWorksheet() {
   } | null>(null);
   const [saving, setSaving] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [initialError, setInitialError] = useState<string | null>(null);
 
   const cryptoSupported = isWebCryptoAvailable();
   const hasSavedData = Boolean(storedCipher);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      setInitialError(null);
+      try {
+        const response = await fetch("/api/worksheets/coach", {
+          method: "GET",
+          credentials: "include",
+        });
+        const payload = (await response.json().catch(() => null)) as
+          | { ok: true; worksheet: { data: unknown } | null }
+          | { ok: false; error?: { message?: string } }
+          | null;
+
+        if (!response.ok || payload?.ok === false) {
+          const message =
+            payload?.error?.message ??
+            "Unable to load saved worksheet data. Please try again.";
+          throw new Error(message);
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        const data = payload?.worksheet?.data;
+        if (typeof data === "string") {
+          setStoredCipher(data);
+        } else if (data && typeof data === "object") {
+          setForm(data as CoachForm);
+          setStoredCipher(null);
+        } else {
+          setStoredCipher(null);
+        }
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load saved worksheet data.";
+        setInitialError(message);
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleChange: ChangeHandler = (key) => (event) => {
     const target = event.target as HTMLInputElement;
@@ -222,7 +272,7 @@ export function CoachWorksheet() {
     }
 
     if (!hasSavedData) {
-      setLoadError("No encrypted notes were found on this device.");
+      setLoadError("No encrypted notes were found for this account.");
       return;
     }
 
@@ -256,7 +306,6 @@ export function CoachWorksheet() {
   };
 
   const handleSave = async () => {
-    if (typeof window === "undefined") return;
     if (!cryptoSupported) {
       setSaveStatus({
         type: "error",
@@ -280,35 +329,88 @@ export function CoachWorksheet() {
     setSaveStatus(null);
     try {
       const encrypted = await encryptFormData(secret, form);
-      window.localStorage.setItem(STORAGE_KEY, encrypted);
+      const response = await fetch("/api/worksheets/coach", {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: encrypted }),
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | { ok: true }
+        | { ok: false; error?: { message?: string } }
+        | null;
+
+      if (!response.ok || payload?.ok === false) {
+        const message =
+          payload?.error?.message ??
+          "Unable to save notes right now. Please try again.";
+        throw new Error(message);
+      }
+
       setStoredCipher(encrypted);
       setSaveStatus({
         type: "success",
-        message: "Saved encrypted notes to this device.",
+        message: "Saved encrypted notes.",
       });
     } catch (error) {
       console.warn("Failed to persist coach worksheet", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to save notes. Please try again.";
       setSaveStatus({
         type: "error",
-        message: "Failed to save notes. Please try again.",
+        message,
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleClear = () => {
-    if (typeof window === "undefined") return;
-    if (!window.confirm("Clear all saved inputs for Coach worksheet?")) return;
-    window.localStorage.removeItem(STORAGE_KEY);
-    setForm({});
-    setStoredCipher(null);
-    setPassphrase("");
-    setLoadError(null);
-    setSaveStatus({
-      type: "success",
-      message: "Saved notes have been removed from this device.",
-    });
+  const handleClear = async () => {
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        "Clear all saved inputs for Coach worksheet?"
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    setSaveStatus(null);
+    try {
+      const response = await fetch("/api/worksheets/coach", {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | { ok: true }
+        | { ok: false; error?: { message?: string } }
+        | null;
+
+      if (!response.ok || payload?.ok === false) {
+        const message =
+          payload?.error?.message ??
+          "Unable to clear notes right now. Please try again.";
+        throw new Error(message);
+      }
+
+      setForm({});
+      setStoredCipher(null);
+      setPassphrase("");
+      setLoadError(null);
+      setInitialError(null);
+      setSaveStatus({
+        type: "success",
+        message: "Saved notes have been removed.",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to clear notes right now.";
+      setSaveStatus({ type: "error", message });
+    }
   };
 
   const issueTypeChecks = useMemo(
@@ -369,6 +471,11 @@ export function CoachWorksheet() {
   return (
     <Container maxWidth="md" sx={{ my: 4, pb: 8 }}>
       <Stack spacing={3}>
+        {initialError && (
+          <Alert severity="error" variant="outlined">
+            {initialError}
+          </Alert>
+        )}
         <Paper
           sx={{
             p: { xs: 3, md: 4 },
@@ -780,8 +887,8 @@ export function CoachWorksheet() {
                 Protect your notes
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Set a personal passphrase to encrypt anything you save on this
-                device. The same passphrase is required to unlock the notes
+                Set a personal passphrase to encrypt anything you save for this
+                account. The same passphrase is required to unlock the notes
                 later.
               </Typography>
             </Stack>
@@ -833,7 +940,13 @@ export function CoachWorksheet() {
               >
                 {saving ? "Saving…" : "Save securely"}
               </Button>
-              <Button variant="outlined" color="warning" onClick={handleClear}>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => {
+                  void handleClear();
+                }}
+              >
                 Clear
               </Button>
             </Stack>
