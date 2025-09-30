@@ -41,16 +41,21 @@ async function resolveRole(context: RouteContext): Promise<WorksheetRole | null>
   }
 }
 
-type AuthResolution = {
-  email: string | null;
-  response: NextResponse | null;
-};
+type AuthResolution =
+  | {
+      status: "authenticated";
+      email: string;
+    }
+  | {
+      status: "unauthenticated";
+      response: NextResponse;
+    };
 
 async function resolveAuthenticatedEmail(): Promise<AuthResolution> {
   const session = await getOptionalUserSession();
   if (!session) {
     return {
-      email: null,
+      status: "unauthenticated",
       response: NextResponse.json(
         {
           ok: false,
@@ -64,7 +69,7 @@ async function resolveAuthenticatedEmail(): Promise<AuthResolution> {
   const email = session.user?.email?.trim();
   if (!email) {
     return {
-      email: null,
+      status: "unauthenticated",
       response: NextResponse.json(
         {
           ok: false,
@@ -78,7 +83,7 @@ async function resolveAuthenticatedEmail(): Promise<AuthResolution> {
     };
   }
 
-  return { email, response: null };
+  return { status: "authenticated", email };
 }
 
 export async function GET(_request: NextRequest, context: RouteContext) {
@@ -93,13 +98,13 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     );
   }
 
-  const { email, response } = await resolveAuthenticatedEmail();
-  if (email === null) {
-    return response;
+  const auth = await resolveAuthenticatedEmail();
+  if (auth.status === "unauthenticated") {
+    return auth.response;
   }
 
   try {
-    const record = await getWorksheet(email, role);
+    const record = await getWorksheet(auth.email, role);
     return NextResponse.json({
       ok: true,
       worksheet: record
@@ -136,9 +141,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     );
   }
 
-  const { email, response } = await resolveAuthenticatedEmail();
-  if (email === null) {
-    return response;
+  const auth = await resolveAuthenticatedEmail();
+  if (auth.status === "unauthenticated") {
+    return auth.response;
   }
 
   let payload: SaveWorksheetPayload;
@@ -155,7 +160,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 
   try {
-    await upsertWorksheet(email, role, payload.data ?? null);
+    await upsertWorksheet(auth.email, role, payload.data ?? null);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to save worksheet", error);
@@ -187,13 +192,13 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     );
   }
 
-  const { email, response } = await resolveAuthenticatedEmail();
-  if (email === null) {
-    return response;
+  const auth = await resolveAuthenticatedEmail();
+  if (auth.status === "unauthenticated") {
+    return auth.response;
   }
 
   try {
-    await deleteWorksheet(email, role);
+    await deleteWorksheet(auth.email, role);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to clear worksheet", error);
