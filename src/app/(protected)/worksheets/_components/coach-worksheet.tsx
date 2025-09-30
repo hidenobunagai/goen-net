@@ -17,22 +17,212 @@ import {
   Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 const STORAGE_KEY = "worksheet_coach_v1";
+const ENC_VERSION = "v2";
+const IV_BYTES = 12;
+const KEY_DB_NAME = "coachWorksheetSecureStore";
+const KEY_STORE_NAME = "keys";
+const KEY_ID = "coachWorksheetKey_v1";
 
-function readInitialForm(): CoachForm {
-  if (typeof window === "undefined") {
-    return {};
+const isSecureStorageAvailable = () =>
+  typeof window !== "undefined" &&
+  Boolean(window.crypto?.subtle) &&
+  typeof window.indexedDB !== "undefined";
+
+const toBase64 = (value: Uint8Array): string => {
+  if (typeof window !== "undefined" && typeof window.btoa === "function") {
+    let binary = "";
+    value.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+    return window.btoa(binary);
+  }
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(value).toString("base64");
+  }
+  throw new Error("Base64 encoding is not supported in this environment.");
+};
+
+const fromBase64 = (encoded: string): Uint8Array => {
+  if (typeof window !== "undefined" && typeof window.atob === "function") {
+    const binary = window.atob(encoded);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  }
+  if (typeof Buffer !== "undefined") {
+    return new Uint8Array(Buffer.from(encoded, "base64"));
+  }
+  throw new Error("Base64 decoding is not supported in this environment.");
+};
+
+function openKeyDatabase(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      reject(new Error("Secure storage is not available on the server."));
+      return;
+    }
+
+    const request = window.indexedDB.open(KEY_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore(KEY_STORE_NAME);
+    };
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error ?? new Error("Failed to open secure storage."));
+    };
+  });
+}
+
+async function getStoredKey(): Promise<CryptoKey | null> {
+  try {
+    const db = await openKeyDatabase();
+    return await new Promise((resolve, reject) => {
+      const transaction = db.transaction(KEY_STORE_NAME, "readonly");
+      const store = transaction.objectStore(KEY_STORE_NAME);
+      const getRequest = store.get(KEY_ID);
+
+      getRequest.onsuccess = () => {
+        resolve((getRequest.result as CryptoKey | undefined) ?? null);
+      };
+
+      getRequest.onerror = () => {
+        reject(getRequest.error ?? new Error("Failed to read secure key."));
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+
+      transaction.onerror = () => {
+        reject(transaction.error ?? new Error("Secure key transaction failed."));
+      };
+    });
+  } catch (error) {
+    console.warn("Failed to access coach worksheet key", error);
+    return null;
+  }
+}
+
+async function storeKey(key: CryptoKey): Promise<void> {
+  const db = await openKeyDatabase();
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(KEY_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(KEY_STORE_NAME);
+    store.put(key, KEY_ID);
+
+    transaction.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error ?? new Error("Failed to persist secure key."));
+    };
+  });
+}
+
+async function deleteStoredKey(): Promise<void> {
+  try {
+    const db = await openKeyDatabase();
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(KEY_STORE_NAME, "readwrite");
+      const store = transaction.objectStore(KEY_STORE_NAME);
+      store.delete(KEY_ID);
+
+      transaction.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+
+      transaction.onerror = () => {
+        reject(transaction.error ?? new Error("Failed to remove secure key."));
+      };
+    });
+  } catch (error) {
+    console.warn("Failed to remove coach worksheet key", error);
+  }
+}
+
+async function generateAndStoreKey(): Promise<CryptoKey> {
+  if (typeof window === "undefined" || !window.crypto?.subtle) {
+    throw new Error("Secure storage is not supported in this environment.");
+  }
+
+  const key = await window.crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+
+  await storeKey(key);
+  return key;
+}
+
+async function getOrCreateKey(): Promise<CryptoKey> {
+  const existing = await getStoredKey();
+  if (existing) {
+    return existing;
+  }
+  return generateAndStoreKey();
+}
+
+async function encryptFormData(form: CoachForm): Promise<string> {
+  if (typeof window === "undefined" || !window.crypto?.subtle) {
+    throw new Error("Secure storage is not supported in this environment.");
+  }
+
+  const key = await getOrCreateKey();
+  const iv = window.crypto.getRandomValues(new Uint8Array(IV_BYTES));
+  const encoder = new TextEncoder();
+  const payload = encoder.encode(JSON.stringify(form));
+  const encrypted = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
+    key,
+    payload
+  );
+
+  return [ENC_VERSION, toBase64(iv), toBase64(new Uint8Array(encrypted))].join(":");
+}
+
+async function decryptFormData(record: string): Promise<CoachForm | null> {
+  if (typeof window === "undefined" || !window.crypto?.subtle) {
+    return null;
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw) as CoachForm;
+    const [version, ivEncoded, payloadEncoded] = record.split(":");
+    if (version !== ENC_VERSION || !ivEncoded || !payloadEncoded) {
+      return null;
+    }
+
+    const key = await getStoredKey();
+    if (!key) {
+      return null;
+    }
+
+    const iv = fromBase64(ivEncoded);
+    const payload = fromBase64(payloadEncoded);
+    const decrypted = await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
+      key,
+      payload.buffer as ArrayBuffer
+    );
+    const decoder = new TextDecoder();
+    const json = decoder.decode(decrypted);
+    return JSON.parse(json) as CoachForm;
   } catch (error) {
-    console.warn("Failed to parse coach worksheet state", error);
-    return {};
+    console.warn("Failed to decrypt coach worksheet", error);
+    return null;
   }
 }
 
@@ -54,11 +244,73 @@ type ChangeHandler = (
 
 export function CoachWorksheet() {
   useDocumentTitle("Coach Worksheet");
-  const [form, setForm] = useState<CoachForm>(() => readInitialForm());
+  const [form, setForm] = useState<CoachForm>({});
+  const [initializing, setInitializing] = useState(true);
+  const [secureStorageSupported, setSecureStorageSupported] = useState(false);
+  const [hasSavedData, setHasSavedData] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    let active = true;
+
+    const initialize = async () => {
+      const supported = isSecureStorageAvailable();
+      if (!active) return;
+      setSecureStorageSupported(supported);
+
+      const record = window.localStorage.getItem(STORAGE_KEY);
+      if (!active) return;
+      setHasSavedData(Boolean(record));
+
+      if (!supported) {
+        setLoadError(
+          "Secure storage is not supported in this browser. Notes cannot be saved."
+        );
+        setInitializing(false);
+        return;
+      }
+
+      if (!record) {
+        setInitializing(false);
+        return;
+      }
+
+      const decrypted = await decryptFormData(record);
+      if (!active) return;
+
+      if (decrypted) {
+        setForm(decrypted);
+        setLoadError(null);
+      } else {
+        setLoadError(
+          "Saved notes could not be unlocked. They may have been created on another device or have been cleared."
+        );
+      }
+
+      setInitializing(false);
+    };
+
+    initialize().catch((error) => {
+      console.warn("Failed to load coach worksheet", error);
+      if (!active) return;
+      setLoadError("Unable to load saved notes right now.");
+      setInitializing(false);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleChange: ChangeHandler = (key) => (event) => {
     const target = event.target as HTMLInputElement;
@@ -69,6 +321,7 @@ export function CoachWorksheet() {
       [key]: value,
     }));
     setSaveStatus(null);
+    setLoadError(null);
   };
 
   const handleConfidentialChange = (level: ConfidentialLevel) => () => {
@@ -77,16 +330,32 @@ export function CoachWorksheet() {
       confidential: prev.confidential === level ? "" : level,
     }));
     setSaveStatus(null);
+    setLoadError(null);
   };
 
-  const handleSave = () => {
-    if (typeof window === "undefined") return;
+  const handleSave = async () => {
+    if (typeof window === "undefined" || initializing) return;
+
+    if (!secureStorageSupported) {
+      setSaveStatus({
+        type: "error",
+        message:
+          "Secure storage is not available in this browser, so notes cannot be saved.",
+      });
+      return;
+    }
+
+    setSaving(true);
+    setSaveStatus(null);
 
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      const encrypted = await encryptFormData(form);
+      window.localStorage.setItem(STORAGE_KEY, encrypted);
+      setHasSavedData(true);
+      setLoadError(null);
       setSaveStatus({
         type: "success",
-        message: "Saved notes to this device.",
+        message: "Saved encrypted notes to this device.",
       });
     } catch (error) {
       console.warn("Failed to persist coach worksheet", error);
@@ -94,18 +363,32 @@ export function CoachWorksheet() {
         type: "error",
         message: "Failed to save notes. Please try again.",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleClear = () => {
-    if (typeof window === "undefined") return;
+  const handleClear = async () => {
+    if (typeof window === "undefined" || initializing) return;
     if (!window.confirm("Clear all saved inputs for Coach worksheet?")) return;
-    window.localStorage.removeItem(STORAGE_KEY);
-    setForm({});
-    setSaveStatus({
-      type: "success",
-      message: "Saved notes have been removed from this device.",
-    });
+
+    setClearing(true);
+
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+      setForm({});
+      setHasSavedData(false);
+      setLoadError(null);
+      setSaveStatus({
+        type: "success",
+        message: "Saved notes have been removed from this device.",
+      });
+      if (secureStorageSupported) {
+        await deleteStoredKey();
+      }
+    } finally {
+      setClearing(false);
+    }
   };
 
   const issueTypeChecks = useMemo(
@@ -590,14 +873,25 @@ export function CoachWorksheet() {
               <Button
                 variant="contained"
                 onClick={handleSave}
+                disabled={initializing || saving || !secureStorageSupported}
               >
-                Save
+                {saving ? "Saving..." : "Save"}
               </Button>
-              <Button variant="outlined" color="warning" onClick={handleClear}>
-                Clear
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={handleClear}
+                disabled={initializing || clearing || !hasSavedData}
+              >
+                {clearing ? "Clearing..." : "Clear"}
               </Button>
             </Stack>
 
+            {loadError ? (
+              <Typography color="error.main" variant="body2">
+                {loadError}
+              </Typography>
+            ) : null}
             {saveStatus ? (
               <Typography
                 color={
