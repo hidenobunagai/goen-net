@@ -16,215 +16,30 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import AES from "crypto-js/aes";
+import Utf8 from "crypto-js/enc-utf8";
 import type { ChangeEvent } from "react";
 import { useMemo, useState, useEffect } from "react";
 
 const STORAGE_KEY = "worksheet_coach_v1";
-const ENC_VERSION = "v2";
-const IV_BYTES = 12;
-const KEY_DB_NAME = "coachWorksheetSecureStore";
-const KEY_STORE_NAME = "keys";
-const KEY_ID = "coachWorksheetKey_v1";
+const encryptFormData = (form: CoachForm, passphrase: string): string =>
+  AES.encrypt(JSON.stringify(form), passphrase).toString();
 
-const isSecureStorageAvailable = () =>
-  typeof window !== "undefined" &&
-  Boolean(window.crypto?.subtle) &&
-  typeof window.indexedDB !== "undefined";
-
-const toBase64 = (value: Uint8Array): string => {
-  if (typeof window !== "undefined" && typeof window.btoa === "function") {
-    let binary = "";
-    value.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
-    return window.btoa(binary);
-  }
-  if (typeof Buffer !== "undefined") {
-    return Buffer.from(value).toString("base64");
-  }
-  throw new Error("Base64 encoding is not supported in this environment.");
-};
-
-const fromBase64 = (encoded: string): Uint8Array => {
-  if (typeof window !== "undefined" && typeof window.atob === "function") {
-    const binary = window.atob(encoded);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes;
-  }
-  if (typeof Buffer !== "undefined") {
-    return new Uint8Array(Buffer.from(encoded, "base64"));
-  }
-  throw new Error("Base64 decoding is not supported in this environment.");
-};
-
-function openKeyDatabase(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") {
-      reject(new Error("Secure storage is not available on the server."));
-      return;
-    }
-
-    const request = window.indexedDB.open(KEY_DB_NAME, 1);
-
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(KEY_STORE_NAME);
-    };
-
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
-
-    request.onerror = () => {
-      reject(request.error ?? new Error("Failed to open secure storage."));
-    };
-  });
-}
-
-async function getStoredKey(): Promise<CryptoKey | null> {
+const decryptFormData = (
+  record: string,
+  passphrase: string
+): CoachForm | null => {
   try {
-    const db = await openKeyDatabase();
-    return await new Promise((resolve, reject) => {
-      const transaction = db.transaction(KEY_STORE_NAME, "readonly");
-      const store = transaction.objectStore(KEY_STORE_NAME);
-      const getRequest = store.get(KEY_ID);
-
-      getRequest.onsuccess = () => {
-        resolve((getRequest.result as CryptoKey | undefined) ?? null);
-      };
-
-      getRequest.onerror = () => {
-        reject(getRequest.error ?? new Error("Failed to read secure key."));
-      };
-
-      transaction.oncomplete = () => {
-        db.close();
-      };
-
-      transaction.onerror = () => {
-        reject(transaction.error ?? new Error("Secure key transaction failed."));
-      };
-    });
-  } catch (error) {
-    console.warn("Failed to access coach worksheet key", error);
-    return null;
-  }
-}
-
-async function storeKey(key: CryptoKey): Promise<void> {
-  const db = await openKeyDatabase();
-  await new Promise<void>((resolve, reject) => {
-    const transaction = db.transaction(KEY_STORE_NAME, "readwrite");
-    const store = transaction.objectStore(KEY_STORE_NAME);
-    store.put(key, KEY_ID);
-
-    transaction.oncomplete = () => {
-      db.close();
-      resolve();
-    };
-
-    transaction.onerror = () => {
-      reject(transaction.error ?? new Error("Failed to persist secure key."));
-    };
-  });
-}
-
-async function deleteStoredKey(): Promise<void> {
-  try {
-    const db = await openKeyDatabase();
-    await new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction(KEY_STORE_NAME, "readwrite");
-      const store = transaction.objectStore(KEY_STORE_NAME);
-      store.delete(KEY_ID);
-
-      transaction.oncomplete = () => {
-        db.close();
-        resolve();
-      };
-
-      transaction.onerror = () => {
-        reject(transaction.error ?? new Error("Failed to remove secure key."));
-      };
-    });
-  } catch (error) {
-    console.warn("Failed to remove coach worksheet key", error);
-  }
-}
-
-async function generateAndStoreKey(): Promise<CryptoKey> {
-  if (typeof window === "undefined" || !window.crypto?.subtle) {
-    throw new Error("Secure storage is not supported in this environment.");
-  }
-
-  const key = await window.crypto.subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"]
-  );
-
-  await storeKey(key);
-  return key;
-}
-
-async function getOrCreateKey(): Promise<CryptoKey> {
-  const existing = await getStoredKey();
-  if (existing) {
-    return existing;
-  }
-  return generateAndStoreKey();
-}
-
-async function encryptFormData(form: CoachForm): Promise<string> {
-  if (typeof window === "undefined" || !window.crypto?.subtle) {
-    throw new Error("Secure storage is not supported in this environment.");
-  }
-
-  const key = await getOrCreateKey();
-  const iv = window.crypto.getRandomValues(new Uint8Array(IV_BYTES));
-  const encoder = new TextEncoder();
-  const payload = encoder.encode(JSON.stringify(form));
-  const encrypted = await window.crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
-    key,
-    payload
-  );
-
-  return [ENC_VERSION, toBase64(iv), toBase64(new Uint8Array(encrypted))].join(":");
-}
-
-async function decryptFormData(record: string): Promise<CoachForm | null> {
-  if (typeof window === "undefined" || !window.crypto?.subtle) {
-    return null;
-  }
-
-  try {
-    const [version, ivEncoded, payloadEncoded] = record.split(":");
-    if (version !== ENC_VERSION || !ivEncoded || !payloadEncoded) {
+    const decrypted = AES.decrypt(record, passphrase).toString(Utf8);
+    if (!decrypted) {
       return null;
     }
-
-    const key = await getStoredKey();
-    if (!key) {
-      return null;
-    }
-
-    const iv = fromBase64(ivEncoded);
-    const payload = fromBase64(payloadEncoded);
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
-      key,
-      payload.buffer as ArrayBuffer
-    );
-    const decoder = new TextDecoder();
-    const json = decoder.decode(decrypted);
-    return JSON.parse(json) as CoachForm;
+    return JSON.parse(decrypted) as CoachForm;
   } catch (error) {
     console.warn("Failed to decrypt coach worksheet", error);
     return null;
   }
-}
+};
 
 type ConfidentialLevel = "HIGH" | "MEDIUM" | "NORMAL" | "";
 
@@ -245,71 +60,29 @@ type ChangeHandler = (
 export function CoachWorksheet() {
   useDocumentTitle("Coach Worksheet");
   const [form, setForm] = useState<CoachForm>({});
-  const [initializing, setInitializing] = useState(true);
-  const [secureStorageSupported, setSecureStorageSupported] = useState(false);
   const [hasSavedData, setHasSavedData] = useState(false);
+  const [encryptedRecord, setEncryptedRecord] = useState<string | null>(null);
+  const [passphrase, setPassphrase] = useState("");
   const [saveStatus, setSaveStatus] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [unlockStatus, setUnlockStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    let active = true;
-
-    const initialize = async () => {
-      const supported = isSecureStorageAvailable();
-      if (!active) return;
-      setSecureStorageSupported(supported);
-
-      const record = window.localStorage.getItem(STORAGE_KEY);
-      if (!active) return;
-      setHasSavedData(Boolean(record));
-
-      if (!supported) {
-        setLoadError(
-          "Secure storage is not supported in this browser. Notes cannot be saved."
-        );
-        setInitializing(false);
-        return;
-      }
-
-      if (!record) {
-        setInitializing(false);
-        return;
-      }
-
-      const decrypted = await decryptFormData(record);
-      if (!active) return;
-
-      if (decrypted) {
-        setForm(decrypted);
-        setLoadError(null);
-      } else {
-        setLoadError(
-          "Saved notes could not be unlocked. They may have been created on another device or have been cleared."
-        );
-      }
-
-      setInitializing(false);
-    };
-
-    initialize().catch((error) => {
-      console.warn("Failed to load coach worksheet", error);
-      if (!active) return;
-      setLoadError("Unable to load saved notes right now.");
-      setInitializing(false);
-    });
-
-    return () => {
-      active = false;
-    };
+    const record = window.localStorage.getItem(STORAGE_KEY);
+    setEncryptedRecord(record);
+    setHasSavedData(Boolean(record));
   }, []);
 
   const handleChange: ChangeHandler = (key) => (event) => {
@@ -321,7 +94,7 @@ export function CoachWorksheet() {
       [key]: value,
     }));
     setSaveStatus(null);
-    setLoadError(null);
+    setUnlockStatus(null);
   };
 
   const handleConfidentialChange = (level: ConfidentialLevel) => () => {
@@ -330,29 +103,30 @@ export function CoachWorksheet() {
       confidential: prev.confidential === level ? "" : level,
     }));
     setSaveStatus(null);
-    setLoadError(null);
+    setUnlockStatus(null);
   };
 
   const handleSave = async () => {
-    if (typeof window === "undefined" || initializing) return;
+    if (typeof window === "undefined") return;
 
-    if (!secureStorageSupported) {
+    if (!passphrase) {
       setSaveStatus({
         type: "error",
         message:
-          "Secure storage is not available in this browser, so notes cannot be saved.",
+          "Enter a passphrase to encrypt your notes before saving them to this device.",
       });
       return;
     }
 
     setSaving(true);
     setSaveStatus(null);
+    setUnlockStatus(null);
 
     try {
-      const encrypted = await encryptFormData(form);
+      const encrypted = encryptFormData(form, passphrase);
       window.localStorage.setItem(STORAGE_KEY, encrypted);
+      setEncryptedRecord(encrypted);
       setHasSavedData(true);
-      setLoadError(null);
       setSaveStatus({
         type: "success",
         message: "Saved encrypted notes to this device.",
@@ -369,7 +143,7 @@ export function CoachWorksheet() {
   };
 
   const handleClear = async () => {
-    if (typeof window === "undefined" || initializing) return;
+    if (typeof window === "undefined") return;
     if (!window.confirm("Clear all saved inputs for Coach worksheet?")) return;
 
     setClearing(true);
@@ -378,17 +152,60 @@ export function CoachWorksheet() {
       window.localStorage.removeItem(STORAGE_KEY);
       setForm({});
       setHasSavedData(false);
-      setLoadError(null);
+      setEncryptedRecord(null);
+      setUnlockStatus(null);
       setSaveStatus({
         type: "success",
         message: "Saved notes have been removed from this device.",
       });
-      if (secureStorageSupported) {
-        await deleteStoredKey();
-      }
     } finally {
       setClearing(false);
     }
+  };
+
+  const handleUnlock = () => {
+    if (typeof window === "undefined" || !encryptedRecord) {
+      return;
+    }
+
+    if (!passphrase) {
+      setUnlockStatus({
+        type: "error",
+        message: "Enter the passphrase used when saving your notes to unlock them.",
+      });
+      return;
+    }
+
+    setUnlocking(true);
+    setUnlockStatus(null);
+    setSaveStatus(null);
+
+    try {
+      const decrypted = decryptFormData(encryptedRecord, passphrase);
+      if (!decrypted) {
+        setUnlockStatus({
+          type: "error",
+          message: "Unable to unlock saved notes. Double-check the passphrase.",
+        });
+        return;
+      }
+
+      setForm(decrypted);
+      setUnlockStatus({
+        type: "success",
+        message: "Unlocked saved notes for this session.",
+      });
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
+  const handlePassphraseChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setPassphrase(event.target.value);
+    setSaveStatus(null);
+    setUnlockStatus(null);
   };
 
   const issueTypeChecks = useMemo(
@@ -861,9 +678,19 @@ export function CoachWorksheet() {
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Save your progress to this device so you can revisit and edit
-                it later. Saved notes stay only on this browser.
+                it later. Saved notes stay only on this browser. Protect them
+                with a passphrase so they remain encrypted at rest.
               </Typography>
             </Stack>
+
+            <TextField
+              label="Passphrase"
+              type="password"
+              value={passphrase}
+              onChange={handlePassphraseChange}
+              placeholder="Enter a passphrase to encrypt your notes"
+              helperText="Use the same passphrase to unlock saved notes on this device."
+            />
 
             <Stack
               direction={{ xs: "column", sm: "row" }}
@@ -871,9 +698,16 @@ export function CoachWorksheet() {
               justifyContent="flex-end"
             >
               <Button
+                variant="outlined"
+                onClick={handleUnlock}
+                disabled={!hasSavedData || unlocking}
+              >
+                {unlocking ? "Unlocking..." : "Unlock saved notes"}
+              </Button>
+              <Button
                 variant="contained"
                 onClick={handleSave}
-                disabled={initializing || saving || !secureStorageSupported}
+                disabled={saving}
               >
                 {saving ? "Saving..." : "Save"}
               </Button>
@@ -881,15 +715,22 @@ export function CoachWorksheet() {
                 variant="outlined"
                 color="warning"
                 onClick={handleClear}
-                disabled={initializing || clearing || !hasSavedData}
+                disabled={clearing || !hasSavedData}
               >
                 {clearing ? "Clearing..." : "Clear"}
               </Button>
             </Stack>
 
-            {loadError ? (
-              <Typography color="error.main" variant="body2">
-                {loadError}
+            {unlockStatus ? (
+              <Typography
+                color={
+                  unlockStatus.type === "success"
+                    ? "success.main"
+                    : "error.main"
+                }
+                variant="body2"
+              >
+                {unlockStatus.message}
               </Typography>
             ) : null}
             {saveStatus ? (
