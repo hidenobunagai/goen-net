@@ -1,5 +1,5 @@
 import { getOptionalUserSession } from "@/lib/session";
-import { getNextSession, upsertNextSession } from "@/lib/turso";
+import { TursoUnavailableError, getNextSession, upsertNextSession } from "@/lib/turso";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -21,12 +21,15 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Failed to load next session", error);
+    const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "FETCH_FAILED",
-          message: "Unable to load the next session. Please try again later.",
+          code: unavailable ? "DATABASE_UNAVAILABLE" : "FETCH_FAILED",
+          message: unavailable
+            ? "The next session cannot be loaded because the database is unavailable right now."
+            : "Unable to load the next session. Please try again later.",
         },
       },
       { status: 503 }
@@ -86,12 +89,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to update next session", error);
+    const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "UPDATE_FAILED",
-          message: "Unable to update the next session right now.",
+          code: unavailable ? "DATABASE_UNAVAILABLE" : "UPDATE_FAILED",
+          message: unavailable
+            ? "The next session cannot be updated because the database is unavailable. Please try again once connectivity is restored."
+            : "Unable to update the next session right now.",
         },
       },
       { status: 503 }

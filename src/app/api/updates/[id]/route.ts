@@ -1,4 +1,5 @@
 import { getOptionalUserSession } from "@/lib/session";
+import { TursoUnavailableError } from "@/lib/turso";
 import { deleteUpdate, getUpdateById } from "@/lib/updates";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -51,12 +52,15 @@ export async function GET(
     return NextResponse.json({ ok: true, update });
   } catch (error) {
     console.error("Failed to load update", error);
+    const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "FETCH_FAILED",
-          message: "Unable to load this update right now.",
+          code: unavailable ? "DATABASE_UNAVAILABLE" : "FETCH_FAILED",
+          message: unavailable
+            ? "This update cannot be loaded because the database is unavailable right now."
+            : "Unable to load this update right now.",
         },
       },
       { status: 503 }
@@ -112,12 +116,15 @@ export async function DELETE(
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to delete update", error);
+    const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "DELETE_FAILED",
-          message: "Unable to delete this update right now.",
+          code: unavailable ? "DATABASE_UNAVAILABLE" : "DELETE_FAILED",
+          message: unavailable
+            ? "This update cannot be modified because the database connection is unavailable."
+            : "Unable to delete this update right now.",
         },
       },
       { status: 503 }
