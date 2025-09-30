@@ -360,6 +360,39 @@ function getNumberValue(
   return Number.isNaN(parsed) ? null : parsed;
 }
 
+function getBooleanValue(
+  row: Record<string, unknown>,
+  columnName: string | undefined
+): boolean | null {
+  const value = getValue(row, columnName);
+  if (value == null) {
+    return null;
+  }
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "number") {
+    return !Number.isNaN(value) && value > 0;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+    if (["1", "true", "t", "yes", "y", "urgent"].includes(normalized)) {
+      return true;
+    }
+    if (["0", "false", "f", "no", "n", "normal"].includes(normalized)) {
+      return false;
+    }
+    const parsed = Number(normalized);
+    if (!Number.isNaN(parsed)) {
+      return parsed > 0;
+    }
+  }
+  return null;
+}
+
 function toUpdateRecord(
   row: Record<string, unknown>,
   schema: UpdatesTableSchema,
@@ -381,10 +414,27 @@ function toUpdateRecord(
     categoryValue === 0 || categoryValue === 1 || categoryValue === 2
       ? (categoryValue as UpdateCategory)
       : 0;
-  const urgentSource =
-    getNumberValue(row, schema.urgentColumn) ??
-    getNumberValue(row, schema.priorityColumn) ??
-    0;
+  const urgentColumns = new Set(
+    [schema.urgentColumn, schema.priorityColumn].filter(
+      (column): column is string => Boolean(column)
+    )
+  );
+  let urgent = false;
+  let urgentResolved = false;
+  for (const column of urgentColumns) {
+    const value = getBooleanValue(row, column);
+    if (value != null) {
+      urgent = value;
+      urgentResolved = true;
+      break;
+    }
+  }
+  if (!urgentResolved) {
+    const numericFallback =
+      getNumberValue(row, schema.urgentColumn) ??
+      getNumberValue(row, schema.priorityColumn);
+    urgent = Number(numericFallback ?? 0) > 0;
+  }
   const whenRaw = getNumberValue(row, schema.whenValueColumn) ?? -1;
   const createdAtValue =
     getStringValue(row, schema.createdAtColumn) ??
@@ -395,7 +445,7 @@ function toUpdateRecord(
     id,
     by: by ?? "Unknown",
     category: normalizedCategory,
-    urgent: Number(urgentSource ?? 0) > 0,
+    urgent,
     uid,
     title,
     body,
@@ -677,11 +727,13 @@ export async function insertUpdate(params: {
     pushValue(schema.categoryColumn, params.category);
 
     const urgentValue = params.urgent ? 1 : 0;
-    if (schema.priorityColumn) {
-      pushValue(schema.priorityColumn, urgentValue);
-    }
-    if (schema.urgentColumn && schema.urgentColumn !== schema.priorityColumn) {
-      pushValue(schema.urgentColumn, urgentValue);
+    const urgentColumns = schema.urgentColumn
+      ? [schema.urgentColumn]
+      : schema.priorityColumn
+        ? [schema.priorityColumn]
+        : [];
+    for (const column of new Set(urgentColumns)) {
+      pushValue(column, urgentValue);
     }
 
     pushValue(schema.uidColumn, params.uid);
