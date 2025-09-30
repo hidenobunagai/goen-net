@@ -13,6 +13,7 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -216,7 +217,17 @@ export function NextSessionCard({
         }}
       >
         <Stack spacing={3}>
-          <Stack spacing={1}>
+          <Stack spacing={1.5}>
+            <Chip
+              label={normalized.startAt ? "Upcoming" : "Set the date"}
+              color="primary"
+              size="small"
+              sx={{
+                alignSelf: "flex-start",
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+              }}
+            />
             <Typography variant="h4" component="h2" sx={{ fontWeight: 700 }}>
               Next Session
             </Typography>
@@ -277,14 +288,32 @@ export function NextSessionCard({
           zIndex: 1,
         }}
       >
-        <Button
-          variant="contained"
-          onClick={openDialog}
-          disabled={isPending}
-          fullWidth
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ width: "100%" }}
         >
-          Edit details
-        </Button>
+          {locationIsUrl ? (
+            <Button
+              component="a"
+              href={locationValue}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="outlined"
+              fullWidth
+            >
+              Open location
+            </Button>
+          ) : null}
+          <Button
+            variant="contained"
+            onClick={openDialog}
+            disabled={isPending}
+            fullWidth
+          >
+            Edit details
+          </Button>
+        </Stack>
       </CardActions>
 
       <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="sm">
