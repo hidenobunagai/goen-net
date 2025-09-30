@@ -2,6 +2,7 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -17,9 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
-import { useMemo, useState } from "react";
-
-const STORAGE_KEY = "worksheet_presenter_v1";
+import { useEffect, useMemo, useState } from "react";
 
 type PresenterForm = {
   context?: string;
@@ -34,31 +33,23 @@ type PresenterForm = {
   ask?: string;
 };
 
-function readInitialForm(): PresenterForm {
-  if (typeof window === "undefined") {
+function normalizeFormValue(value: unknown): PresenterForm {
+  if (!value || typeof value !== "object") {
     return {};
   }
 
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as PresenterForm;
-
-    const legacyType = (parsed.type ?? "").toLowerCase();
-    return {
-      ...parsed,
-      typeWork: parsed.typeWork ?? legacyType.includes("work"),
-      typeHome:
-        parsed.typeHome ??
-        (legacyType.includes("home") || legacyType.includes("family")),
-      typePersonal:
-        parsed.typePersonal ??
-        (legacyType.includes("personal") || legacyType.includes("self")),
-    };
-  } catch (error) {
-    console.warn("Failed to parse presenter worksheet state", error);
-    return {};
-  }
+  const parsed = value as PresenterForm;
+  const legacyType = (parsed.type ?? "").toLowerCase();
+  return {
+    ...parsed,
+    typeWork: parsed.typeWork ?? legacyType.includes("work"),
+    typeHome:
+      parsed.typeHome ??
+      (legacyType.includes("home") || legacyType.includes("family")),
+    typePersonal:
+      parsed.typePersonal ??
+      (legacyType.includes("personal") || legacyType.includes("self")),
+  };
 }
 
 type ChangeHandler = (
@@ -67,33 +58,169 @@ type ChangeHandler = (
 
 export function PresenterWorksheet() {
   useDocumentTitle("Presenter Worksheet");
-  const [form, setForm] = useState<PresenterForm>(() => readInitialForm());
+  const [form, setForm] = useState<PresenterForm>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [status, setStatus] = useState<
+    { type: "success" | "error"; message: string }
+  | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const response = await fetch("/api/worksheets/presenter", {
+          method: "GET",
+          credentials: "include",
+        });
+        const payload = (await response.json().catch(() => null)) as
+          | {
+              ok: true;
+              worksheet: { data: unknown } | null;
+              error?: undefined;
+            }
+          | {
+              ok: false;
+              error?: { message?: string };
+              worksheet?: undefined;
+            }
+          | null;
+
+        if (!response.ok || payload?.ok === false) {
+          const message =
+            (payload && "error" in payload
+              ? payload.error?.message
+              : undefined) ??
+            "Unable to load saved worksheet data. Please try again.";
+          throw new Error(message);
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        const data = payload?.worksheet?.data;
+        setForm(normalizeFormValue(data));
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load saved worksheet data.";
+        setLoadError(message);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleChange: ChangeHandler = (key) => (event) => {
     const target = event.target as HTMLInputElement;
     const value =
       target.type === "checkbox" ? target.checked : event.target.value;
+    setStatus(null);
     setForm((prev) => ({
       ...prev,
       [key]: value,
     }));
   };
 
-  const handleSave = () => {
-    if (typeof window === "undefined") return;
+  const handleSave = async () => {
+    setSaving(true);
+    setStatus(null);
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      const response = await fetch("/api/worksheets/presenter", {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: form }),
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | { ok: true }
+        | { ok: false; error?: { message?: string } }
+        | null;
+
+        if (!response.ok || payload?.ok === false) {
+          const message =
+            (payload && "error" in payload
+              ? payload.error?.message
+              : undefined) ??
+            "Unable to save worksheet right now. Please try again.";
+        throw new Error(message);
+      }
+
+      setStatus({ type: "success", message: "Worksheet saved." });
     } catch (error) {
-      console.warn("Failed to persist presenter worksheet", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to save worksheet right now.";
+      setStatus({ type: "error", message });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleClear = () => {
-    if (typeof window === "undefined") return;
-    if (!window.confirm("Clear all saved inputs for Presenter worksheet?"))
-      return;
-    window.localStorage.removeItem(STORAGE_KEY);
-    setForm({});
+  const handleClear = async () => {
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        "Clear all saved inputs for Presenter worksheet?"
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    setClearing(true);
+    setStatus(null);
+    try {
+      const response = await fetch("/api/worksheets/presenter", {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | { ok: true }
+        | { ok: false; error?: { message?: string } }
+        | null;
+
+        if (!response.ok || payload?.ok === false) {
+          const message =
+            (payload && "error" in payload
+              ? payload.error?.message
+              : undefined) ??
+            "Unable to clear worksheet right now. Please try again.";
+        throw new Error(message);
+      }
+
+      setForm({});
+      setStatus({
+        type: "success",
+        message: "Worksheet cleared.",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to clear worksheet right now.";
+      setStatus({ type: "error", message });
+    } finally {
+      setClearing(false);
+    }
   };
 
   const issueTypeChecks = useMemo(
@@ -129,6 +256,11 @@ export function PresenterWorksheet() {
   return (
     <Container maxWidth="md" sx={{ my: 4, pb: 8 }}>
       <Stack spacing={3}>
+        {loadError && (
+          <Alert severity="error" variant="outlined">
+            {loadError}
+          </Alert>
+        )}
         <Paper
           sx={{
             p: { xs: 3, md: 4 },
@@ -431,17 +563,33 @@ export function PresenterWorksheet() {
             bgcolor: "background.paper",
           }}
         >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1}
-            justifyContent="flex-end"
-          >
-            <Button variant="contained" onClick={handleSave}>
-              Save locally
-            </Button>
-            <Button variant="outlined" color="warning" onClick={handleClear}>
-              Clear
-            </Button>
+          <Stack spacing={1.5}>
+            {status && (
+              <Alert severity={status.type} variant="outlined">
+                {status.message}
+              </Alert>
+            )}
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              justifyContent="flex-end"
+            >
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={loading || saving || clearing}
+              >
+                Save
+              </Button>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={handleClear}
+                disabled={clearing || saving}
+              >
+                Clear
+              </Button>
+            </Stack>
           </Stack>
         </Paper>
       </Stack>
