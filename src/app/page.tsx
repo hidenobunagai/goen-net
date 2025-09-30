@@ -46,23 +46,49 @@ export default async function Home() {
 
   return (
     <Box sx={{ bgcolor: "#FFFFFF", minHeight: "100vh" }}>
-      <Container maxWidth="lg" sx={{ py: { xs: 6, sm: 8, md: 12 } }}>
-        <Stack spacing={{ xs: 7, md: 11 }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          py: { xs: 5, sm: 7, md: 12 },
+          px: { xs: 2.5, sm: 4, md: 6 },
+        }}
+      >
+        <Stack spacing={{ xs: 6, md: 11 }}>
           <Grid
             container
             spacing={{ xs: 3, sm: 4, md: 6 }}
             columns={{ xs: 1, md: 12 }}
             alignItems="center"
           >
-            <Grid xs={1} md={7}>
-              <Stack spacing={{ xs: 2.5, md: 3 }}>
+            <Grid xs={1} md={5} order={{ xs: 1, md: 2 }}>
+              <Card
+                elevation={3}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  p: { xs: 1.5, sm: 2, md: 2.5 },
+                  borderRadius: { xs: 3, md: 4 },
+                  boxShadow: {
+                    xs: "0px 12px 32px rgba(0, 44, 95, 0.12)",
+                    md: "0px 16px 40px rgba(0, 44, 95, 0.18)",
+                  },
+                }}
+              >
+                <NextSessionCard initial={nextSession} />
+              </Card>
+            </Grid>
+            <Grid xs={1} md={7} order={{ xs: 2, md: 1 }}>
+              <Stack
+                spacing={{ xs: 2, sm: 2.5, md: 3 }}
+                sx={{ textAlign: { xs: "center", md: "left" } }}
+              >
                 <Typography
                   variant="overline"
                   sx={{
                     color: "primary.main",
                     fontWeight: 700,
                     letterSpacing: "0.15em",
-                    fontSize: "0.75rem",
+                    fontSize: { xs: "0.7rem", sm: "0.75rem" },
                   }}
                 >
                   WELCOME BACK
@@ -77,31 +103,21 @@ export default async function Home() {
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    lineHeight: 1.2,
+                    lineHeight: { xs: 1.25, md: 1.2 },
+                    fontSize: { xs: "2rem", sm: "2.5rem", md: "3.5rem" },
                   }}
                 >
                   Everything builds toward our next session, {firstName}.
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ fontSize: { xs: "0.95rem", sm: "1rem" } }}
+                >
                   Align on priorities, surface decisions, and arrive prepared to
                   move the circle forward. Start by reviewing your peers&apos; latest
                   updates so everyone arrives ready for the conversation.
                 </Typography>
-              </Stack>
-            </Grid>
-            <Grid xs={1} md={5}>
-              <Stack spacing={2}>
-                {/* Original Next Session Card */}
-                <Card
-                  elevation={3}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    p: { xs: 1, sm: 1.5, md: 2 },
-                  }}
-                >
-                  <NextSessionCard initial={nextSession} />
-                </Card>
               </Stack>
             </Grid>
           </Grid>
