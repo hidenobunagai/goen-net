@@ -8,12 +8,15 @@ import {
   type WorksheetRole,
 } from "@/lib/worksheets";
 import { JsonBodyError, requireJson } from "@/lib/utils";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+type Awaitable<T> = T | Promise<T>;
+
 type RouteContext = {
-  params: {
-    role?: string;
-  };
+  params: Awaitable<{
+    role: string;
+  }>;
 };
 
 type SaveWorksheetPayload = {
@@ -26,6 +29,16 @@ function normalizeRole(value: string | undefined): WorksheetRole | null {
   }
   const normalized = value.toLowerCase();
   return isValidWorksheetRole(normalized) ? normalized : null;
+}
+
+async function resolveRole(context: RouteContext): Promise<WorksheetRole | null> {
+  try {
+    const params = await context.params;
+    return normalizeRole(params?.role);
+  } catch (error) {
+    console.error("Failed to resolve worksheet role", error);
+    return null;
+  }
 }
 
 async function resolveAuthenticatedEmail() {
@@ -63,8 +76,8 @@ async function resolveAuthenticatedEmail() {
   return { email, response: null as const };
 }
 
-export async function GET(_request: Request, context: RouteContext) {
-  const role = normalizeRole(context.params?.role);
+export async function GET(_request: NextRequest, context: RouteContext) {
+  const role = await resolveRole(context);
   if (!role) {
     return NextResponse.json(
       {
@@ -106,8 +119,8 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 }
 
-export async function PUT(request: Request, context: RouteContext) {
-  const role = normalizeRole(context.params?.role);
+export async function PUT(request: NextRequest, context: RouteContext) {
+  const role = await resolveRole(context);
   if (!role) {
     return NextResponse.json(
       {
@@ -157,8 +170,8 @@ export async function PUT(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
-  const role = normalizeRole(context.params?.role);
+export async function DELETE(_request: NextRequest, context: RouteContext) {
+  const role = await resolveRole(context);
   if (!role) {
     return NextResponse.json(
       {
