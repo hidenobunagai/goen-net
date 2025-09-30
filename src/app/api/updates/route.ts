@@ -1,5 +1,6 @@
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getOptionalUserSession } from "@/lib/session";
+import { TursoUnavailableError } from "@/lib/turso";
 import type { UpdateRecord } from "@/lib/updates";
 import {
   deleteAllUpdates,
@@ -60,12 +61,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, updates });
   } catch (error) {
     console.error("Failed to fetch updates", error);
+    const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "FETCH_FAILED",
-          message: "Unable to load updates right now. Please try again soon.",
+          code: unavailable ? "DATABASE_UNAVAILABLE" : "FETCH_FAILED",
+          message: unavailable
+            ? "Updates cannot be loaded because the database is currently unavailable."
+            : "Unable to load updates right now. Please try again soon.",
         },
       },
       { status: 503 }
@@ -183,13 +187,15 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Failed to create update", error);
+    const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "CREATE_FAILED",
-          message:
-            "Unable to create an update right now. Please try again later.",
+          code: unavailable ? "DATABASE_UNAVAILABLE" : "CREATE_FAILED",
+          message: unavailable
+            ? "Updates cannot be posted right now because the database is unavailable. 現在はデータベースに接続できないため投稿できません。サービス復旧後に再度お試しください。"
+            : "Unable to create an update right now. Please try again later.",
         },
       },
       { status: 503 }
@@ -268,13 +274,15 @@ export async function DELETE() {
     return NextResponse.json({ ok: true, deleted });
   } catch (error) {
     console.error("Failed to delete updates", error);
+    const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "DELETE_FAILED",
-          message:
-            "Unable to delete updates right now. Please try again later.",
+          code: unavailable ? "DATABASE_UNAVAILABLE" : "DELETE_FAILED",
+          message: unavailable
+            ? "Updates cannot be cleared right now because the database is unavailable."
+            : "Unable to delete updates right now. Please try again later.",
         },
       },
       { status: 503 }

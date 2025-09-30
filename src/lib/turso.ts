@@ -122,8 +122,6 @@ export type NextSessionRecord = {
   updatedAt: string | null;
 };
 
-let memoryNextSession: NextSessionRecord | null = null;
-
 function normalizeRow(
   row: Record<string, unknown> | undefined
 ): NextSessionRecord | null {
@@ -148,21 +146,14 @@ function normalizeRow(
 
 export async function getNextSession(): Promise<NextSessionRecord | null> {
   if (!isTursoConfigured()) {
-    return memoryNextSession;
+    throw new TursoUnavailableError();
   }
 
-  try {
-    const result = await execute(
-      "SELECT start_at, end_at, location, updated_at FROM next_session WHERE id = 1 LIMIT 1"
-    );
-    const row = result.rows?.[0] as Record<string, unknown> | undefined;
-    return normalizeRow(row ?? undefined);
-  } catch (error) {
-    if (error instanceof TursoUnavailableError) {
-      return memoryNextSession;
-    }
-    throw error;
-  }
+  const result = await execute(
+    "SELECT start_at, end_at, location, updated_at FROM next_session WHERE id = 1 LIMIT 1"
+  );
+  const row = result.rows?.[0] as Record<string, unknown> | undefined;
+  return normalizeRow(row ?? undefined);
 }
 
 export type UpsertNextSessionInput = {
@@ -177,36 +168,17 @@ export async function upsertNextSession({
   location,
 }: UpsertNextSessionInput): Promise<void> {
   if (!isTursoConfigured()) {
-    memoryNextSession = {
-      startAt,
-      endAt,
-      location,
-      updatedAt: new Date().toISOString(),
-    };
-    return;
+    throw new TursoUnavailableError();
   }
 
-  try {
-    await execute(
-      `INSERT INTO next_session (id, start_at, end_at, location, updated_at)
+  await execute(
+    `INSERT INTO next_session (id, start_at, end_at, location, updated_at)
        VALUES (1, ?1, ?2, ?3, datetime('now'))
        ON CONFLICT(id) DO UPDATE SET
          start_at = excluded.start_at,
          end_at = excluded.end_at,
          location = excluded.location,
          updated_at = datetime('now')`,
-      [startAt, endAt, location]
-    );
-  } catch (error) {
-    if (error instanceof TursoUnavailableError) {
-      memoryNextSession = {
-        startAt,
-        endAt,
-        location,
-        updatedAt: new Date().toISOString(),
-      };
-      return;
-    }
-    throw error;
-  }
+    [startAt, endAt, location]
+  );
 }

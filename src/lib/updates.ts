@@ -29,63 +29,10 @@ type FetchOptions = {
   offset?: number;
 };
 
-type MemoryUpdate = {
-  id: string;
-  by: string;
-  category: UpdateCategory;
-  urgent: boolean;
-  uid: string;
-  title: string;
-  body: string;
-  when: UpdateWhen;
-  createdAt: string;
-};
-
-type UpdatesMemoryStore = {
-  updates: MemoryUpdate[];
-  fallbackEnabled: boolean;
-};
-
-const globalUpdatesStore = globalThis as typeof globalThis & {
-  __goenNetUpdatesMemory?: UpdatesMemoryStore;
-};
-
-if (!globalUpdatesStore.__goenNetUpdatesMemory) {
-  globalUpdatesStore.__goenNetUpdatesMemory = {
-    updates: [],
-    fallbackEnabled: false,
-  };
-}
-
-const memoryStore = globalUpdatesStore.__goenNetUpdatesMemory;
-const memoryUpdates = memoryStore.updates;
-
-function shouldUseMemory(): boolean {
-  return memoryStore.fallbackEnabled || !isTursoConfigured();
-}
-
-function fallbackToMemoryOnError(error: unknown): boolean {
-  if (shouldUseMemory()) {
-    return true;
+function assertTursoAvailable(): void {
+  if (!isTursoConfigured()) {
+    throw new TursoUnavailableError();
   }
-
-  const allowFallback =
-    error instanceof TursoUnavailableError ||
-    process.env.NODE_ENV !== "production";
-
-  if (!allowFallback) {
-    return false;
-  }
-
-  if (!memoryStore.fallbackEnabled) {
-    console.warn(
-      "[updates] Falling back to in-memory storage for updates operations.",
-      error
-    );
-    memoryStore.fallbackEnabled = true;
-  }
-
-  return true;
 }
 
 type UsersTableSchema = {
@@ -451,9 +398,7 @@ function toUpdateRecord(
 }
 
 async function ensureUserProfile(uid: string, name: string): Promise<void> {
-  if (shouldUseMemory()) {
-    return;
-  }
+  assertTursoAvailable();
 
   const safeName = name?.trim() || uid;
 
@@ -522,163 +467,62 @@ ${conflictClause}`;
   }
 }
 
-function toTimestamp(value: string): number {
-  const parsed = Date.parse(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
-
-function toRecordFromMemory(
-  item: MemoryUpdate,
-  viewerId: string
-): UpdateRecord {
-  return {
-    id: item.id,
-    by: item.by,
-    category: item.category,
-    urgent: item.urgent,
-    uid: item.uid,
-    title: item.title,
-    body: item.body,
-    when: item.when,
-    createdAt: item.createdAt,
-    viewerIsOwner: item.uid === viewerId,
-  };
-}
-
-function fetchUpdatesFromMemory(
-  viewerId: string,
-  { limit = 50, offset = 0 }: FetchOptions = {}
-): UpdateRecord[] {
-  return memoryUpdates
-    .slice()
-    .sort((a, b) => toTimestamp(b.createdAt) - toTimestamp(a.createdAt))
-    .slice(offset, offset + limit)
-    .map((item) => toRecordFromMemory(item, viewerId));
-}
-
-function getUpdateFromMemory(
-  id: string,
-  viewerId: string
-): UpdateRecord | null {
-  const match = memoryUpdates.find((item) => item.id === id);
-  return match ? toRecordFromMemory(match, viewerId) : null;
-}
-
-function insertUpdateIntoMemory(params: {
-  id: string;
-  by: string;
-  category: UpdateCategory;
-  urgent: boolean;
-  uid: string;
-  title: string | null;
-  body: string;
-  when: UpdateWhen;
-}): void {
-  const createdAt = new Date().toISOString();
-  const title = params.title ?? (params.body.slice(0, 80) || "Untitled");
-  const item: MemoryUpdate = {
-    id: params.id,
-    by: params.by,
-    category: params.category,
-    urgent: params.urgent,
-    uid: params.uid,
-    title,
-    body: params.body,
-    when: params.when,
-    createdAt,
-  };
-  memoryUpdates.unshift(item);
-}
-
-function deleteUpdateFromMemory(id: string, uid: string): boolean {
-  const index = memoryUpdates.findIndex(
-    (item) => item.id === id && item.uid === uid
-  );
-  if (index === -1) return false;
-  memoryUpdates.splice(index, 1);
-  return true;
-}
-
-function deleteAllUpdatesFromMemory(): number {
-  const deleted = memoryUpdates.length;
-  memoryUpdates.splice(0, memoryUpdates.length);
-  return deleted;
-}
-
 export async function fetchUpdates(
   viewerId: string,
   { limit = 50, offset = 0 }: FetchOptions = {}
 ): Promise<UpdateRecord[]> {
-  if (shouldUseMemory()) {
-    return fetchUpdatesFromMemory(viewerId, { limit, offset });
-  }
+  assertTursoAvailable();
 
   const schema = await getUpdatesTableSchema();
 
   const orderBy =
     schema.createdAtColumn ?? schema.updatedAtColumn ?? schema.idColumn;
 
-  try {
-    const result = await execute(
-      `SELECT * FROM updates ORDER BY ${orderBy} DESC LIMIT ?1 OFFSET ?2`,
-      [limit, offset] as InArgs
-    );
+  const result = await execute(
+    `SELECT * FROM updates ORDER BY ${orderBy} DESC LIMIT ?1 OFFSET ?2`,
+    [limit, offset] as InArgs
+  );
 
-    const records: Record<string, unknown>[] = [];
-    for (const row of result.rows ?? []) {
-      const record = toRecord(row);
-      if (record) {
-        records.push(record);
-      }
+  const records: Record<string, unknown>[] = [];
+  for (const row of result.rows ?? []) {
+    const record = toRecord(row);
+    if (record) {
+      records.push(record);
     }
-
-    const updates: UpdateRecord[] = [];
-    for (const record of records) {
-      const update = toUpdateRecord(record, schema, viewerId);
-      if (update) {
-        updates.push(update);
-      }
-    }
-
-    return updates;
-  } catch (error) {
-    if (fallbackToMemoryOnError(error)) {
-      return fetchUpdatesFromMemory(viewerId, { limit, offset });
-    }
-    throw error;
   }
+
+  const updates: UpdateRecord[] = [];
+  for (const record of records) {
+    const update = toUpdateRecord(record, schema, viewerId);
+    if (update) {
+      updates.push(update);
+    }
+  }
+
+  return updates;
 }
 
 export async function getUpdateById(
   id: string,
   viewerId: string
 ): Promise<UpdateRecord | null> {
-  if (shouldUseMemory()) {
-    return getUpdateFromMemory(id, viewerId);
-  }
+  assertTursoAvailable();
 
   const schema = await getUpdatesTableSchema();
 
-  try {
-    const result = await execute(
-      `SELECT * FROM updates WHERE ${schema.idColumn} = ?1 LIMIT 1`,
-      [id] as InArgs
-    );
+  const result = await execute(
+    `SELECT * FROM updates WHERE ${schema.idColumn} = ?1 LIMIT 1`,
+    [id] as InArgs
+  );
 
-    const row = result.rows?.[0];
-    const record = toRecord(row);
-    if (!record) {
-      return null;
-    }
-
-    const update = toUpdateRecord(record, schema, viewerId);
-    return update;
-  } catch (error) {
-    if (fallbackToMemoryOnError(error)) {
-      return getUpdateFromMemory(id, viewerId);
-    }
-    throw error;
+  const row = result.rows?.[0];
+  const record = toRecord(row);
+  if (!record) {
+    return null;
   }
+
+  const update = toUpdateRecord(record, schema, viewerId);
+  return update;
 }
 
 export async function insertUpdate(params: {
@@ -691,108 +535,77 @@ export async function insertUpdate(params: {
   body: string;
   when: UpdateWhen;
 }): Promise<void> {
-  if (shouldUseMemory()) {
-    insertUpdateIntoMemory(params);
-    return;
-  }
+  assertTursoAvailable();
 
-  try {
-    await ensureUserProfile(params.uid, params.by);
+  await ensureUserProfile(params.uid, params.by);
 
-    const schema = await getUpdatesTableSchema();
+  const schema = await getUpdatesTableSchema();
 
-    const columns: string[] = [];
-    const values: string[] = [];
-    const args: (string | number | null)[] = [];
+  const columns: string[] = [];
+  const values: string[] = [];
+  const args: (string | number | null)[] = [];
 
-    const pushValue = (
-      columnName: string | undefined,
-      value: string | number | null
-    ) => {
-      if (!columnName) {
-        return;
-      }
-      columns.push(columnName);
-      args.push(value);
-      values.push(`?${args.length}`);
-    };
-
-    pushValue(schema.idColumn, params.id);
-    pushValue(schema.byNameColumn, params.by);
-    pushValue(schema.categoryColumn, params.category);
-
-    const urgentValue = params.urgent ? 1 : 0;
-    if (schema.priorityColumn) {
-      pushValue(schema.priorityColumn, urgentValue);
-    }
-    if (schema.urgentColumn && schema.urgentColumn !== schema.priorityColumn) {
-      pushValue(schema.urgentColumn, urgentValue);
-    }
-
-    pushValue(schema.uidColumn, params.uid);
-    pushValue(schema.titleColumn, params.title ?? null);
-    pushValue(schema.bodyColumn, params.body);
-    pushValue(schema.whenValueColumn, params.when);
-
-    if (schema.createdAtColumn) {
-      columns.push(schema.createdAtColumn);
-      values.push("datetime('now')");
-    }
-
-    if (schema.updatedAtColumn) {
-      columns.push(schema.updatedAtColumn);
-      values.push("datetime('now')");
-    }
-
-    const sql = `INSERT INTO updates (${columns.join(
-      ", "
-    )}) VALUES (${values.join(", ")})`;
-
-    await execute(sql, args as InArgs);
-  } catch (error) {
-    if (fallbackToMemoryOnError(error)) {
-      insertUpdateIntoMemory(params);
+  const pushValue = (
+    columnName: string | undefined,
+    value: string | number | null
+  ) => {
+    if (!columnName) {
       return;
     }
-    throw error;
+    columns.push(columnName);
+    args.push(value);
+    values.push(`?${args.length}`);
+  };
+
+  pushValue(schema.idColumn, params.id);
+  pushValue(schema.byNameColumn, params.by);
+  pushValue(schema.categoryColumn, params.category);
+
+  const urgentValue = params.urgent ? 1 : 0;
+  if (schema.priorityColumn) {
+    pushValue(schema.priorityColumn, urgentValue);
   }
+  if (schema.urgentColumn && schema.urgentColumn !== schema.priorityColumn) {
+    pushValue(schema.urgentColumn, urgentValue);
+  }
+
+  pushValue(schema.uidColumn, params.uid);
+  pushValue(schema.titleColumn, params.title ?? null);
+  pushValue(schema.bodyColumn, params.body);
+  pushValue(schema.whenValueColumn, params.when);
+
+  if (schema.createdAtColumn) {
+    columns.push(schema.createdAtColumn);
+    values.push("datetime('now')");
+  }
+
+  if (schema.updatedAtColumn) {
+    columns.push(schema.updatedAtColumn);
+    values.push("datetime('now')");
+  }
+
+  const sql = `INSERT INTO updates (${columns.join(", ")}) VALUES (${values.join(", ")})`;
+
+  await execute(sql, args as InArgs);
 }
 
 export async function deleteUpdate(id: string, uid: string): Promise<boolean> {
-  if (shouldUseMemory()) {
-    return deleteUpdateFromMemory(id, uid);
-  }
+  assertTursoAvailable();
 
   const schema = await getUpdatesTableSchema();
   const hasUidColumn = Boolean(schema.uidColumn);
 
-  try {
-    const sql = hasUidColumn
-      ? `DELETE FROM updates WHERE ${schema.idColumn} = ?1 AND ${schema.uidColumn} = ?2`
-      : `DELETE FROM updates WHERE ${schema.idColumn} = ?1`;
-    const args: (string | number)[] = hasUidColumn ? [id, uid] : [id];
-    const result = await execute(sql, args as InArgs);
-    return (result.rowsAffected ?? 0) > 0;
-  } catch (error) {
-    if (fallbackToMemoryOnError(error)) {
-      return deleteUpdateFromMemory(id, uid);
-    }
-    throw error;
-  }
+  const sql = hasUidColumn
+    ? `DELETE FROM updates WHERE ${schema.idColumn} = ?1 AND ${schema.uidColumn} = ?2`
+    : `DELETE FROM updates WHERE ${schema.idColumn} = ?1`;
+  const args: (string | number)[] = hasUidColumn ? [id, uid] : [id];
+  const result = await execute(sql, args as InArgs);
+  return (result.rowsAffected ?? 0) > 0;
 }
 
 export async function deleteAllUpdates(): Promise<number> {
-  if (shouldUseMemory()) {
-    return deleteAllUpdatesFromMemory();
-  }
+  assertTursoAvailable();
 
-  try {
-    const result = await execute(`DELETE FROM updates`);
-    return result.rowsAffected ?? 0;
-  } catch (error) {
-    if (fallbackToMemoryOnError(error)) {
-      return deleteAllUpdatesFromMemory();
-    }
-    throw error;
-  }
+  const result = await execute(`DELETE FROM updates`);
+  return result.rowsAffected ?? 0;
 }
