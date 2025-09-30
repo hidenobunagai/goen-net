@@ -56,9 +56,10 @@ export default async function Home() {
         <Stack spacing={{ xs: 6, md: 11 }}>
           <Grid
             container
-            spacing={{ xs: 3, sm: 4, md: 6 }}
             columns={{ xs: 1, md: 12 }}
             alignItems="center"
+            columnSpacing={{ xs: 0, sm: 4, md: 6 }}
+            rowSpacing={{ xs: 3, sm: 4, md: 6 }}
           >
             <Grid xs={1} md={5} order={{ xs: 1, md: 2 }}>
               <NextSessionCard initial={nextSession} />
@@ -135,8 +136,9 @@ export default async function Home() {
               </Stack>
               <Grid
                 container
-                spacing={{ xs: 2, md: 3 }}
                 columns={{ xs: 1, md: 12 }}
+                columnSpacing={{ xs: 0, md: 3 }}
+                rowSpacing={{ xs: 2, md: 3 }}
               >
                 <Grid xs={1} md={4}>
                   <Stack spacing={1}>
@@ -202,6 +204,7 @@ export default async function Home() {
                       bgcolor: "primary.main",
                       color: "primary.contrastText",
                       py: 0.5,
+                      flexShrink: 0,
                     }}
                   >
                     1
@@ -229,6 +232,7 @@ export default async function Home() {
                       bgcolor: "primary.main",
                       color: "primary.contrastText",
                       py: 0.5,
+                      flexShrink: 0,
                     }}
                   >
                     2
@@ -255,6 +259,7 @@ export default async function Home() {
                       bgcolor: "primary.main",
                       color: "primary.contrastText",
                       py: 0.5,
+                      flexShrink: 0,
                     }}
                   >
                     3
@@ -281,6 +286,7 @@ export default async function Home() {
                       bgcolor: "primary.main",
                       color: "primary.contrastText",
                       py: 0.5,
+                      flexShrink: 0,
                     }}
                   >
                     4
@@ -301,8 +307,9 @@ export default async function Home() {
 
           <Grid
             container
-            spacing={{ xs: 2, md: 3 }}
             columns={{ xs: 1, md: 12 }}
+            columnSpacing={{ xs: 0, md: 3 }}
+            rowSpacing={{ xs: 2, md: 3 }}
           >
             <Grid xs={1} md={4}>
               <Card sx={{ height: "100%", p: { xs: 2, sm: 2.5, md: 3 } }}>
@@ -410,8 +417,9 @@ export default async function Home() {
               </Stack>
               <Grid
                 container
-                spacing={{ xs: 1.5, sm: 2 }}
                 columns={{ xs: 1, sm: 3 }}
+                columnSpacing={{ xs: 0, sm: 2 }}
+                rowSpacing={{ xs: 1.5, sm: 2 }}
               >
                 <Grid xs={1}>
                   <Button
