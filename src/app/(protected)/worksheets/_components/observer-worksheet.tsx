@@ -66,7 +66,9 @@ export function ObserverWorksheet() {
 
         if (!response.ok || payload?.ok === false) {
           const message =
-            payload?.error?.message ??
+            (payload && "error" in payload
+              ? payload.error?.message
+              : undefined) ??
             "Unable to load saved worksheet data. Please try again.";
           throw new Error(message);
         }
@@ -122,10 +124,12 @@ export function ObserverWorksheet() {
         | { ok: false; error?: { message?: string } }
         | null;
 
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          payload?.error?.message ??
-          "Unable to save worksheet right now. Please try again.";
+        if (!response.ok || payload?.ok === false) {
+          const message =
+            (payload && "error" in payload
+              ? payload.error?.message
+              : undefined) ??
+            "Unable to save worksheet right now. Please try again.";
         throw new Error(message);
       }
 
@@ -163,10 +167,12 @@ export function ObserverWorksheet() {
         | { ok: false; error?: { message?: string } }
         | null;
 
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          payload?.error?.message ??
-          "Unable to clear worksheet right now. Please try again.";
+        if (!response.ok || payload?.ok === false) {
+          const message =
+            (payload && "error" in payload
+              ? payload.error?.message
+              : undefined) ??
+            "Unable to clear worksheet right now. Please try again.";
         throw new Error(message);
       }
 
