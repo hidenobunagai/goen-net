@@ -41,11 +41,16 @@ async function resolveRole(context: RouteContext): Promise<WorksheetRole | null>
   }
 }
 
-async function resolveAuthenticatedEmail() {
+type AuthResolution = {
+  email: string | null;
+  response: NextResponse | null;
+};
+
+async function resolveAuthenticatedEmail(): Promise<AuthResolution> {
   const session = await getOptionalUserSession();
   if (!session) {
     return {
-      email: null as const,
+      email: null,
       response: NextResponse.json(
         {
           ok: false,
@@ -53,13 +58,13 @@ async function resolveAuthenticatedEmail() {
         },
         { status: 401 }
       ),
-    } as const;
+    };
   }
 
   const email = session.user?.email?.trim();
   if (!email) {
     return {
-      email: null as const,
+      email: null,
       response: NextResponse.json(
         {
           ok: false,
@@ -70,10 +75,10 @@ async function resolveAuthenticatedEmail() {
         },
         { status: 400 }
       ),
-    } as const;
+    };
   }
 
-  return { email, response: null as const };
+  return { email, response: null };
 }
 
 export async function GET(_request: NextRequest, context: RouteContext) {
