@@ -89,7 +89,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   }
 
   const { email, response } = await resolveAuthenticatedEmail();
-  if (!email) {
+  if (email === null) {
     return response;
   }
 
@@ -132,7 +132,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 
   const { email, response } = await resolveAuthenticatedEmail();
-  if (!email) {
+  if (email === null) {
     return response;
   }
 
@@ -183,7 +183,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
   }
 
   const { email, response } = await resolveAuthenticatedEmail();
-  if (!email) {
+  if (email === null) {
     return response;
   }
 
