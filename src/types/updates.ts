@@ -19,7 +19,6 @@ export interface Update {
     | "next-month"
     | "long-term";
   tags: string[];
-  votes: number;
   comments: UpdateComment[];
   createdAt: string;
   updatedAt: string;
@@ -38,6 +37,4 @@ export interface UpdateSummary {
   totalUpdates: number;
   byCategory: Record<Update["category"], number>;
   byPriority: Record<Update["priority"], number>;
-  totalVotes: number;
-  averageVotes: number;
 }

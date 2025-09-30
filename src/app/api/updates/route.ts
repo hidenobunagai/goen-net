@@ -215,8 +215,6 @@ export async function POST(request: Request) {
       body: updateText,
       when: (when === 1 ? 1 : -1) as -1 | 1,
       createdAt: new Date().toISOString(),
-      votes: 0,
-      viewerHasVoted: false,
       viewerIsOwner: true,
     };
     created = fallback;

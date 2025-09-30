@@ -34,12 +34,6 @@ export async function GET() {
       recentUpdates: recentUpdates.length,
       urgentItems: urgentUpdates.length,
       activeMembers: 8, // Based on the fixed 8-person circle
-      totalVotes: updates.reduce((sum, update) => sum + (update.votes || 0), 0),
-      averageVotes:
-        updates.length > 0
-          ? updates.reduce((sum, update) => sum + (update.votes || 0), 0) /
-            updates.length
-          : 0,
       daysToMeeting: 5, // This should be calculated based on next meeting
       byCategory: {
         general: updates.filter((u) => u.category === 0).length,

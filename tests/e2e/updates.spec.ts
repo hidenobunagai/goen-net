@@ -11,7 +11,7 @@ const canAuthenticate = Boolean(TEST_EMAIL && TEST_PASSWORD);
 test.describe("Updates dashboard", () => {
   test.skip(!canAuthenticate, "PLAYWRIGHT_TEST_EMAIL / PLAYWRIGHT_TEST_PASSWORD が未設定のためスキップします。");
 
-  test("allows creating and voting an update", async ({ page }) => {
+  test("allows creating and reviewing an update", async ({ page }) => {
     await page.goto(SIGNIN_PATH);
 
     await page.getByLabel("Email").fill(TEST_EMAIL);
@@ -27,8 +27,6 @@ test.describe("Updates dashboard", () => {
     await expect(page.getByText("Playwright test update")).toBeVisible({ timeout: 10_000 });
 
     const card = page.locator("text=Playwright test update").first();
-    await card.getByRole("button", { name: /vote/i }).click();
-    await expect(card.getByText("voted")).toBeVisible();
 
     await card.getByRole("button", { name: "Details" }).click();
     await expect(page.getByText("Playwright test update")).toBeVisible();
