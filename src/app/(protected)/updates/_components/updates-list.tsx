@@ -733,7 +733,14 @@ export function UpdatesBoard({
                 </Box>
                 <UpdateStatusBadge urgent={detailsItem.urgent} />
               </Stack>
-              <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  overflowWrap: "anywhere",
+                }}
+              >
                 {detailsItem.body}
               </Typography>
             </Stack>
