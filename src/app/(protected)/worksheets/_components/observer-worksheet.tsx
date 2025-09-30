@@ -2,9 +2,12 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
+  Avatar,
   Box,
   Button,
+  Chip,
   Container,
+  Divider,
   Paper,
   Stack,
   TextField,
@@ -112,6 +115,27 @@ export function ObserverWorksheet() {
     []
   );
 
+  const headerHighlights = useMemo(
+    () => [
+      {
+        title: "Observe patterns",
+        description:
+          "Capture moments that showcase effective collaboration and meeting flow.",
+      },
+      {
+        title: "Spot opportunities",
+        description:
+          "Document where the team can communicate with more empathy and rigor.",
+      },
+      {
+        title: "Share actionable feedback",
+        description:
+          "Synthesize observations into insights the cohort can apply immediately.",
+      },
+    ],
+    []
+  );
+
   return (
     <Container maxWidth="md" sx={{ my: 4, pb: 8 }}>
       <Stack spacing={3}>
@@ -120,28 +144,120 @@ export function ObserverWorksheet() {
             p: { xs: 3, md: 4 },
             borderRadius: 4,
             border: "1px solid",
-            borderColor: "primary.light",
+            borderColor: "secondary.light",
             background:
-              "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.08))",
+              "linear-gradient(135deg, rgba(129,140,248,0.18), rgba(99,102,241,0.14))",
             boxShadow: "0 24px 60px rgba(15, 23, 42, 0.16)",
+            position: "relative",
+            overflow: "hidden",
+            isolation: "isolate",
+            "&::after": {
+              content: "''",
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(140px at 18% 20%, rgba(255,255,255,0.45), transparent 65%), radial-gradient(220px at 82% 10%, rgba(165,180,252,0.35), transparent 60%)",
+              pointerEvents: "none",
+              zIndex: -1,
+            },
           }}
         >
-          <Stack spacing={1.5}>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: 800, color: "primary.dark" }}
-              gutterBottom
+          <Stack spacing={3}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              alignItems={{ sm: "center" }}
             >
-              Process Feedback Sheet [For Process Observers]
-            </Typography>
-            <Typography
-              color="text.secondary"
-              sx={{ fontSize: 14, maxWidth: 720 }}
-            >
-              The process observer’s role is to observe a meeting while
-              participating, and give feedback for everybody to learn from good
-              examples and to improve the quality of a meeting.
-            </Typography>
+              <Avatar
+                sx={{
+                  width: 64,
+                  height: 64,
+                  bgcolor: "secondary.main",
+                  color: "secondary.contrastText",
+                  fontSize: 32,
+                  boxShadow: "0 16px 40px rgba(99, 102, 241, 0.35)",
+                }}
+              >
+                👀
+              </Avatar>
+              <Box>
+                <Chip
+                  label="Process observer"
+                  color="secondary"
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 1,
+                    bgcolor: "rgba(255,255,255,0.24)",
+                    borderColor: "rgba(165, 180, 252, 0.6)",
+                  }}
+                />
+                <Typography
+                  variant="h4"
+                  sx={{ fontWeight: 800, color: "secondary.dark" }}
+                >
+                  Process Feedback Worksheet
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: 600, color: "secondary.dark", mt: 0.5 }}
+                >
+                  Capture the meeting dynamics so the team can celebrate wins
+                  and adjust behaviours together.
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Divider sx={{ borderColor: "rgba(165, 180, 252, 0.4)" }} />
+
+            <Stack spacing={2}>
+              <Typography
+                color="text.secondary"
+                sx={{ fontSize: 14, maxWidth: 760 }}
+              >
+                Observe while participating, note concrete examples, and
+                translate them into collective learning for your cohort.
+              </Typography>
+
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2}
+                sx={{
+                  "& > *": {
+                    flex: 1,
+                  },
+                }}
+              >
+                {headerHighlights.map((highlight) => (
+                  <Box
+                    key={highlight.title}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      borderRadius: 2.5,
+                      border: "1px solid rgba(165, 180, 252, 0.45)",
+                      bgcolor: "rgba(255,255,255,0.28)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
+                      backdropFilter: "blur(6px)",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ fontWeight: 700, color: "secondary.dark" }}
+                    >
+                      {highlight.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary", mt: 0.5 }}
+                    >
+                      {highlight.description}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Stack>
           </Stack>
         </Paper>
 

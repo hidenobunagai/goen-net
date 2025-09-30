@@ -2,9 +2,11 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
+  Avatar,
   Box,
   Button,
   Checkbox,
+  Chip,
   Container,
   Divider,
   FormControlLabel,
@@ -343,6 +345,27 @@ export function CoachWorksheet() {
     },
   ];
 
+  const headerHighlights = useMemo(
+    () => [
+      {
+        title: "Create shared clarity",
+        description:
+          "Listen for emotions and facts so the presenter can articulate the core issue.",
+      },
+      {
+        title: "Coach with intention",
+        description:
+          "Use open questions to surface insights, options, and desired outcomes.",
+      },
+      {
+        title: "Set the team up",
+        description:
+          "Frame the confidentiality level and what support the presenter needs from peers.",
+      },
+    ],
+    []
+  );
+
   return (
     <Container maxWidth="md" sx={{ my: 4, pb: 8 }}>
       <Stack spacing={3}>
@@ -353,26 +376,118 @@ export function CoachWorksheet() {
             border: "1px solid",
             borderColor: "primary.light",
             background:
-              "linear-gradient(135deg, rgba(14,116,144,0.12), rgba(59,130,246,0.08))",
+              "linear-gradient(135deg, rgba(14,116,144,0.18), rgba(59,130,246,0.14))",
             boxShadow: "0 24px 60px rgba(15, 23, 42, 0.16)",
+            position: "relative",
+            overflow: "hidden",
+            isolation: "isolate",
+            "&::after": {
+              content: "''",
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(140px at 15% 15%, rgba(255,255,255,0.5), transparent 65%), radial-gradient(200px at 85% 5%, rgba(125,211,252,0.35), transparent 60%)",
+              pointerEvents: "none",
+              zIndex: -1,
+            },
           }}
         >
-          <Stack spacing={1.5}>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: 800, color: "primary.dark" }}
-              gutterBottom
+          <Stack spacing={3}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              alignItems={{ sm: "center" }}
             >
-              Coaching Worksheet [For Coaches]
-            </Typography>
-            <Typography
-              color="text.secondary"
-              sx={{ fontSize: 14, maxWidth: 720 }}
-            >
-              Review the presentation sheet together with the presenter. Listen
-              and ask questions to help understand what really the problem is.
-              Then, fill out this sheet and use it to introduce the presenter.
-            </Typography>
+              <Avatar
+                sx={{
+                  width: 64,
+                  height: 64,
+                  bgcolor: "primary.main",
+                  color: "primary.contrastText",
+                  fontSize: 32,
+                  boxShadow: "0 16px 40px rgba(14, 116, 144, 0.35)",
+                }}
+              >
+                🧭
+              </Avatar>
+              <Box>
+                <Chip
+                  label="Coach role"
+                  color="primary"
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 1,
+                    bgcolor: "rgba(255,255,255,0.24)",
+                    borderColor: "rgba(125, 211, 252, 0.6)",
+                  }}
+                />
+                <Typography
+                  variant="h4"
+                  sx={{ fontWeight: 800, color: "primary.dark" }}
+                >
+                  Coaching Worksheet
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: 600, color: "primary.dark", mt: 0.5 }}
+                >
+                  Guide the presenter to surface the real issue and prepare the
+                  cohort to support effectively.
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Divider sx={{ borderColor: "rgba(125, 211, 252, 0.4)" }} />
+
+            <Stack spacing={2}>
+              <Typography
+                color="text.secondary"
+                sx={{ fontSize: 14, maxWidth: 760 }}
+              >
+                Review the presentation sheet together, listen deeply, and use
+                this worksheet to introduce the presenter with clarity.
+              </Typography>
+
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2}
+                sx={{
+                  "& > *": {
+                    flex: 1,
+                  },
+                }}
+              >
+                {headerHighlights.map((highlight) => (
+                  <Box
+                    key={highlight.title}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      borderRadius: 2.5,
+                      border: "1px solid rgba(125, 211, 252, 0.45)",
+                      bgcolor: "rgba(255,255,255,0.28)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
+                      backdropFilter: "blur(6px)",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ fontWeight: 700, color: "primary.dark" }}
+                    >
+                      {highlight.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary", mt: 0.5 }}
+                    >
+                      {highlight.description}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Stack>
           </Stack>
         </Paper>
 

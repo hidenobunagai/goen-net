@@ -2,10 +2,13 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
+  Avatar,
   Box,
   Button,
   Checkbox,
+  Chip,
   Container,
+  Divider,
   FormControlLabel,
   FormGroup,
   Paper,
@@ -102,6 +105,27 @@ export function PresenterWorksheet() {
     []
   );
 
+  const headerHighlights = useMemo(
+    () => [
+      {
+        title: "Clarify the story",
+        description:
+          "Capture the context, emotions, and expectations around the issue.",
+      },
+      {
+        title: "Co-create insight",
+        description:
+          "Partner with your coach to surface perspectives and options.",
+      },
+      {
+        title: "Plan your ask",
+        description:
+          "Shape a clear request that invites support from your peers.",
+      },
+    ],
+    []
+  );
+
   return (
     <Container maxWidth="md" sx={{ my: 4, pb: 8 }}>
       <Stack spacing={3}>
@@ -114,28 +138,120 @@ export function PresenterWorksheet() {
             background:
               "linear-gradient(135deg, rgba(251,191,36,0.16), rgba(249,115,22,0.12))",
             boxShadow: "0 24px 60px rgba(15, 23, 42, 0.16)",
+            position: "relative",
+            overflow: "hidden",
+            isolation: "isolate",
+            "&::after": {
+              content: "''",
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(120px at 20% 20%, rgba(255,255,255,0.48), transparent 65%), radial-gradient(180px at 80% 10%, rgba(253,186,116,0.28), transparent 55%)",
+              pointerEvents: "none",
+              zIndex: -1,
+            },
           }}
         >
-          <Stack spacing={1.5}>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: 800, color: "warning.dark" }}
-              gutterBottom
+          <Stack spacing={3}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              alignItems={{ sm: "center" }}
             >
-              Presentation Worksheet [For Presenters]
-            </Typography>
-            <Typography
-              color="text.secondary"
-              sx={{ fontSize: 14, maxWidth: 720 }}
-            >
-              First, fill in the boxes below. Then let the coach ask you to
-              clarify the issue you are facing, so that you can describe
-              specifically about (a) what is happening in what context, (b) what
-              you feel about it, (c) what you think will/might happen, and (d)
-              your options. After sorting out the situation and identifying your
-              issue, the presenter and the coach together prepare communication
-              starters.
-            </Typography>
+              <Avatar
+                sx={{
+                  width: 64,
+                  height: 64,
+                  bgcolor: "warning.main",
+                  color: "warning.contrastText",
+                  fontSize: 32,
+                  boxShadow: "0 16px 40px rgba(234, 179, 8, 0.35)",
+                }}
+              >
+                🎤
+              </Avatar>
+              <Box>
+                <Chip
+                  label="Presenter role"
+                  color="warning"
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 1,
+                    bgcolor: "rgba(255,255,255,0.24)",
+                    borderColor: "rgba(253, 186, 116, 0.6)",
+                  }}
+                />
+                <Typography
+                  variant="h4"
+                  sx={{ fontWeight: 800, color: "warning.dark" }}
+                >
+                  Presentation Worksheet
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: 600, color: "warning.dark", mt: 0.5 }}
+                >
+                  Prepare to lead the conversation with clarity and confidence.
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Divider sx={{ borderColor: "rgba(253, 186, 116, 0.4)" }} />
+
+            <Stack spacing={2}>
+              <Typography
+                color="text.secondary"
+                sx={{ fontSize: 14, maxWidth: 760 }}
+              >
+                First, fill in the boxes below. Then let the coach ask you to
+                clarify the issue you are facing, so that you can describe
+                specifically about (a) what is happening in what context, (b)
+                what you feel about it, (c) what you think will/might happen,
+                and (d) your options. After sorting out the situation and
+                identifying your issue, the presenter and the coach together
+                prepare communication starters.
+              </Typography>
+
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2}
+                sx={{
+                  "& > *": {
+                    flex: 1,
+                  },
+                }}
+              >
+                {headerHighlights.map((highlight) => (
+                  <Box
+                    key={highlight.title}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      borderRadius: 2.5,
+                      border: "1px solid rgba(253, 186, 116, 0.4)",
+                      bgcolor: "rgba(255,255,255,0.28)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
+                      backdropFilter: "blur(6px)",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ fontWeight: 700, color: "warning.dark" }}
+                    >
+                      {highlight.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary", mt: 0.5 }}
+                    >
+                      {highlight.description}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Stack>
           </Stack>
         </Paper>
 
