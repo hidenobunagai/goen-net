@@ -271,14 +271,24 @@ export function UpdatesBoard({
       grouped[update.category][bucket].push(update);
     }
 
-    const sortUpdates = (a: UpdateItem, b: UpdateItem) => {
-      if (b.votes !== a.votes) return b.votes - a.votes;
-      return b.createdAtDate.getTime() - a.createdAtDate.getTime();
+    const groupUpdatesByUser = (items: UpdateItem[]) => {
+      const groups = new Map<string, UpdateItem[]>();
+      const order: string[] = [];
+
+      for (const item of items) {
+        if (!groups.has(item.uid)) {
+          groups.set(item.uid, []);
+          order.push(item.uid);
+        }
+        groups.get(item.uid)!.push(item);
+      }
+
+      return order.flatMap((uid) => groups.get(uid)!);
     };
 
     for (const category of CATEGORIES) {
-      grouped[category.id].past.sort(sortUpdates);
-      grouped[category.id].future.sort(sortUpdates);
+      grouped[category.id].past = groupUpdatesByUser(grouped[category.id].past);
+      grouped[category.id].future = groupUpdatesByUser(grouped[category.id].future);
     }
 
     return grouped;
