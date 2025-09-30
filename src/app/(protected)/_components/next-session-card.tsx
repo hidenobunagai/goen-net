@@ -188,10 +188,16 @@ export function NextSessionCard({
     <Card
       sx={{
         height: "100%",
+        width: "100%",
         position: "relative",
         overflow: "hidden",
         backgroundImage:
           "linear-gradient(160deg, rgba(0,27,68,0.08), rgba(255,255,255,0.96))",
+        borderRadius: { xs: 3, md: 4 },
+        boxShadow: {
+          xs: "0px 12px 32px rgba(0, 44, 95, 0.12)",
+          md: "0px 16px 40px rgba(0, 44, 95, 0.18)",
+        },
       }}
     >
       <Box
@@ -203,7 +209,11 @@ export function NextSessionCard({
         }}
       />
       <CardContent
-        sx={{ position: "relative", zIndex: 1, p: { xs: 3, md: 4 } }}
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          p: { xs: 3, sm: 3.5, md: 4 },
+        }}
       >
         <Stack spacing={3}>
           <Stack spacing={1}>
@@ -259,9 +269,20 @@ export function NextSessionCard({
         </Stack>
       </CardContent>
       <CardActions
-        sx={{ px: 3, pb: 3, pt: 0, position: "relative", zIndex: 1 }}
+        sx={{
+          px: { xs: 3, sm: 3.5, md: 4 },
+          pb: { xs: 3, sm: 3.5, md: 4 },
+          pt: 0,
+          position: "relative",
+          zIndex: 1,
+        }}
       >
-        <Button variant="contained" onClick={openDialog} disabled={isPending}>
+        <Button
+          variant="contained"
+          onClick={openDialog}
+          disabled={isPending}
+          fullWidth
+        >
           Edit details
         </Button>
       </CardActions>
