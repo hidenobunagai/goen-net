@@ -215,6 +215,11 @@ type UpdatesTableSchema = {
 };
 
 let cachedUpdatesTableSchema: UpdatesTableSchema | null = null;
+let attemptedPriorityToUrgentRename = false;
+
+function quoteIdentifier(identifier: string): string {
+  return `"${identifier.replace(/"/g, '""')}"`;
+}
 
 async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
   if (cachedUpdatesTableSchema) {
@@ -309,8 +314,48 @@ async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
     ]),
   };
 
+  if (!schema.urgentColumn && schema.priorityColumn) {
+    if (
+      !attemptedPriorityToUrgentRename &&
+      (await renamePriorityColumnToUrgent(schema.priorityColumn))
+    ) {
+      cachedUpdatesTableSchema = null;
+      return getUpdatesTableSchema();
+    }
+
+    schema.urgentColumn = schema.priorityColumn;
+    schema.priorityColumn = undefined;
+  }
+
   cachedUpdatesTableSchema = schema;
   return schema;
+}
+
+async function renamePriorityColumnToUrgent(columnName: string): Promise<boolean> {
+  if (!isTursoConfigured()) {
+    return false;
+  }
+
+  attemptedPriorityToUrgentRename = true;
+
+  const quotedSource = quoteIdentifier(columnName);
+  const quotedTarget = quoteIdentifier("urgent");
+
+  try {
+    await execute(
+      `ALTER TABLE updates RENAME COLUMN ${quotedSource} TO ${quotedTarget}`
+    );
+    console.info(
+      `[updates] Renamed ${columnName} column to urgent to match application schema.`
+    );
+    return true;
+  } catch (error) {
+    console.warn(
+      `[updates] Failed to rename ${columnName} column to urgent. Falling back to legacy mapping.`,
+      error
+    );
+    return false;
+  }
 }
 
 function toRecord(row: unknown): Record<string, unknown> | null {
