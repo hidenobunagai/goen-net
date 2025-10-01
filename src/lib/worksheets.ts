@@ -27,6 +27,50 @@ type WorksheetsTableSchema = {
 
 let cachedSchema: WorksheetsTableSchema | null = null;
 
+type MemoryWorksheetRecord = {
+  data: unknown;
+  updatedAt: string;
+};
+
+const memoryWorksheetStore = new Map<string, MemoryWorksheetRecord>();
+
+function getMemoryKey(uid: string, role: WorksheetRole): string {
+  return `${uid}::${role}`;
+}
+
+function getMemoryWorksheet<T = unknown>(
+  uid: string,
+  role: WorksheetRole
+): WorksheetRecord<T> | null {
+  const record = memoryWorksheetStore.get(getMemoryKey(uid, role));
+  if (!record) {
+    return null;
+  }
+
+  return {
+    uid,
+    role,
+    data: (record.data as T | null) ?? null,
+    updatedAt: record.updatedAt,
+  };
+}
+
+function upsertMemoryWorksheet<T = unknown>(
+  uid: string,
+  role: WorksheetRole,
+  data: T
+): void {
+  const updatedAt = new Date().toISOString();
+  memoryWorksheetStore.set(getMemoryKey(uid, role), {
+    data: (data ?? null) as T | null,
+    updatedAt,
+  });
+}
+
+function deleteMemoryWorksheet(uid: string, role: WorksheetRole): void {
+  memoryWorksheetStore.delete(getMemoryKey(uid, role));
+}
+
 function assertTursoAvailable(): void {
   if (!isTursoConfigured()) {
     throw new TursoUnavailableError();
@@ -161,7 +205,10 @@ export async function getWorksheet<T = unknown>(
   uid: string,
   role: WorksheetRole
 ): Promise<WorksheetRecord<T> | null> {
-  assertTursoAvailable();
+  if (!isTursoConfigured()) {
+    return getMemoryWorksheet<T>(uid, role);
+  }
+
   const schema = await getSchema();
   const { uidColumn, roleColumn, dataColumn, updatedAtColumn } = schema;
 
@@ -211,7 +258,11 @@ export async function upsertWorksheet<T = unknown>(
   role: WorksheetRole,
   data: T
 ): Promise<void> {
-  assertTursoAvailable();
+  if (!isTursoConfigured()) {
+    upsertMemoryWorksheet(uid, role, data);
+    return;
+  }
+
   const schema = await getSchema();
   const { uidColumn, roleColumn, dataColumn, updatedAtColumn, createdAtColumn } =
     schema;
@@ -256,7 +307,11 @@ export async function deleteWorksheet(
   uid: string,
   role: WorksheetRole
 ): Promise<void> {
-  assertTursoAvailable();
+  if (!isTursoConfigured()) {
+    deleteMemoryWorksheet(uid, role);
+    return;
+  }
+
   const schema = await getSchema();
   const { uidColumn, roleColumn } = schema;
 
@@ -272,4 +327,5 @@ export function isValidWorksheetRole(value: string): value is WorksheetRole {
 
 export function resetWorksheetsCache(): void {
   cachedSchema = null;
+  memoryWorksheetStore.clear();
 }
