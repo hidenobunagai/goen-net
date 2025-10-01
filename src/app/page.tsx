@@ -7,16 +7,11 @@ import Chip from "@mui/material/Chip";
 import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2";
 import Link from "next/link";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
@@ -162,11 +157,13 @@ export default async function Home() {
                     size="large"
                     sx={{
                       px: 4,
-                      borderColor: "rgba(0, 51, 102, 0.35)",
+                      borderColor: "primary.main",
                       color: "primary.main",
+                      bgcolor: "rgba(0, 51, 102, 0.06)",
+                      fontWeight: 600,
                       "&:hover": {
-                        borderColor: "primary.main",
-                        bgcolor: "rgba(0, 51, 102, 0.04)",
+                        borderColor: "primary.dark",
+                        bgcolor: "rgba(0, 51, 102, 0.12)",
                       },
                     }}
                   >
@@ -180,73 +177,11 @@ export default async function Home() {
           <Grid
             container
             columns={{ xs: 1, md: 12 }}
+            justifyContent="center"
             columnSpacing={{ xs: 0, md: 3 }}
             rowSpacing={{ xs: 2.5, md: 3 }}
           >
-            <Grid xs={1} md={8}>
-              <Card sx={{ p: { xs: 2.5, md: 3 }, height: "100%" }}>
-                <Stack spacing={2.5}>
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Typography
-                      variant="overline"
-                      color="primary"
-                      sx={{ letterSpacing: "0.18em" }}
-                    >
-                      Quick prep
-                    </Typography>
-                    <Chip label="5 min" size="small" sx={{ fontWeight: 600 }} />
-                  </Stack>
-                  <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                    Checklist before you join
-                  </Typography>
-                  <List disablePadding sx={{ display: "grid", gap: 1.5 }}>
-                    {[ 
-                      {
-                        primary: "Skim everyone&apos;s latest update",
-                        secondary:
-                          "Highlight the wins, blockers, and follow-ups that matter most.",
-                      },
-                      {
-                        primary: "Vote on the conversations that need airtime",
-                        secondary:
-                          "Stack rank the agenda so facilitators can set the flow with confidence.",
-                      },
-                      {
-                        primary: "Log any context teammates should review",
-                        secondary:
-                          "Attach links, decks, or docs so decisions can happen in the room.",
-                      },
-                    ].map((item) => (
-                      <ListItem
-                        key={item.primary}
-                        sx={{
-                          borderRadius: 2,
-                          px: 1.5,
-                          py: 1.25,
-                          bgcolor: "rgba(0, 51, 102, 0.04)",
-                        }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <CheckCircleRoundedIcon sx={{ color: "primary.main" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primaryTypographyProps={{ fontWeight: 600 }}
-                          secondaryTypographyProps={{ color: "text.secondary" }}
-                          primary={item.primary}
-                          secondary={item.secondary}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Stack>
-              </Card>
-            </Grid>
-            <Grid xs={1} md={4}>
+            <Grid xs={1} md={4} sx={{ display: "flex", justifyContent: "center" }}>
               <Card
                 sx={{
                   p: { xs: 2.5, md: 3 },
@@ -255,6 +190,8 @@ export default async function Home() {
                   bgcolor: "#021f3f",
                   color: "common.white",
                   height: "100%",
+                  width: "100%",
+                  maxWidth: 420,
                 }}
               >
                 <Box
@@ -291,12 +228,12 @@ export default async function Home() {
                     size="large"
                     sx={{
                       alignSelf: { xs: "flex-start", md: "flex-start" },
-                      borderColor: "rgba(255,255,255,0.6)",
+                      borderColor: "rgba(255,255,255,0.7)",
                       color: "common.white",
                       fontWeight: 600,
                       "&:hover": {
                         borderColor: "common.white",
-                        bgcolor: "rgba(255,255,255,0.08)",
+                        bgcolor: "rgba(255,255,255,0.12)",
                       },
                     }}
                   >
