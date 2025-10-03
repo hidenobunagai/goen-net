@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --background: #f8f9fa;
+  --foreground: #1a202c;
+  --accent: #e60012;
+  --primary: #003366;
+
+  /* Standard shadcn/ui theme variables */
+  --background: 210 20% 98%; /* #F8F9FA */
+  --foreground: 213 30% 15%; /* #1a202c */
+  --primary: 210 100% 20%; /* #003366 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 357 100% 45%; /* #E60012 */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 210 15% 94%;
+  --muted-foreground: 213 15% 45%;
+  --accent: 357 100% 45%; /* #E60012 */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 214 15% 91%;
+  --input: 214 15% 91%;
+  --ring: 210 100% 20%; /* #003366 */
+  --card: 0 0% 100%;
+  --card-foreground: 213 30% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 213 30% 15%;
+  --radius: 0.75rem;
+}
+
+body {
+  background: #FFFFFF;
+  color: var(--foreground);
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background-color: rgba(230, 0, 18, 0.2);
+  color: var(--primary);
+}
+
+/* スムーズスクロール */
+html {
+  scroll-behavior: smooth;
+}
+
+/* フォーカス時のアウトライン */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

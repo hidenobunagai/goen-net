@@ -1,0 +1,33 @@
+$dbUrl = "https://goen-net-db-hidenobunagai.aws-ap-northeast-1.turso.io"
+$authToken = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTg5OTE4NTcsImlkIjoiYmFlYWE5OTMtN2Q0Mi00ZTczLWE5MGEtMWM1MzhlNGNhNDkzIiwicmlkIjoiNzE5MTIxZGMtNGE1OC00NzQxLTgwMjYtM2FkZGJjYjYxNzhiIn0.oz7EUKYqeNzDmfrfTF-V87Mrvh_EFjaeBNbbo6-Lbs3MlhVq_7SH04nzThC9PFXdv4Fx1Xyx5H1NdPHkzcG-AA"
+
+$sql = @"
+CREATE TABLE IF NOT EXISTS worksheets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  uid TEXT NOT NULL,
+  role TEXT NOT NULL,
+  data TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(uid, role)
+)
+"@
+
+$body = @{
+    statements = @($sql)
+} | ConvertTo-Json -Depth 10
+
+$headers = @{
+    "Authorization" = "Bearer $authToken"
+    "Content-Type" = "application/json"
+}
+
+try {
+    $response = Invoke-RestMethod -Uri $dbUrl -Method Post -Headers $headers -Body $body
+    Write-Host "✅ worksheets table created successfully" -ForegroundColor Green
+    $response | ConvertTo-Json -Depth 10
+} catch {
+    Write-Host "❌ Error creating table:" -ForegroundColor Red
+    Write-Host $_.Exception.Message
+    Write-Host $_.Exception.Response
+}
