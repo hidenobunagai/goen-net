@@ -372,6 +372,9 @@ export function UpdatesBoard({
                 borderRadius: 2,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                bgcolor: item.urgent ? "#fff4e5" : "#ffffff",
+                borderColor: item.urgent ? "#ff9800" : "divider",
+                borderLeftWidth: item.urgent ? 4 : 1,
                 "&:hover": {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   transform: "translateY(-2px)",
@@ -379,7 +382,7 @@ export function UpdatesBoard({
               }}
             >
               <Stack spacing={1.2}>
-                {/* Header: Name badge + Status + Delete */}
+                {/* Header: Name badge + Delete */}
                 <Stack
                   direction="row"
                   justifyContent="space-between"
@@ -409,7 +412,6 @@ export function UpdatesBoard({
                     {item.by}
                   </Box>
                   <Stack direction="row" spacing={0.25} alignItems="center">
-                    <UpdateStatusBadge urgent={item.urgent} />
                     {item.viewerIsOwner ? (
                       <Tooltip title="Delete" placement="top">
                         <span>
