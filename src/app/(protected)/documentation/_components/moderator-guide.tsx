@@ -472,12 +472,76 @@ export function ModeratorGuide() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ my: { xs: 3, md: 5 } }}>
-      <Stack spacing={3}>
-        <Typography variant="h4" sx={{ fontWeight: 800 }}>
-          Goen Net Moderator Playbook
-        </Typography>
-        <Typography color="text.secondary">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: `
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
+          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
+          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
+        `,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
+        },
+      }}
+    >
+    <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
+      <Stack spacing={4}>
+        <Stack
+          spacing={2}
+          sx={{
+            animation: "fadeInUp 0.8s ease-out",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="overline"
+              sx={{
+                color: "primary.main",
+                fontWeight: 700,
+                letterSpacing: "0.15em",
+                fontSize: "0.8125rem",
+                textTransform: "uppercase",
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -4,
+                  left: 0,
+                  width: "40px",
+                  height: "2px",
+                  background: "linear-gradient(90deg, currentColor, transparent)",
+                },
+              }}
+            >
+              Session Guide
+            </Typography>
+          </Box>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              fontWeight: 800,
+              letterSpacing: "-0.025em",
+              lineHeight: 1.2,
+              background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Goen Net Moderator Playbook
+          </Typography>
+        </Stack>
+        <Typography color="text.secondary" sx={{ fontSize: "1.0625rem", lineHeight: 1.75, opacity: 0.9 }}>
           Keep this tab open during the session and follow the timeline below. ★
           indicates additional explanations for members who are new to the
           process.
@@ -506,6 +570,7 @@ export function ModeratorGuide() {
         </Paper>
       </Stack>
     </Container>
+    </Box>
   );
 }
 

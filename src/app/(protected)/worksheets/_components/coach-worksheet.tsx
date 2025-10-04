@@ -2,20 +2,20 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Container,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
+    Alert,
+    Avatar,
+    Box,
+    Button,
+    Checkbox,
+    Chip,
+    Container,
+    Divider,
+    FormControlLabel,
+    FormGroup,
+    Paper,
+    Stack,
+    TextField,
+    Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -478,10 +478,24 @@ export function CoachWorksheet() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #ffffff 50%, #f8f9fb 100%)",
+        background: `
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
+          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
+          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
+        `,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
+        },
       }}
     >
-      <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 }, pb: 8 }}>
+      <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 }, pb: 8 }}>
         <Stack spacing={4}>
         {initialError && (
           <Alert severity="error" variant="outlined">
@@ -492,20 +506,37 @@ export function CoachWorksheet() {
           sx={{
             p: { xs: 3, md: 4 },
             borderRadius: 4,
-            border: "1px solid",
-            borderColor: "primary.light",
-            background:
-              "linear-gradient(135deg, rgba(14,116,144,0.18), rgba(59,130,246,0.14))",
-            boxShadow: "0 24px 60px rgba(15, 23, 42, 0.16)",
+            border: "1px solid transparent",
+            background: "linear-gradient(135deg, rgba(14,116,144,0.12), rgba(59,130,246,0.08))",
+            backdropFilter: "blur(20px) saturate(150%)",
+            boxShadow: `
+              0 1px 2px rgba(14, 116, 144, 0.08),
+              0 8px 24px rgba(14, 116, 144, 0.12),
+              0 16px 48px rgba(14, 116, 144, 0.08)
+            `,
             position: "relative",
             overflow: "hidden",
             isolation: "isolate",
-            "&::after": {
-              content: "''",
+            "&::before": {
+              content: '""',
               position: "absolute",
               inset: 0,
-              background:
-                "radial-gradient(140px at 15% 15%, rgba(255,255,255,0.5), transparent 65%), radial-gradient(200px at 85% 5%, rgba(125,211,252,0.35), transparent 60%)",
+              borderRadius: "inherit",
+              padding: "1px",
+              background: "linear-gradient(135deg, rgba(14, 116, 144, 0.3), rgba(59, 130, 246, 0.2), rgba(14, 116, 144, 0.1))",
+              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+              pointerEvents: "none",
+            },
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              inset: 0,
+              background: `
+                radial-gradient(ellipse 140px at 15% 15%, rgba(255,255,255,0.4), transparent 60%),
+                radial-gradient(ellipse 200px at 85% 5%, rgba(125,211,252,0.3), transparent 55%)
+              `,
               pointerEvents: "none",
               zIndex: -1,
             },

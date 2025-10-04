@@ -2,46 +2,46 @@
 
 import type { UpdateRecord } from "@/lib/updates";
 import {
-  DndContext,
-  DragOverlay,
-  KeyboardSensor,
-  PointerSensor,
-  closestCorners,
-  useDroppable,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragOverEvent,
-  type DragStartEvent,
+    DndContext,
+    DragOverlay,
+    KeyboardSensor,
+    PointerSensor,
+    closestCorners,
+    useDroppable,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+    type DragOverEvent,
+    type DragStartEvent,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    SortableContext,
+    arrayMove,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Divider,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Divider,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    TextField,
+    Tooltip,
+    Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -583,29 +583,67 @@ export function PrioritizationBoard() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #ffffff 50%, #f8f9fb 100%)",
+        background: `
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
+          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
+          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
+        `,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
+        },
       }}
     >
-      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
-        <Stack spacing={4}>
-        <Stack spacing={1.5}>
-          <Typography
-            variant="overline"
-            sx={{
-              color: "primary.main",
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              fontSize: "0.875rem",
-            }}
-          >
-            Session Planning
-          </Typography>
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
+        <Stack spacing={5}>
+        <Stack
+          spacing={2}
+          sx={{
+            animation: "fadeInUp 0.8s ease-out",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="overline"
+              sx={{
+                color: "primary.main",
+                fontWeight: 700,
+                letterSpacing: "0.15em",
+                fontSize: "0.8125rem",
+                textTransform: "uppercase",
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -4,
+                  left: 0,
+                  width: "40px",
+                  height: "2px",
+                  background: "linear-gradient(90deg, currentColor, transparent)",
+                },
+              }}
+            >
+              Session Planning
+            </Typography>
+          </Box>
           <Typography
             variant="h3"
             component="h1"
             sx={{
               fontWeight: 800,
-              letterSpacing: "-0.02em",
+              letterSpacing: "-0.025em",
+              lineHeight: 1.2,
+              background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}
           >
             Prioritization
@@ -615,8 +653,9 @@ export function PrioritizationBoard() {
             color="text.secondary"
             sx={{
               fontSize: "1.0625rem",
-              lineHeight: 1.7,
-              mb: 2,
+              lineHeight: 1.75,
+              maxWidth: 760,
+              opacity: 0.9,
             }}
           >
             Organize the latest updates into categories to prepare for the
