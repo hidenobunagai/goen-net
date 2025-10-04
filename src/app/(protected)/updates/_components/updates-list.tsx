@@ -367,6 +367,7 @@ export function UpdatesBoard({
             <Paper
               key={item.id}
               variant="outlined"
+              onClick={() => handleDetailsOpen(item)}
               sx={{
                 p: 1.5,
                 borderRadius: 2,
@@ -375,13 +376,14 @@ export function UpdatesBoard({
                 bgcolor: item.urgent ? "#fff4e5" : "#ffffff",
                 borderColor: item.urgent ? "#ff9800" : "divider",
                 borderLeftWidth: item.urgent ? 4 : 1,
+                cursor: "pointer",
                 "&:hover": {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   transform: "translateY(-2px)",
                 },
               }}
             >
-              <Stack spacing={1.2}>
+              <Stack spacing={1}>
                 {/* Header: Name badge + Delete */}
                 <Stack
                   direction="row"
@@ -417,7 +419,10 @@ export function UpdatesBoard({
                         <span>
                           <IconButton
                             size="small"
-                            onClick={() => requestDelete(item)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              requestDelete(item);
+                            }}
                             disabled={
                               deleteLoading && deleteTarget?.id === item.id
                             }
@@ -444,34 +449,12 @@ export function UpdatesBoard({
                   sx={{
                     fontWeight: 600,
                     wordBreak: "break-word",
-                    cursor: "pointer",
                     color: "text.primary",
                     lineHeight: 1.4,
-                    "&:hover": {
-                      color: "primary.main",
-                    },
                   }}
-                  onClick={() => handleDetailsOpen(item)}
                 >
                   {item.title || "Untitled"}
                 </Typography>
-
-                {/* View details link */}
-                <Button
-                  size="small"
-                  onClick={() => handleDetailsOpen(item)}
-                  sx={{
-                    textTransform: "none",
-                    px: 0,
-                    alignSelf: "flex-start",
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    minHeight: 0,
-                    py: 0.25,
-                  }}
-                >
-                  View details
-                </Button>
               </Stack>
             </Paper>
           );
