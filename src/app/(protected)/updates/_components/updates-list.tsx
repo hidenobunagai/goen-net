@@ -611,6 +611,7 @@ export function UpdatesBoard({
                       width: CATEGORY_COL_WIDTH,
                       bgcolor: "#f5f5f5",
                       fontSize: "0.875rem",
+                      borderRight: "2px solid #d0d0d0",
                     }}
                   >
                     Category
@@ -621,6 +622,7 @@ export function UpdatesBoard({
                       width: FLEX_COL_WIDTH,
                       bgcolor: "#f5f5f5",
                       fontSize: "0.875rem",
+                      borderRight: "2px solid #d0d0d0",
                     }}
                   >
                     Reflect on the past 3 months
@@ -638,7 +640,7 @@ export function UpdatesBoard({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {CATEGORIES.map((category) => (
+                {CATEGORIES.map((category, index) => (
                   <TableRow key={category.id}>
                     <TableCell
                       sx={{
@@ -647,6 +649,8 @@ export function UpdatesBoard({
                         verticalAlign: "top",
                         fontSize: "0.9375rem",
                         bgcolor: "#f5f5f5",
+                        borderRight: "2px solid #d0d0d0",
+                        borderBottom: index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
                       }}
                     >
                       {category.label}
@@ -655,6 +659,8 @@ export function UpdatesBoard({
                       sx={{
                         verticalAlign: "top",
                         p: 2,
+                        borderRight: "2px solid #d0d0d0",
+                        borderBottom: index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
                       }}
                     >
                       {renderCell(groupedUpdates[category.id]?.past ?? [])}
@@ -663,6 +669,7 @@ export function UpdatesBoard({
                       sx={{
                         verticalAlign: "top",
                         p: 2,
+                        borderBottom: index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
                       }}
                     >
                       {renderCell(groupedUpdates[category.id]?.future ?? [])}
