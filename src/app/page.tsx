@@ -29,50 +29,95 @@ export default async function Home() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #ffffff 50%, #f8f9fb 100%)",
+        background: `
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
+          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
+          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
+        `,
         position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
+        },
       }}
     >
       <Container
         maxWidth="lg"
         sx={{
-          py: { xs: 6, md: 10 },
+          py: { xs: 8, md: 12 },
           px: { xs: 2, sm: 3 },
         }}
       >
-        <Stack spacing={{ xs: 5, md: 8 }}>
+        <Stack spacing={{ xs: 6, md: 10 }}>
           <Grid
             container
             columns={{ xs: 1, md: 12 }}
             alignItems="center"
-            columnSpacing={{ xs: 0, md: 6 }}
-            rowSpacing={{ xs: 4, md: 0 }}
+            columnSpacing={{ xs: 0, md: 8 }}
+            rowSpacing={{ xs: 5, md: 0 }}
           >
             <Grid xs={1} md={7}>
               <Stack
-                spacing={3}
-                sx={{ textAlign: { xs: "center", md: "left" } }}
+                spacing={3.5}
+                sx={{
+                  textAlign: { xs: "center", md: "left" },
+                  animation: "fadeInUp 0.8s ease-out",
+                  "@keyframes fadeInUp": {
+                    from: {
+                      opacity: 0,
+                      transform: "translateY(20px)",
+                    },
+                    to: {
+                      opacity: 1,
+                      transform: "translateY(0)",
+                    },
+                  },
+                }}
               >
-                <Typography
-                  variant="overline"
-                  sx={{
-                    color: "primary.main",
-                    fontWeight: 700,
-                    letterSpacing: "0.12em",
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  Welcome back
-                </Typography>
+                <Box>
+                  <Typography
+                    variant="overline"
+                    sx={{
+                      color: "primary.main",
+                      fontWeight: 700,
+                      letterSpacing: "0.15em",
+                      fontSize: "0.8125rem",
+                      textTransform: "uppercase",
+                      position: "relative",
+                      display: "inline-block",
+                      "&::after": {
+                        content: '""',
+                        position: "absolute",
+                        bottom: -4,
+                        left: 0,
+                        width: "40px",
+                        height: "2px",
+                        background: "linear-gradient(90deg, currentColor, transparent)",
+                        mx: { xs: "auto", md: 0 },
+                      },
+                    }}
+                  >
+                    Welcome back
+                  </Typography>
+                </Box>
                 <Typography
                   variant="h2"
                   component="h1"
                   sx={{
                     fontWeight: 800,
                     color: "text.primary",
-                    lineHeight: 1.15,
-                    fontSize: { xs: "2.25rem", md: "3.25rem" },
-                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                    fontSize: { xs: "2.5rem", sm: "2.75rem", md: "3.5rem" },
+                    letterSpacing: "-0.025em",
+                    background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
                   }}
                 >
                   Everything builds toward our next session, {firstName}.
@@ -80,19 +125,26 @@ export default async function Home() {
                 <Typography
                   variant="body1"
                   color="text.secondary"
-                  sx={{ 
+                  sx={{
                     fontSize: "1.125rem",
-                    lineHeight: 1.8,
+                    lineHeight: 1.75,
                     maxWidth: 600,
                     mx: { xs: "auto", md: 0 },
                     fontWeight: 400,
+                    opacity: 0.9,
                   }}
                 >
                   Prepare, collaborate, and stay aligned as a circle.
                 </Typography>
               </Stack>
             </Grid>
-            <Grid xs={1} md={5}>
+            <Grid
+              xs={1}
+              md={5}
+              sx={{
+                animation: "fadeInUp 0.8s ease-out 0.2s backwards",
+              }}
+            >
               <NextSessionCard initial={nextSession} />
             </Grid>
           </Grid>

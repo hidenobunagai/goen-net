@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  combineDateAndTime,
-  extractDate,
-  extractTime,
-  formatSessionRange,
-  normalizeToDatetimeLocal,
+    combineDateAndTime,
+    extractDate,
+    extractTime,
+    formatSessionRange,
+    normalizeToDatetimeLocal,
 } from "@/lib/datetime";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -192,15 +192,38 @@ export function NextSessionCard({
         width: "100%",
         position: "relative",
         overflow: "hidden",
-        background: "rgba(255, 255, 255, 0.9)",
-        backdropFilter: "blur(20px)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        border: "1px solid transparent",
         borderRadius: { xs: 3, md: 4 },
-        boxShadow: "0 8px 32px rgba(0, 51, 102, 0.12)",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        boxShadow: `
+          0 1px 2px rgba(0, 51, 102, 0.04),
+          0 4px 12px rgba(0, 51, 102, 0.08),
+          0 16px 32px rgba(0, 51, 102, 0.08)
+        `,
+        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          borderRadius: "inherit",
+          padding: "1px",
+          background: "linear-gradient(135deg, rgba(0, 51, 102, 0.15), rgba(230, 0, 18, 0.1), rgba(0, 51, 102, 0.05))",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude",
+          pointerEvents: "none",
+        },
         "&:hover": {
-          boxShadow: "0 12px 48px rgba(0, 51, 102, 0.18)",
-          transform: "translateY(-2px)",
+          boxShadow: `
+            0 2px 4px rgba(0, 51, 102, 0.06),
+            0 8px 20px rgba(0, 51, 102, 0.12),
+            0 24px 48px rgba(0, 51, 102, 0.12)
+          `,
+          transform: "translateY(-4px)",
+          "&::before": {
+            background: "linear-gradient(135deg, rgba(0, 51, 102, 0.2), rgba(230, 0, 18, 0.15), rgba(0, 51, 102, 0.08))",
+          },
         },
       }}
     >
@@ -208,15 +231,19 @@ export function NextSessionCard({
         sx={{
           position: "absolute",
           inset: 0,
-          background:
-            "radial-gradient(circle at 90% -10%, rgba(199,50,47,0.18), transparent 45%), radial-gradient(circle at 0% 100%, rgba(0,27,68,0.12), transparent 55%)",
+          background: `
+            radial-gradient(ellipse 100% 80% at 90% -10%, rgba(230, 0, 18, 0.06), transparent 50%),
+            radial-gradient(ellipse 100% 80% at 10% 110%, rgba(0, 51, 102, 0.04), transparent 50%)
+          `,
+          pointerEvents: "none",
         }}
       />
       <CardContent
         sx={{
           position: "relative",
           zIndex: 1,
-          p: { xs: 3, sm: 3.5, md: 4 },
+          p: { xs: 3.5, sm: 4, md: 4.5 },
+          pb: { xs: 2.5, sm: 3, md: 3.5 },
         }}
       >
         <Stack spacing={3}>
@@ -227,8 +254,13 @@ export function NextSessionCard({
               size="small"
               sx={{
                 alignSelf: "flex-start",
-                fontWeight: 600,
-                letterSpacing: "0.12em",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                fontSize: "0.75rem",
+                px: 0.5,
+                height: 28,
+                background: "linear-gradient(135deg, rgba(0, 51, 102, 0.95) 0%, rgba(0, 51, 102, 1) 100%)",
+                boxShadow: "0 2px 8px rgba(0, 51, 102, 0.15)",
               }}
             />
             <Typography variant="h4" component="h2" sx={{ fontWeight: 700 }}>
@@ -284,65 +316,89 @@ export function NextSessionCard({
       </CardContent>
       <CardActions
         sx={{
-          px: { xs: 3, sm: 3.5, md: 4 },
-          pb: { xs: 3, sm: 3.5, md: 4 },
+          px: { xs: 3.5, sm: 4, md: 4.5 },
+          pb: { xs: 3.5, sm: 4, md: 4.5 },
           pt: 0,
           position: "relative",
           zIndex: 1,
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={1.5}
-          sx={{ width: "100%" }}
-        >
-          {locationIsUrl ? (
-            <Button
-              component="a"
-              href={locationValue}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="contained"
-              fullWidth
-              sx={{
-                color: '#fff !important',
-                '& .MuiButton-label': {
-                  color: '#fff !important'
-                },
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                '&:hover': {
-                  color: '#fff !important',
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 6px 20px rgba(0, 51, 102, 0.25)",
-                },
-                '&:active': {
-                  color: '#fff !important',
-                  transform: "translateY(0)",
-                }
-              }}
-            >
-              Open location
-            </Button>
-          ) : null}
+        {locationIsUrl ? (
           <Button
-            variant="outlined"
-            onClick={openDialog}
-            disabled={isPending}
-            fullWidth
+            component="a"
+            href={locationValue}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="contained"
+            size="large"
             sx={{
-              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(0, 51, 102, 0.15)",
+              color: '#fff !important',
+              fontWeight: 600,
+              px: 4,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: "none",
+              fontSize: "1rem",
+              boxShadow: "0 4px 12px rgba(0, 51, 102, 0.2)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              '&:hover': {
+                color: '#fff !important',
+                transform: "translateY(-2px)",
+                boxShadow: "0 6px 20px rgba(0, 51, 102, 0.3)",
               },
-              "&:active": {
+              '&:active': {
+                color: '#fff !important',
                 transform: "translateY(0)",
               },
             }}
           >
-            Edit details
+            Open location
           </Button>
-        </Stack>
+        ) : (
+          <Box />
+        )}
+        <Typography
+          component="button"
+          onClick={openDialog}
+          disabled={isPending}
+          sx={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            font: "inherit",
+            cursor: isPending ? "default" : "pointer",
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            color: "primary.main",
+            textDecoration: "none",
+            opacity: isPending ? 0.5 : 1,
+            transition: "all 0.2s ease",
+            position: "relative",
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              bottom: -2,
+              left: 0,
+              right: 0,
+              height: "1px",
+              background: "currentColor",
+              transform: "scaleX(0)",
+              transformOrigin: "right",
+              transition: "transform 0.2s ease",
+            },
+            "&:hover:not(:disabled)": {
+              color: "primary.dark",
+              "&::after": {
+                transform: "scaleX(1)",
+                transformOrigin: "left",
+              },
+            },
+          }}
+        >
+          Edit details
+        </Typography>
       </CardActions>
 
       <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="sm">
