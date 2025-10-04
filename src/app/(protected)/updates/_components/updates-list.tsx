@@ -759,33 +759,40 @@ export function UpdatesBoard({
           sx={{
             wordBreak: "break-word",
             overflowWrap: "anywhere",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 2,
           }}
         >
-          {detailsItem?.title || detailsItem?.by || "Update details"}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {detailsItem?.title || detailsItem?.by || "Update details"}
+          </Box>
+          {detailsItem?.urgent ? (
+            <UpdateStatusBadge urgent={detailsItem.urgent} />
+          ) : null}
         </DialogTitle>
         <DialogContent>
           {detailsItem ? (
             <Stack spacing={1.5}>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Box
-                  sx={{
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: 999,
-                    bgcolor: getUserBadgeColor(detailsItem.uid),
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                    letterSpacing: 0.3,
-                    lineHeight: 1.3,
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}
-                >
-                  {detailsItem.by}
-                </Box>
-                <UpdateStatusBadge urgent={detailsItem.urgent} />
-              </Stack>
+              <Box
+                sx={{
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 999,
+                  bgcolor: getUserBadgeColor(detailsItem.uid),
+                  color: "white",
+                  fontWeight: 700,
+                  fontSize: "0.95rem",
+                  letterSpacing: 0.3,
+                  lineHeight: 1.3,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  alignSelf: "flex-start",
+                }}
+              >
+                {detailsItem.by}
+              </Box>
               <Typography
                 variant="body2"
                 sx={{
