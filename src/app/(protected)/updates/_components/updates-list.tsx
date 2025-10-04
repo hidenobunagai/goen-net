@@ -355,14 +355,20 @@ export function UpdatesBoard({
     }
 
     return (
-      <Stack spacing={1.5}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: 1.5,
+        }}
+      >
         {items.map((item) => {
           return (
             <Paper
               key={item.id}
               variant="outlined"
               sx={{
-                p: 2,
+                p: 1.5,
                 borderRadius: 2,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -372,28 +378,28 @@ export function UpdatesBoard({
                 },
               }}
             >
-              <Stack spacing={1.5}>
+              <Stack spacing={1.2}>
                 {/* Header: Name badge + Status + Delete */}
                 <Stack
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"
-                  spacing={1}
+                  spacing={0.5}
                 >
                   <Box
                     sx={{
-                      px: 1.5,
-                      py: 0.5,
+                      px: 1.2,
+                      py: 0.4,
                       borderRadius: 999,
                       bgcolor: getUserBadgeColor(item.uid),
                       color: "white",
                       fontWeight: 600,
-                      fontSize: "0.875rem",
+                      fontSize: "0.75rem",
                       letterSpacing: 0.2,
-                      lineHeight: 1.4,
+                      lineHeight: 1.3,
                       display: "inline-flex",
                       alignItems: "center",
-                      maxWidth: "70%",
+                      maxWidth: "60%",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -402,7 +408,7 @@ export function UpdatesBoard({
                   >
                     {item.by}
                   </Box>
-                  <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Stack direction="row" spacing={0.25} alignItems="center">
                     <UpdateStatusBadge urgent={item.urgent} />
                     {item.viewerIsOwner ? (
                       <Tooltip title="Delete" placement="top">
@@ -414,6 +420,7 @@ export function UpdatesBoard({
                               deleteLoading && deleteTarget?.id === item.id
                             }
                             sx={{
+                              padding: "4px",
                               color: "text.secondary",
                               "&:hover": {
                                 color: "error.main",
@@ -421,7 +428,7 @@ export function UpdatesBoard({
                               },
                             }}
                           >
-                            <DeleteOutlineIcon fontSize="small" />
+                            <DeleteOutlineIcon sx={{ fontSize: "1rem" }} />
                           </IconButton>
                         </span>
                       </Tooltip>
@@ -431,13 +438,13 @@ export function UpdatesBoard({
 
                 {/* Title */}
                 <Typography
-                  variant="body1"
+                  variant="body2"
                   sx={{
                     fontWeight: 600,
                     wordBreak: "break-word",
                     cursor: "pointer",
                     color: "text.primary",
-                    lineHeight: 1.5,
+                    lineHeight: 1.4,
                     "&:hover": {
                       color: "primary.main",
                     },
@@ -455,8 +462,10 @@ export function UpdatesBoard({
                     textTransform: "none",
                     px: 0,
                     alignSelf: "flex-start",
-                    fontSize: "0.8125rem",
+                    fontSize: "0.75rem",
                     fontWeight: 500,
+                    minHeight: 0,
+                    py: 0.25,
                   }}
                 >
                   View details
@@ -465,7 +474,7 @@ export function UpdatesBoard({
             </Paper>
           );
         })}
-      </Stack>
+      </Box>
     );
   };
 
