@@ -28,15 +28,17 @@ export default async function Home() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "calc(100vh - 64px)",
         background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
         position: "relative",
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
       }}
     >
       <Container
         maxWidth="lg"
         sx={{
-          py: { xs: 8, md: 12 },
           px: { xs: 2, sm: 3 },
         }}
       >
