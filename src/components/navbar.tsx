@@ -238,6 +238,7 @@ export function Navbar() {
                   open={Boolean(anchorWorksheet)}
                   onClose={handleCloseWorksheet}
                   keepMounted
+                disableScrollLock={true}
                 >
                   {worksheetLinks.map((link) => (
                     <MenuItem
@@ -279,6 +280,7 @@ export function Navbar() {
                   open={Boolean(anchorDocs)}
                   onClose={handleCloseDocs}
                   keepMounted
+                disableScrollLock={true}
                 >
                   {documentationLinks.map((link) => (
                     <MenuItem
@@ -312,6 +314,7 @@ export function Navbar() {
                 open={Boolean(anchorNav)}
                 onClose={handleCloseNav}
                 keepMounted
+                disableScrollLock={true}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'right',
@@ -343,6 +346,7 @@ export function Navbar() {
                 open={Boolean(anchorNav)}
                 onClose={handleCloseNav}
                 keepMounted
+                disableScrollLock={true}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'right',
