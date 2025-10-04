@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  combineDateAndTime,
-  extractDate,
-  extractTime,
-  formatSessionRange,
-  normalizeToDatetimeLocal,
+    combineDateAndTime,
+    extractDate,
+    extractTime,
+    formatSessionRange,
+    normalizeToDatetimeLocal,
 } from "@/lib/datetime";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -213,21 +213,49 @@ export function NextSessionCard({
       >
         <Stack spacing={3}>
           <Stack spacing={1.5}>
-            <Chip
-              label={normalized.startAt ? "Upcoming" : "Set the date"}
-              color="primary"
-              size="small"
-              sx={{
-                alignSelf: "flex-start",
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                fontSize: "0.75rem",
-                px: 0.5,
-                height: 28,
-                background: "linear-gradient(135deg, rgba(0, 51, 102, 0.95) 0%, rgba(0, 51, 102, 1) 100%)",
-                boxShadow: "0 2px 8px rgba(0, 51, 102, 0.15)",
-              }}
-            />
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Chip
+                label={normalized.startAt ? "Upcoming" : "Set the date"}
+                color="primary"
+                size="small"
+                sx={{
+                  alignSelf: "flex-start",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  fontSize: "0.75rem",
+                  px: 0.5,
+                  height: 28,
+                  background: "linear-gradient(135deg, rgba(0, 51, 102, 0.95) 0%, rgba(0, 51, 102, 1) 100%)",
+                  boxShadow: "0 2px 8px rgba(0, 51, 102, 0.15)",
+                }}
+              />
+              <Typography
+                component="button"
+                onClick={openDialog}
+                disabled={isPending}
+                sx={{
+                  background: "none",
+                  border: "none",
+                  padding: "4px 8px",
+                  font: "inherit",
+                  cursor: isPending ? "default" : "pointer",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  color: "primary.main",
+                  textDecoration: "none",
+                  opacity: isPending ? 0.5 : 1,
+                  transition: "all 0.2s ease",
+                  position: "relative",
+                  "&:hover:not(:disabled)": {
+                    color: "primary.dark",
+                    backgroundColor: "rgba(0, 51, 102, 0.04)",
+                    borderRadius: 1,
+                  },
+                }}
+              >
+                Edit
+              </Typography>
+            </Stack>
             <Typography variant="h4" component="h2" sx={{ fontWeight: 700 }}>
               Next Session
             </Typography>
@@ -286,8 +314,6 @@ export function NextSessionCard({
           pt: 0,
           position: "relative",
           zIndex: 1,
-          justifyContent: "space-between",
-          alignItems: "center",
         }}
       >
         {locationIsUrl ? (
@@ -321,49 +347,7 @@ export function NextSessionCard({
           >
             Open location
           </Button>
-        ) : (
-          <Box />
-        )}
-        <Typography
-          component="button"
-          onClick={openDialog}
-          disabled={isPending}
-          sx={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            font: "inherit",
-            cursor: isPending ? "default" : "pointer",
-            fontSize: "0.875rem",
-            fontWeight: 500,
-            color: "primary.main",
-            textDecoration: "none",
-            opacity: isPending ? 0.5 : 1,
-            transition: "all 0.2s ease",
-            position: "relative",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              bottom: -2,
-              left: 0,
-              right: 0,
-              height: "1px",
-              background: "currentColor",
-              transform: "scaleX(0)",
-              transformOrigin: "right",
-              transition: "transform 0.2s ease",
-            },
-            "&:hover:not(:disabled)": {
-              color: "primary.dark",
-              "&::after": {
-                transform: "scaleX(1)",
-                transformOrigin: "left",
-              },
-            },
-          }}
-        >
-          Edit details
-        </Typography>
+        ) : null}
       </CardActions>
 
       <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="sm">
