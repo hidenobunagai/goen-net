@@ -558,8 +558,8 @@ export function PrioritizationBoard() {
     return (
       <Container sx={{ py: 6 }}>
         <Stack spacing={2} alignItems="center">
-          <CircularProgress />
-          <Typography variant="body1" color="text.secondary">
+          <CircularProgress sx={{ color: "rgba(255, 255, 255, 0.8)" }} />
+          <Typography variant="body1" sx={{ color: "rgba(255, 255, 255, 0.75)" }}>
             Loading updates…
           </Typography>
         </Stack>
@@ -634,12 +634,12 @@ export function PrioritizationBoard() {
           </Typography>
           <Typography
             variant="body1"
-            color="text.secondary"
             sx={{
               fontSize: "1.0625rem",
               lineHeight: 1.75,
               maxWidth: 760,
               opacity: 0.9,
+              color: "rgba(255, 255, 255, 0.75)",
             }}
           >
             Organize the latest updates into categories to prepare for the

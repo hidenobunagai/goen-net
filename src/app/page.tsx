@@ -97,28 +97,23 @@ export default async function Home() {
                   component="h1"
                   sx={{
                     fontWeight: 800,
-                    color: "text.primary",
-                    lineHeight: 1.2,
                     fontSize: { xs: "2.5rem", sm: "2.75rem", md: "3.5rem" },
                     letterSpacing: "-0.025em",
-                    background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
+                    lineHeight: 1.2,
+                    color: "rgba(255, 255, 255, 0.95)",
                   }}
                 >
                   Everything builds toward our next session, {firstName}.
                 </Typography>
                 <Typography
                   variant="body1"
-                  color="text.secondary"
                   sx={{
                     fontSize: "1.125rem",
                     lineHeight: 1.75,
                     maxWidth: 600,
                     mx: { xs: "auto", md: 0 },
                     fontWeight: 400,
-                    opacity: 0.9,
+                    color: "rgba(255, 255, 255, 0.75)",
                   }}
                 >
                   Prepare, collaborate, and stay aligned as a circle.

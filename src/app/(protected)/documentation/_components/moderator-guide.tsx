@@ -525,7 +525,7 @@ export function ModeratorGuide() {
             Goen Net Moderator Playbook
           </Typography>
         </Stack>
-        <Typography color="text.secondary" sx={{ fontSize: "1.0625rem", lineHeight: 1.75, opacity: 0.9 }}>
+        <Typography sx={{ fontSize: "1.0625rem", lineHeight: 1.75, opacity: 0.9, color: "rgba(255, 255, 255, 0.75)" }}>
           Keep this tab open during the session and follow the timeline below. ★
           indicates additional explanations for members who are new to the
           process.

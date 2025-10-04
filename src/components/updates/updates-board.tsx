@@ -63,61 +63,77 @@ export function UpdatesBoard() {
     },
   });
 
+  const containerStyle = {
+    minHeight: "100vh",
+    background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
+    padding: "3rem 1rem",
+  };
+
   if (error) {
     return (
-      <Card className="border-red-200 bg-red-50">
-        <CardContent className="p-6">
-          <p className="text-red-600">Failed to load updates</p>
-        </CardContent>
-      </Card>
+      <div style={containerStyle}>
+        <div className="max-w-4xl mx-auto">
+          <Card className="border-red-200 bg-red-50" style={{ borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)" }}>
+            <CardContent className="p-6">
+              <p className="text-red-600">Failed to load updates</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Updates</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse border rounded-lg p-4">
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-full"></div>
+      <div style={containerStyle}>
+        <div className="max-w-4xl mx-auto">
+          <Card style={{ backgroundColor: "#ffffff", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)", border: "none" }}>
+            <CardHeader>
+              <CardTitle>Recent Updates</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse border rounded-lg p-4">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-full"></div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   }
 
   const updatesData = updates?.updates || [];
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            Recent Updates
-            <Badge variant="secondary" className="ml-2">
-              {updatesData.length}
-            </Badge>
-          </CardTitle>
-          <Button size="sm" variant="outline">
-            View All Updates
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
+    <div style={containerStyle}>
+      <div className="max-w-4xl mx-auto">
+        <Card style={{ backgroundColor: "#ffffff", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)", border: "none" }}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5" />
+                Recent Updates
+                <Badge variant="secondary" className="ml-2">
+                  {updatesData.length}
+                </Badge>
+              </CardTitle>
+              <Button size="sm" variant="outline">
+                View All Updates
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
         {updatesData.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -204,5 +220,7 @@ export function UpdatesBoard() {
         )}
       </CardContent>
     </Card>
+      </div>
+    </div>
   );
 }
