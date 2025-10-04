@@ -312,6 +312,14 @@ export function Navbar() {
                 open={Boolean(anchorNav)}
                 onClose={handleCloseNav}
                 keepMounted
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
                 sx={{ display: { xs: "block", md: "none" } }}
               >
                 {mobileMenuContent}
@@ -335,6 +343,14 @@ export function Navbar() {
                 open={Boolean(anchorNav)}
                 onClose={handleCloseNav}
                 keepMounted
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
                 sx={{ display: { xs: "none", md: "block" } }}
               >
                 {desktopMenuContent}
