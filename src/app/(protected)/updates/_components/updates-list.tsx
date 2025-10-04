@@ -4,33 +4,33 @@ import { del, get } from "@/lib/api-client";
 import type { UpdateRecord } from "@/lib/updates";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    FormControl,
-    IconButton,
-    InputLabel,
-    MenuItem,
-    Paper,
-    Select,
-    Snackbar,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Tooltip,
-    Typography,
-    useMediaQuery,
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Snackbar,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+  useMediaQuery,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
@@ -802,7 +802,12 @@ export function UpdatesBoard({
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>
+        <DialogTitle
+          sx={{
+            wordBreak: "break-word",
+            overflowWrap: "anywhere",
+          }}
+        >
           {detailsItem?.title || detailsItem?.by || "Update details"}
         </DialogTitle>
         <DialogContent>
