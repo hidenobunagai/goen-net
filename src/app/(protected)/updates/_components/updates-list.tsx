@@ -755,24 +755,7 @@ export function UpdatesBoard({
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle
-          sx={{
-            wordBreak: "break-word",
-            overflowWrap: "anywhere",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 2,
-          }}
-        >
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {detailsItem?.title || detailsItem?.by || "Update details"}
-          </Box>
-          {detailsItem?.urgent ? (
-            <UpdateStatusBadge urgent={detailsItem.urgent} />
-          ) : null}
-        </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: 3 }}>
           {detailsItem ? (
             <Stack spacing={1.5}>
               <Box
@@ -792,6 +775,34 @@ export function UpdatesBoard({
                 }}
               >
                 {detailsItem.by}
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  wordBreak: "break-word",
+                  overflowWrap: "anywhere",
+                }}
+              >
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: "1.1rem",
+                      lineHeight: 1.3,
+                      mb: 1,
+                    }}
+                  >
+                    {detailsItem.title || "Untitled"}
+                  </Typography>
+                </Box>
+                {detailsItem.urgent ? (
+                  <UpdateStatusBadge urgent={detailsItem.urgent} />
+                ) : null}
               </Box>
               <Typography
                 variant="body2"
