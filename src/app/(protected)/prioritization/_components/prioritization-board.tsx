@@ -2,46 +2,46 @@
 
 import type { UpdateRecord } from "@/lib/updates";
 import {
-  DndContext,
-  DragOverlay,
-  KeyboardSensor,
-  PointerSensor,
-  closestCorners,
-  useDroppable,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragOverEvent,
-  type DragStartEvent,
+    DndContext,
+    DragOverlay,
+    KeyboardSensor,
+    PointerSensor,
+    closestCorners,
+    useDroppable,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+    type DragOverEvent,
+    type DragStartEvent,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    SortableContext,
+    arrayMove,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Divider,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Divider,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    TextField,
+    Tooltip,
+    Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -367,12 +367,6 @@ export function PrioritizationBoard() {
     selectedMember !== "all" ||
     selectedTimeframe !== "all" ||
     selectedCategory !== "all";
-  const selectedMemberLabel = useMemo(() => {
-    if (selectedMember === "all") return null;
-    return (
-      memberOptions.find((option) => option.uid === selectedMember)?.by ?? null
-    );
-  }, [memberOptions, selectedMember]);
 
   const allItemsById = useMemo(
     () => new Map(updates.map((item) => [item.id, item])),
@@ -720,34 +714,19 @@ export function PrioritizationBoard() {
                 ))}
               </Select>
             </FormControl>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              alignItems={{ xs: "flex-start", sm: "center" }}
-              sx={{ width: { xs: "100%", sm: "auto" } }}
+            <Button
+              variant="text"
+              startIcon={<ClearIcon />}
+              onClick={handleClearFilters}
+              disabled={!filtersActive}
+              sx={{
+                color: "rgba(255, 255, 255, 0.8)",
+                "&:hover": { color: "rgba(255, 255, 255, 1)", backgroundColor: "rgba(255, 255, 255, 0.1)" },
+                "&.Mui-disabled": { color: "rgba(255, 255, 255, 0.3)" },
+              }}
             >
-              <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.75)" }}>
-                {`${visibleUnassignedUpdates.length} unassigned update${
-                  visibleUnassignedUpdates.length === 1 ? "" : "s"
-                } shown${
-                  selectedMemberLabel ? ` · ${selectedMemberLabel}` : ""
-                }`}
-              </Typography>
-              <Button
-                variant="text"
-                startIcon={<ClearIcon />}
-                onClick={handleClearFilters}
-                disabled={!filtersActive}
-                sx={{
-                  alignSelf: { xs: "stretch", sm: "center" },
-                  color: "rgba(255, 255, 255, 0.8)",
-                  "&:hover": { color: "rgba(255, 255, 255, 1)", backgroundColor: "rgba(255, 255, 255, 0.1)" },
-                  "&.Mui-disabled": { color: "rgba(255, 255, 255, 0.3)" },
-                }}
-              >
-                Clear filters
-              </Button>
-            </Stack>
+              Clear filters
+            </Button>
           </Stack>
         </Stack>
 
