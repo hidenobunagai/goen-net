@@ -653,7 +653,7 @@ export function PrioritizationBoard() {
             sx={{ mt: 2, flexWrap: "wrap" }}
           >
             <FormControl size="small" sx={{ width: { xs: "100%", sm: 220 } }}>
-              <InputLabel id="timeframe-filter-label">
+              <InputLabel id="timeframe-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>
                 Filter by time
               </InputLabel>
               <Select
@@ -661,6 +661,13 @@ export function PrioritizationBoard() {
                 value={selectedTimeframe}
                 label="Filter by time"
                 onChange={handleTimeframeChange}
+                sx={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
+                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                }}
               >
                 <MenuItem value="all">All dates</MenuItem>
                 <MenuItem value="past3">Past 3 months</MenuItem>
@@ -668,7 +675,7 @@ export function PrioritizationBoard() {
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ width: { xs: "100%", sm: 220 } }}>
-              <InputLabel id="category-filter-label">
+              <InputLabel id="category-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>
                 Filter by category
               </InputLabel>
               <Select
@@ -676,6 +683,13 @@ export function PrioritizationBoard() {
                 value={selectedCategory}
                 label="Filter by category"
                 onChange={handleCategoryChange}
+                sx={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
+                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                }}
               >
                 <MenuItem value="all">All categories</MenuItem>
                 <MenuItem value="work">Work</MenuItem>
@@ -684,10 +698,17 @@ export function PrioritizationBoard() {
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ width: { xs: "100%", sm: 260 } }}>
-              <InputLabel id="member-filter-label">Filter by member</InputLabel>
+              <InputLabel id="member-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>Filter by member</InputLabel>
               <Select
                 labelId="member-filter-label"
                 value={selectedMember}
+                sx={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
+                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                }}
                 label="Filter by member"
                 onChange={handleMemberChange}
               >

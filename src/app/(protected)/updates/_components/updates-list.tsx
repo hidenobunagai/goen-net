@@ -4,33 +4,33 @@ import { del, get } from "@/lib/api-client";
 import type { UpdateRecord } from "@/lib/updates";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Snackbar,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-  useMediaQuery,
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Snackbar,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Tooltip,
+    Typography,
+    useMediaQuery,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
@@ -454,7 +454,7 @@ export function UpdatesBoard({
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #ffffff 50%, #f8f9fb 100%)",
+        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
       }}
     >
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
@@ -469,7 +469,7 @@ export function UpdatesBoard({
             <Typography
               variant="overline"
               sx={{
-                color: "primary.main",
+                color: "rgba(255, 255, 255, 0.8)",
                 fontWeight: 700,
                 letterSpacing: "0.12em",
                 fontSize: "0.875rem",
@@ -483,18 +483,19 @@ export function UpdatesBoard({
               sx={{
                 fontWeight: 800,
                 letterSpacing: "-0.02em",
+                color: "rgba(255, 255, 255, 0.95)",
               }}
             >
               Updates
             </Typography>
             <Typography
               variant="body1"
-              color="text.secondary"
               sx={{
                 maxWidth: 680,
                 fontSize: "1.0625rem",
                 lineHeight: 1.7,
                 mb: { xs: 2, sm: 0 },
+                color: "rgba(255, 255, 255, 0.75)",
               }}
             >
               Share your team&apos;s latest updates and ideas to keep everyone
@@ -510,12 +511,19 @@ export function UpdatesBoard({
               size="small"
               sx={{ minWidth: { xs: "100%", sm: 220 } }}
             >
-              <InputLabel id="updates-member-filter-label">Member</InputLabel>
+              <InputLabel id="updates-member-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>Member</InputLabel>
               <Select
                 labelId="updates-member-filter-label"
                 label="Member"
                 value={selectedUid}
                 onChange={handleMemberFilterChange}
+                sx={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
+                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                }}
               >
                 <MenuItem value="all">All members</MenuItem>
                 {memberOptions.map((member) => (

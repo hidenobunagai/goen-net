@@ -536,7 +536,24 @@ export function ModeratorGuide() {
           onChange={handleScenarioChange}
           color="primary"
           aria-label="Moderator agenda scenario"
-          sx={{ alignSelf: { xs: "stretch", md: "flex-start" } }}
+          sx={{
+            alignSelf: { xs: "stretch", md: "flex-start" },
+            ".MuiToggleButton-root": {
+              color: "rgba(255, 255, 255, 0.7)",
+              borderColor: "rgba(255, 255, 255, 0.3)",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+              },
+              "&.Mui-selected": {
+                color: "rgba(255, 255, 255, 0.95)",
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
+                borderColor: "rgba(255, 255, 255, 0.5)",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                },
+              },
+            },
+          }}
         >
           <ToggleButton value="twoPresentations">
             Two Presentations
