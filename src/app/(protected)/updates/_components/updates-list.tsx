@@ -699,11 +699,22 @@ export function UpdatesBoard({
       {/* Delete all updates button - below main content */}
       <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
         <Button
-          variant="outlined"
-          color="error"
+          variant="text"
           size="small"
           onClick={openDeleteAll}
           disabled={updates.length === 0}
+          sx={{
+            color: "rgba(255, 255, 255, 0.8)",
+            fontSize: "0.8125rem",
+            textTransform: "none",
+            "&:hover": {
+              color: "rgba(255, 255, 255, 1)",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+            },
+            "&.Mui-disabled": {
+              color: "rgba(255, 255, 255, 0.3)",
+            },
+          }}
         >
           Delete all updates
         </Button>
