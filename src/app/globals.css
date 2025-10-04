@@ -37,8 +37,8 @@ body {
   color: var(--foreground);
   margin: 0;
   padding: 0;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -48,8 +48,7 @@ body {
 html {
   margin: 0;
   padding: 0;
-  height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
