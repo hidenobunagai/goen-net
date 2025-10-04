@@ -345,10 +345,8 @@ export function UpdatesBoard({
         <Typography
           variant="body2"
           sx={{
-            color: "rgba(0, 51, 102, 0.4)",
+            color: "text.secondary",
             fontStyle: "italic",
-            textAlign: "center",
-            py: 2,
           }}
         >
           —
@@ -362,17 +360,15 @@ export function UpdatesBoard({
           return (
             <Paper
               key={item.id}
+              variant="outlined"
               sx={{
                 p: 2,
-                borderRadius: 1.5,
-                bgcolor: "#ffffff",
-                boxShadow: "0 1px 3px rgba(0, 51, 102, 0.12), 0 1px 2px rgba(0, 51, 102, 0.08)",
-                border: "1px solid rgba(0, 51, 102, 0.08)",
+                borderRadius: 2,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&:hover": {
-                  boxShadow: "0 4px 12px rgba(0, 51, 102, 0.15), 0 2px 4px rgba(0, 51, 102, 0.1)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   transform: "translateY(-2px)",
-                  borderColor: "rgba(0, 51, 102, 0.15)",
                 },
               }}
             >
@@ -387,17 +383,17 @@ export function UpdatesBoard({
                   <Box
                     sx={{
                       px: 1.5,
-                      py: 0.4,
-                      borderRadius: 1,
+                      py: 0.5,
+                      borderRadius: 999,
                       bgcolor: getUserBadgeColor(item.uid),
                       color: "white",
                       fontWeight: 600,
-                      fontSize: "0.8125rem",
+                      fontSize: "0.875rem",
                       letterSpacing: 0.2,
                       lineHeight: 1.4,
                       display: "inline-flex",
                       alignItems: "center",
-                      maxWidth: "60%",
+                      maxWidth: "70%",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -421,7 +417,7 @@ export function UpdatesBoard({
                               color: "text.secondary",
                               "&:hover": {
                                 color: "error.main",
-                                bgcolor: "error.lighter",
+                                bgcolor: "rgba(211, 47, 47, 0.08)",
                               },
                             }}
                           >
@@ -591,7 +587,6 @@ export function UpdatesBoard({
             component={Paper}
             variant="outlined"
             sx={{
-              background: "linear-gradient(to bottom, #f5f7fa 0%, #eceff4 100%)",
               borderRadius: 2,
               overflow: "hidden",
             }}
@@ -603,10 +598,8 @@ export function UpdatesBoard({
                     sx={{
                       fontWeight: 700,
                       width: CATEGORY_COL_WIDTH,
-                      bgcolor: "#003366",
-                      color: "white",
-                      fontSize: "0.95rem",
-                      borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+                      bgcolor: "#f5f5f5",
+                      fontSize: "0.875rem",
                     }}
                   >
                     Category
@@ -615,10 +608,8 @@ export function UpdatesBoard({
                     sx={{
                       fontWeight: 700,
                       width: FLEX_COL_WIDTH,
-                      bgcolor: "#003366",
-                      color: "white",
-                      fontSize: "0.95rem",
-                      borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+                      bgcolor: "#f5f5f5",
+                      fontSize: "0.875rem",
                     }}
                   >
                     Reflect on the past 3 months
@@ -627,9 +618,8 @@ export function UpdatesBoard({
                     sx={{
                       fontWeight: 700,
                       width: FLEX_COL_WIDTH,
-                      bgcolor: "#003366",
-                      color: "white",
-                      fontSize: "0.95rem",
+                      bgcolor: "#f5f5f5",
+                      fontSize: "0.875rem",
                     }}
                   >
                     Next 3 months
@@ -638,23 +628,13 @@ export function UpdatesBoard({
               </TableHead>
               <TableBody>
                 {CATEGORIES.map((category) => (
-                  <TableRow
-                    key={category.id}
-                    sx={{
-                      "&:hover": {
-                        bgcolor: "rgba(0, 51, 102, 0.02)",
-                      }
-                    }}
-                  >
+                  <TableRow key={category.id}>
                     <TableCell
                       sx={{
                         fontWeight: 600,
                         whiteSpace: "nowrap",
                         verticalAlign: "top",
-                        bgcolor: "rgba(255, 255, 255, 0.6)",
-                        borderRight: "2px solid #e0e4e8",
-                        color: "#003366",
-                        fontSize: "1rem",
+                        fontSize: "0.9375rem",
                       }}
                     >
                       {category.label}
@@ -662,8 +642,6 @@ export function UpdatesBoard({
                     <TableCell
                       sx={{
                         verticalAlign: "top",
-                        bgcolor: "rgba(255, 255, 255, 0.4)",
-                        borderRight: "2px solid #e0e4e8",
                         p: 2,
                       }}
                     >
@@ -672,7 +650,6 @@ export function UpdatesBoard({
                     <TableCell
                       sx={{
                         verticalAlign: "top",
-                        bgcolor: "rgba(255, 255, 255, 0.4)",
                         p: 2,
                       }}
                     >
