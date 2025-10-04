@@ -635,6 +635,7 @@ export function UpdatesBoard({
                         whiteSpace: "nowrap",
                         verticalAlign: "top",
                         fontSize: "0.9375rem",
+                        bgcolor: "#f5f5f5",
                       }}
                     >
                       {category.label}
