@@ -342,7 +342,15 @@ export function UpdatesBoard({
   const renderCell = (items: UpdateItem[]) => {
     if (items.length === 0) {
       return (
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "rgba(0, 51, 102, 0.4)",
+            fontStyle: "italic",
+            textAlign: "center",
+            py: 2,
+          }}
+        >
           —
         </Typography>
       );
@@ -354,59 +362,54 @@ export function UpdatesBoard({
           return (
             <Paper
               key={item.id}
-              variant="outlined"
               sx={{
-                p: { xs: 2, sm: 2.5 },
-                borderRadius: 2,
-                boxShadow: "0 2px 8px rgba(0, 51, 102, 0.08)",
-                width: "100%",
+                p: 2,
+                borderRadius: 1.5,
+                bgcolor: "#ffffff",
+                boxShadow: "0 1px 3px rgba(0, 51, 102, 0.12), 0 1px 2px rgba(0, 51, 102, 0.08)",
+                border: "1px solid rgba(0, 51, 102, 0.08)",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&:hover": {
-                  boxShadow: "0 4px 16px rgba(0, 51, 102, 0.12)",
+                  boxShadow: "0 4px 12px rgba(0, 51, 102, 0.15), 0 2px 4px rgba(0, 51, 102, 0.1)",
                   transform: "translateY(-2px)",
+                  borderColor: "rgba(0, 51, 102, 0.15)",
                 },
               }}
             >
               <Stack spacing={1.5}>
+                {/* Header: Name badge + Status + Delete */}
                 <Stack
-                  direction={{ xs: "column", sm: "row" }}
+                  direction="row"
                   justifyContent="space-between"
-                  alignItems={{ xs: "flex-start", sm: "center" }}
+                  alignItems="center"
                   spacing={1}
                 >
                   <Box
                     sx={{
                       px: 1.5,
-                      py: 0.5,
-                      borderRadius: 999,
+                      py: 0.4,
+                      borderRadius: 1,
                       bgcolor: getUserBadgeColor(item.uid),
                       color: "white",
-                      fontWeight: 700,
-                      fontSize: "0.95rem",
-                      letterSpacing: 0.3,
-                      lineHeight: 1.3,
+                      fontWeight: 600,
+                      fontSize: "0.8125rem",
+                      letterSpacing: 0.2,
+                      lineHeight: 1.4,
                       display: "inline-flex",
                       alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: 0.25,
-                      maxWidth: "100%",
-                      wordBreak: "break-word",
-                      boxShadow: "0 10px 20px rgba(0, 27, 68, 0.16)",
+                      maxWidth: "60%",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                     title={item.by}
                   >
                     {item.by}
                   </Box>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    justifyContent={{ xs: "flex-start", sm: "flex-end" }}
-                    sx={{ width: { xs: "100%", sm: "auto" } }}
-                  >
+                  <Stack direction="row" spacing={0.5} alignItems="center">
                     <UpdateStatusBadge urgent={item.urgent} />
                     {item.viewerIsOwner ? (
-                      <Tooltip title="Delete this update" placement="left">
+                      <Tooltip title="Delete" placement="top">
                         <span>
                           <IconButton
                             size="small"
@@ -414,6 +417,13 @@ export function UpdatesBoard({
                             disabled={
                               deleteLoading && deleteTarget?.id === item.id
                             }
+                            sx={{
+                              color: "text.secondary",
+                              "&:hover": {
+                                color: "error.main",
+                                bgcolor: "error.lighter",
+                              },
+                            }}
                           >
                             <DeleteOutlineIcon fontSize="small" />
                           </IconButton>
@@ -423,22 +433,35 @@ export function UpdatesBoard({
                   </Stack>
                 </Stack>
 
+                {/* Title */}
                 <Typography
-                  variant="subtitle1"
+                  variant="body1"
                   sx={{
-                    fontWeight: 700,
+                    fontWeight: 600,
                     wordBreak: "break-word",
                     cursor: "pointer",
+                    color: "text.primary",
+                    lineHeight: 1.5,
+                    "&:hover": {
+                      color: "primary.main",
+                    },
                   }}
                   onClick={() => handleDetailsOpen(item)}
                 >
                   {item.title || "Untitled"}
                 </Typography>
 
+                {/* View details link */}
                 <Button
                   size="small"
                   onClick={() => handleDetailsOpen(item)}
-                  sx={{ textTransform: "none", px: 0, alignSelf: "flex-start" }}
+                  sx={{
+                    textTransform: "none",
+                    px: 0,
+                    alignSelf: "flex-start",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                  }}
                 >
                   View details
                 </Button>
@@ -564,39 +587,95 @@ export function UpdatesBoard({
         ) : null}
 
         {!isMobile ? (
-          <TableContainer component={Paper} variant="outlined">
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            sx={{
+              background: "linear-gradient(to bottom, #f5f7fa 0%, #eceff4 100%)",
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
             <Table sx={{ tableLayout: "fixed" }}>
               <TableHead>
                 <TableRow>
                   <TableCell
-                    sx={{ fontWeight: 700, width: CATEGORY_COL_WIDTH }}
+                    sx={{
+                      fontWeight: 700,
+                      width: CATEGORY_COL_WIDTH,
+                      bgcolor: "#003366",
+                      color: "white",
+                      fontSize: "0.95rem",
+                      borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+                    }}
                   >
                     Category
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 700, width: FLEX_COL_WIDTH }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      width: FLEX_COL_WIDTH,
+                      bgcolor: "#003366",
+                      color: "white",
+                      fontSize: "0.95rem",
+                      borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+                    }}
+                  >
                     Reflect on the past 3 months
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 700, width: FLEX_COL_WIDTH }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      width: FLEX_COL_WIDTH,
+                      bgcolor: "#003366",
+                      color: "white",
+                      fontSize: "0.95rem",
+                    }}
+                  >
                     Next 3 months
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {CATEGORIES.map((category) => (
-                  <TableRow key={category.id}>
+                  <TableRow
+                    key={category.id}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "rgba(0, 51, 102, 0.02)",
+                      }
+                    }}
+                  >
                     <TableCell
                       sx={{
                         fontWeight: 600,
                         whiteSpace: "nowrap",
                         verticalAlign: "top",
+                        bgcolor: "rgba(255, 255, 255, 0.6)",
+                        borderRight: "2px solid #e0e4e8",
+                        color: "#003366",
+                        fontSize: "1rem",
                       }}
                     >
                       {category.label}
                     </TableCell>
-                    <TableCell sx={{ verticalAlign: "top" }}>
+                    <TableCell
+                      sx={{
+                        verticalAlign: "top",
+                        bgcolor: "rgba(255, 255, 255, 0.4)",
+                        borderRight: "2px solid #e0e4e8",
+                        p: 2,
+                      }}
+                    >
                       {renderCell(groupedUpdates[category.id]?.past ?? [])}
                     </TableCell>
-                    <TableCell sx={{ verticalAlign: "top" }}>
+                    <TableCell
+                      sx={{
+                        verticalAlign: "top",
+                        bgcolor: "rgba(255, 255, 255, 0.4)",
+                        p: 2,
+                      }}
+                    >
                       {renderCell(groupedUpdates[category.id]?.future ?? [])}
                     </TableCell>
                   </TableRow>
