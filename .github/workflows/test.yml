@@ -1,9 +1,7 @@
 name: Tests
 permissions:
-  contents: read
-
-permissions:
-  contents: read
+  contents: write
+  checks: write
 
 on:
   push:
@@ -18,11 +16,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.12.0'
           cache: 'npm'
 
       - name: Install dependencies
@@ -44,11 +44,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.12.0'
           cache: 'npm'
 
       - name: Install dependencies
@@ -64,6 +66,8 @@ jobs:
           PLAYWRIGHT_TEST_EMAIL: ${{ secrets.PLAYWRIGHT_TEST_EMAIL }}
           PLAYWRIGHT_TEST_PASSWORD: ${{ secrets.PLAYWRIGHT_TEST_PASSWORD }}
           # アプリケーション環境変数
+          # アプリケーション環境変数
+          # 注: secrets の警告は Settings > Secrets に値を設定することで解消されます
           NEXTAUTH_SECRET: test-secret-at-least-32-characters-long-for-testing
           NEXTAUTH_URL: http://localhost:3000
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || 'test-google-client-id' }}

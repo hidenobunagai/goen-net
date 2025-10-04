@@ -1,9 +1,7 @@
 name: CI
 permissions:
   contents: read
-
-permissions:
-  contents: read
+  checks: write
 
 on:
   push:
@@ -18,11 +16,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.12.0'
           cache: 'npm'
 
       - name: Install dependencies
@@ -37,11 +37,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.12.0'
           cache: 'npm'
 
       - name: Install dependencies
@@ -56,11 +58,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.12.0'
           cache: 'npm'
 
       - name: Install dependencies
@@ -70,6 +74,8 @@ jobs:
         run: npm run build
         env:
           # 必須環境変数（ダミー値）
+          # 注: secrets の警告は Settings > Secrets に値を設定することで解消されます
+          # 未設定の場合はフォールバック値が使用されます
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret-at-least-32-characters-long' }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || 'test-client-id' }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET || 'test-client-secret' }}
