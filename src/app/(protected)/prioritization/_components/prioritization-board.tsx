@@ -726,7 +726,7 @@ export function PrioritizationBoard() {
               alignItems={{ xs: "flex-start", sm: "center" }}
               sx={{ width: { xs: "100%", sm: "auto" } }}
             >
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.75)" }}>
                 {`${visibleUnassignedUpdates.length} unassigned update${
                   visibleUnassignedUpdates.length === 1 ? "" : "s"
                 } shown${
@@ -738,7 +738,12 @@ export function PrioritizationBoard() {
                 startIcon={<ClearIcon />}
                 onClick={handleClearFilters}
                 disabled={!filtersActive}
-                sx={{ alignSelf: { xs: "stretch", sm: "center" } }}
+                sx={{
+                  alignSelf: { xs: "stretch", sm: "center" },
+                  color: "rgba(255, 255, 255, 0.8)",
+                  "&:hover": { color: "rgba(255, 255, 255, 1)", backgroundColor: "rgba(255, 255, 255, 0.1)" },
+                  "&.Mui-disabled": { color: "rgba(255, 255, 255, 0.3)" },
+                }}
               >
                 Clear filters
               </Button>
@@ -881,7 +886,7 @@ function Column({ column, items, onDelete }: ColumnProps) {
           <Typography variant="h6" fontWeight={600} noWrap>
             {column.title}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: "rgba(255, 255, 255, 0.6)" }}>
             {items.length}
           </Typography>
         </Stack>
@@ -1022,7 +1027,7 @@ function UpdateCard({ item, isDragging }: UpdateCardProps) {
       </Typography>
       <Typography
         variant="body2"
-        color="text.secondary"
+        sx={{ color: "text.secondary" }}
         noWrap
         title={item.body}
       >
@@ -1034,7 +1039,7 @@ function UpdateCard({ item, isDragging }: UpdateCardProps) {
         justifyContent="flex-start"
         alignItems="center"
       >
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: "text.secondary" }}>
           {item.by}
         </Typography>
       </Stack>
