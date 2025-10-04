@@ -28,18 +28,20 @@ export default async function Home() {
   return (
     <Box
       sx={{
-        height: "calc(100vh - 64px)",
+        minHeight: { xs: "100vh", md: "calc(100vh - 64px)" },
         background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
         position: "relative",
-        overflow: "hidden",
+        overflow: "auto",
         display: "flex",
         alignItems: "center",
+        py: { xs: 4, sm: 6, md: 0 },
       }}
     >
       <Container
         maxWidth="lg"
         sx={{
           px: { xs: 2, sm: 3 },
+          width: "100%",
         }}
       >
         <Stack spacing={{ xs: 6, md: 10 }}>
@@ -48,11 +50,11 @@ export default async function Home() {
             columns={{ xs: 1, md: 12 }}
             alignItems="center"
             columnSpacing={{ xs: 0, md: 8 }}
-            rowSpacing={{ xs: 5, md: 0 }}
+            rowSpacing={{ xs: 4, md: 0 }}
           >
             <Grid xs={1} md={7}>
               <Stack
-                spacing={3.5}
+                spacing={{ xs: 2.5, md: 3.5 }}
                 sx={{
                   textAlign: { xs: "center", md: "left" },
                   animation: "fadeInUp 0.8s ease-out",
@@ -99,9 +101,9 @@ export default async function Home() {
                   component="h1"
                   sx={{
                     fontWeight: 800,
-                    fontSize: { xs: "2.5rem", sm: "2.75rem", md: "3.5rem" },
+                    fontSize: { xs: "1.875rem", sm: "2.5rem", md: "3.5rem" },
                     letterSpacing: "-0.025em",
-                    lineHeight: 1.2,
+                    lineHeight: { xs: 1.25, md: 1.2 },
                     color: "rgba(255, 255, 255, 0.95)",
                   }}
                 >
@@ -110,7 +112,7 @@ export default async function Home() {
                 <Typography
                   variant="body1"
                   sx={{
-                    fontSize: "1.125rem",
+                    fontSize: { xs: "1rem", md: "1.125rem" },
                     lineHeight: 1.75,
                     maxWidth: 600,
                     mx: { xs: "auto", md: 0 },

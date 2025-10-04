@@ -3,8 +3,8 @@ import { PWAServiceWorker } from "@/components/pwa-service-worker";
 import { NextAuthSessionProvider } from "@/components/session-provider";
 import TanStackQueryProvider from "@/components/tanstack-query-provider";
 import { ThemeRegistry } from "@/components/theme-registry";
-import { Analytics } from "@vercel/analytics/next";
 import Box from "@mui/material/Box";
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ReactNode } from "react";
@@ -63,7 +63,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <TanStackQueryProvider>
             <NextAuthSessionProvider>
               <Navbar />
-              <Box component="main" sx={{ bgcolor: "background.default" }}>
+              <Box
+                component="main"
+                sx={{
+                  bgcolor: "background.default",
+                  minHeight: { xs: "calc(100vh - 64px)", md: "auto" },
+                }}
+              >
                 {children}
               </Box>
               <PWAServiceWorker />
