@@ -7,6 +7,7 @@ import {
     formatSessionRange,
     normalizeToDatetimeLocal,
 } from "@/lib/datetime";
+import EditIcon from "@mui/icons-material/Edit";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -18,6 +19,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -200,6 +202,9 @@ export function NextSessionCard({
         "&:hover": {
           boxShadow: "0 2px 4px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15)",
           transform: "translateY(-2px)",
+          "& .edit-icon": {
+            opacity: 1,
+          },
         },
       }}
     >
@@ -229,32 +234,26 @@ export function NextSessionCard({
                   boxShadow: "0 2px 8px rgba(0, 51, 102, 0.15)",
                 }}
               />
-              <Typography
-                component="button"
+              <IconButton
                 onClick={openDialog}
                 disabled={isPending}
+                size="small"
+                className="edit-icon"
                 sx={{
-                  background: "none",
-                  border: "none",
-                  padding: "4px 8px",
-                  font: "inherit",
-                  cursor: isPending ? "default" : "pointer",
-                  fontSize: "0.75rem",
-                  fontWeight: 500,
-                  color: "primary.main",
-                  textDecoration: "none",
-                  opacity: isPending ? 0.5 : 1,
+                  opacity: 0,
                   transition: "all 0.2s ease",
-                  position: "relative",
-                  "&:hover:not(:disabled)": {
-                    color: "primary.dark",
-                    backgroundColor: "rgba(0, 51, 102, 0.04)",
-                    borderRadius: 1,
+                  color: "primary.main",
+                  padding: "4px",
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 51, 102, 0.08)",
+                  },
+                  "&:disabled": {
+                    opacity: 0.3,
                   },
                 }}
               >
-                Edit
-              </Typography>
+                <EditIcon sx={{ fontSize: "1.2rem" }} />
+              </IconButton>
             </Stack>
             <Typography variant="h4" component="h2" sx={{ fontWeight: 700 }}>
               Next Session
