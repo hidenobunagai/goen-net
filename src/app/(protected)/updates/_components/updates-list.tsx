@@ -15,7 +15,6 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
-  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -28,9 +27,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
-  useMediaQuery,
+  useMediaQuery
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
@@ -384,64 +382,29 @@ export function UpdatesBoard({
               }}
             >
               <Stack spacing={1}>
-                {/* Header: Name badge + Delete */}
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  spacing={0.5}
+                {/* Header: Name badge */}
+                <Box
+                  sx={{
+                    px: 1.2,
+                    py: 0.4,
+                    borderRadius: 999,
+                    bgcolor: getUserBadgeColor(item.uid),
+                    color: "white",
+                    fontWeight: 600,
+                    fontSize: "0.75rem",
+                    letterSpacing: 0.2,
+                    lineHeight: 1.3,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    maxWidth: "60%",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  title={item.by}
                 >
-                  <Box
-                    sx={{
-                      px: 1.2,
-                      py: 0.4,
-                      borderRadius: 999,
-                      bgcolor: getUserBadgeColor(item.uid),
-                      color: "white",
-                      fontWeight: 600,
-                      fontSize: "0.75rem",
-                      letterSpacing: 0.2,
-                      lineHeight: 1.3,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      maxWidth: "60%",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                    title={item.by}
-                  >
-                    {item.by}
-                  </Box>
-                  <Stack direction="row" spacing={0.25} alignItems="center">
-                    {item.viewerIsOwner ? (
-                      <Tooltip title="Delete" placement="top">
-                        <span>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              requestDelete(item);
-                            }}
-                            disabled={
-                              deleteLoading && deleteTarget?.id === item.id
-                            }
-                            sx={{
-                              padding: "4px",
-                              color: "text.secondary",
-                              "&:hover": {
-                                color: "error.main",
-                                bgcolor: "rgba(211, 47, 47, 0.08)",
-                              },
-                            }}
-                          >
-                            <DeleteOutlineIcon sx={{ fontSize: "1rem" }} />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    ) : null}
-                  </Stack>
-                </Stack>
+                  {item.by}
+                </Box>
 
                 {/* Title */}
                 <Typography
@@ -837,6 +800,21 @@ export function UpdatesBoard({
           ) : null}
         </DialogContent>
         <DialogActions>
+          {detailsItem?.viewerIsOwner ? (
+            <Button
+              onClick={() => {
+                handleDetailsClose();
+                if (detailsItem) {
+                  requestDelete(detailsItem);
+                }
+              }}
+              color="error"
+              startIcon={<DeleteOutlineIcon />}
+            >
+              Delete
+            </Button>
+          ) : null}
+          <Box sx={{ flex: 1 }} />
           <Button onClick={handleDetailsClose}>Close</Button>
         </DialogActions>
       </Dialog>
