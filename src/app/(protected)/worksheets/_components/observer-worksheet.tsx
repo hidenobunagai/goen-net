@@ -2,17 +2,17 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-    Alert,
-    Avatar,
-    Box,
-    Button,
-    Chip,
-    Container,
-    Divider,
-    Paper,
-    Stack,
-    TextField,
-    Typography,
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Divider,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -256,21 +256,8 @@ export function ObserverWorksheet() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: `
-          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
-          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
-          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
-        `,
+        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
         position: "relative",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
-        },
       }}
     >
       <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 }, pb: 8 }}>
@@ -283,41 +270,10 @@ export function ObserverWorksheet() {
         <Paper
           sx={{
             p: { xs: 3, md: 4 },
-            borderRadius: 4,
-            border: "1px solid transparent",
-            background: "linear-gradient(135deg, rgba(129,140,248,0.12), rgba(99,102,241,0.08))",
-            backdropFilter: "blur(20px) saturate(150%)",
-            boxShadow: `
-              0 1px 2px rgba(129, 140, 248, 0.08),
-              0 8px 24px rgba(129, 140, 248, 0.12),
-              0 16px 48px rgba(129, 140, 248, 0.08)
-            `,
-            position: "relative",
-            overflow: "hidden",
-            isolation: "isolate",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              borderRadius: "inherit",
-              padding: "1px",
-              background: "linear-gradient(135deg, rgba(129, 140, 248, 0.3), rgba(99, 102, 241, 0.2), rgba(129, 140, 248, 0.1))",
-              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              WebkitMaskComposite: "xor",
-              maskComposite: "exclude",
-              pointerEvents: "none",
-            },
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              background: `
-                radial-gradient(ellipse 140px at 18% 20%, rgba(255,255,255,0.4), transparent 60%),
-                radial-gradient(ellipse 220px at 82% 10%, rgba(165,180,252,0.3), transparent 55%)
-              `,
-              pointerEvents: "none",
-              zIndex: -1,
-            },
+            borderRadius: 2,
+            bgcolor: "#ffffff",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)",
+            border: "none",
           }}
         >
           <Stack spacing={3}>

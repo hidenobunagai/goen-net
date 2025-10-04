@@ -1,11 +1,11 @@
 "use client";
 
 import {
-    combineDateAndTime,
-    extractDate,
-    extractTime,
-    formatSessionRange,
-    normalizeToDatetimeLocal,
+  combineDateAndTime,
+  extractDate,
+  extractTime,
+  formatSessionRange,
+  normalizeToDatetimeLocal,
 } from "@/lib/datetime";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -192,52 +192,17 @@ export function NextSessionCard({
         width: "100%",
         position: "relative",
         overflow: "hidden",
-        background: "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)",
-        backdropFilter: "blur(24px) saturate(180%)",
-        border: "1px solid transparent",
-        borderRadius: { xs: 3, md: 4 },
-        boxShadow: `
-          0 1px 2px rgba(0, 51, 102, 0.04),
-          0 4px 12px rgba(0, 51, 102, 0.08),
-          0 16px 32px rgba(0, 51, 102, 0.08)
-        `,
-        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          inset: 0,
-          borderRadius: "inherit",
-          padding: "1px",
-          background: "linear-gradient(135deg, rgba(0, 51, 102, 0.15), rgba(230, 0, 18, 0.1), rgba(0, 51, 102, 0.05))",
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskComposite: "xor",
-          maskComposite: "exclude",
-          pointerEvents: "none",
-        },
+        bgcolor: "#ffffff",
+        borderRadius: 2,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)",
+        border: "none",
+        transition: "all 0.3s ease",
         "&:hover": {
-          boxShadow: `
-            0 2px 4px rgba(0, 51, 102, 0.06),
-            0 8px 20px rgba(0, 51, 102, 0.12),
-            0 24px 48px rgba(0, 51, 102, 0.12)
-          `,
-          transform: "translateY(-4px)",
-          "&::before": {
-            background: "linear-gradient(135deg, rgba(0, 51, 102, 0.2), rgba(230, 0, 18, 0.15), rgba(0, 51, 102, 0.08))",
-          },
+          boxShadow: "0 2px 4px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15)",
+          transform: "translateY(-2px)",
         },
       }}
     >
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          background: `
-            radial-gradient(ellipse 100% 80% at 90% -10%, rgba(230, 0, 18, 0.06), transparent 50%),
-            radial-gradient(ellipse 100% 80% at 10% 110%, rgba(0, 51, 102, 0.04), transparent 50%)
-          `,
-          pointerEvents: "none",
-        }}
-      />
       <CardContent
         sx={{
           position: "relative",

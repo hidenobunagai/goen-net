@@ -475,21 +475,8 @@ export function ModeratorGuide() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: `
-          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
-          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
-          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
-        `,
+        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
         position: "relative",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
-        },
       }}
     >
     <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
@@ -504,7 +491,7 @@ export function ModeratorGuide() {
             <Typography
               variant="overline"
               sx={{
-                color: "primary.main",
+                color: "rgba(255, 255, 255, 0.8)",
                 fontWeight: 700,
                 letterSpacing: "0.15em",
                 fontSize: "0.8125rem",
@@ -518,7 +505,7 @@ export function ModeratorGuide() {
                   left: 0,
                   width: "40px",
                   height: "2px",
-                  background: "linear-gradient(90deg, currentColor, transparent)",
+                  background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent)",
                 },
               }}
             >
@@ -532,10 +519,7 @@ export function ModeratorGuide() {
               fontWeight: 800,
               letterSpacing: "-0.025em",
               lineHeight: 1.2,
-              background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              color: "rgba(255, 255, 255, 0.95)",
             }}
           >
             Goen Net Moderator Playbook

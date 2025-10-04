@@ -2,46 +2,46 @@
 
 import type { UpdateRecord } from "@/lib/updates";
 import {
-    DndContext,
-    DragOverlay,
-    KeyboardSensor,
-    PointerSensor,
-    closestCorners,
-    useDroppable,
-    useSensor,
-    useSensors,
-    type DragEndEvent,
-    type DragOverEvent,
-    type DragStartEvent,
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
-    SortableContext,
-    arrayMove,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Divider,
-    FormControl,
-    IconButton,
-    InputLabel,
-    MenuItem,
-    Paper,
-    Select,
-    Stack,
-    TextField,
-    Tooltip,
-    Typography,
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Divider,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -583,21 +583,8 @@ export function PrioritizationBoard() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: `
-          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
-          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
-          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
-        `,
+        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
         position: "relative",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
-        },
       }}
     >
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
@@ -612,7 +599,7 @@ export function PrioritizationBoard() {
             <Typography
               variant="overline"
               sx={{
-                color: "primary.main",
+                color: "rgba(255, 255, 255, 0.8)",
                 fontWeight: 700,
                 letterSpacing: "0.15em",
                 fontSize: "0.8125rem",
@@ -626,7 +613,7 @@ export function PrioritizationBoard() {
                   left: 0,
                   width: "40px",
                   height: "2px",
-                  background: "linear-gradient(90deg, currentColor, transparent)",
+                  background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent)",
                 },
               }}
             >
@@ -640,10 +627,7 @@ export function PrioritizationBoard() {
               fontWeight: 800,
               letterSpacing: "-0.025em",
               lineHeight: 1.2,
-              background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              color: "rgba(255, 255, 255, 0.95)",
             }}
           >
             Prioritization

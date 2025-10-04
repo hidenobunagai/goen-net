@@ -2,20 +2,20 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-    Alert,
-    Avatar,
-    Box,
-    Button,
-    Checkbox,
-    Chip,
-    Container,
-    Divider,
-    FormControlLabel,
-    FormGroup,
-    Paper,
-    Stack,
-    TextField,
-    Typography,
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Container,
+  Divider,
+  FormControlLabel,
+  FormGroup,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -257,21 +257,8 @@ export function PresenterWorksheet() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: `
-          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.08), transparent),
-          radial-gradient(ellipse 60% 50% at 90% 60%, rgba(230, 0, 18, 0.04), transparent),
-          linear-gradient(180deg, #fafbfc 0%, #ffffff 40%, #f8f9fb 100%)
-        `,
+        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
         position: "relative",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background: "linear-gradient(90deg, transparent, rgba(0, 51, 102, 0.1), transparent)",
-        },
       }}
     >
       <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 }, pb: 8 }}>
@@ -284,41 +271,10 @@ export function PresenterWorksheet() {
         <Paper
           sx={{
             p: { xs: 3, md: 4 },
-            borderRadius: 4,
-            border: "1px solid transparent",
-            background: "linear-gradient(135deg, rgba(251,191,36,0.12), rgba(249,115,22,0.08))",
-            backdropFilter: "blur(20px) saturate(150%)",
-            boxShadow: `
-              0 1px 2px rgba(251, 191, 36, 0.08),
-              0 8px 24px rgba(251, 191, 36, 0.12),
-              0 16px 48px rgba(251, 191, 36, 0.08)
-            `,
-            position: "relative",
-            overflow: "hidden",
-            isolation: "isolate",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              borderRadius: "inherit",
-              padding: "1px",
-              background: "linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(249, 115, 22, 0.2), rgba(251, 191, 36, 0.1))",
-              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              WebkitMaskComposite: "xor",
-              maskComposite: "exclude",
-              pointerEvents: "none",
-            },
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              background: `
-                radial-gradient(ellipse 120px at 20% 20%, rgba(255,255,255,0.4), transparent 60%),
-                radial-gradient(ellipse 180px at 80% 10%, rgba(253,186,116,0.25), transparent 50%)
-              `,
-              pointerEvents: "none",
-              zIndex: -1,
-            },
+            borderRadius: 2,
+            bgcolor: "#ffffff",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)",
+            border: "none",
           }}
         >
           <Stack spacing={3}>
@@ -533,28 +489,10 @@ export function PresenterWorksheet() {
         <Paper
           sx={{
             p: { xs: 3, md: 4 },
-            borderRadius: 4,
-            border: "1px solid transparent",
-            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)",
-            backdropFilter: "blur(24px) saturate(180%)",
-            boxShadow: `
-              0 1px 2px rgba(0, 51, 102, 0.04),
-              0 4px 12px rgba(0, 51, 102, 0.08),
-              0 16px 32px rgba(0, 51, 102, 0.06)
-            `,
-            position: "relative",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              borderRadius: "inherit",
-              padding: "1px",
-              background: "linear-gradient(135deg, rgba(0, 51, 102, 0.1), rgba(230, 0, 18, 0.08), rgba(0, 51, 102, 0.04))",
-              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              WebkitMaskComposite: "xor",
-              maskComposite: "exclude",
-              pointerEvents: "none",
-            },
+            borderRadius: 2,
+            bgcolor: "#ffffff",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)",
+            border: "none",
           }}
         >
           <Stack spacing={2.5}>
@@ -627,27 +565,10 @@ export function PresenterWorksheet() {
         <Paper
           sx={{
             p: { xs: 2.5, md: 3 },
-            borderRadius: 3,
-            border: "1px solid transparent",
-            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%)",
-            backdropFilter: "blur(16px) saturate(150%)",
-            boxShadow: `
-              0 1px 2px rgba(0, 51, 102, 0.03),
-              0 2px 8px rgba(0, 51, 102, 0.06)
-            `,
-            position: "relative",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              borderRadius: "inherit",
-              padding: "1px",
-              background: "linear-gradient(135deg, rgba(0, 51, 102, 0.08), rgba(230, 0, 18, 0.06), rgba(0, 51, 102, 0.03))",
-              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              WebkitMaskComposite: "xor",
-              maskComposite: "exclude",
-              pointerEvents: "none",
-            },
+            borderRadius: 2,
+            bgcolor: "#ffffff",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)",
+            border: "none",
           }}
         >
           <Stack spacing={1.5}>
