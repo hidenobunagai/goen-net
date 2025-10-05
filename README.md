@@ -36,10 +36,10 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 
    | Variable                                     | Description                                                                                                               |
    | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-   | `NEXTAUTH_URL`                               | Base URL of the app (e.g. `https://yourdomain.com`).                                                    |
+   | `NEXTAUTH_URL`                               | Base URL of the app (e.g. `https://yourdomain.com`).                                                                      |
    | `NEXTAUTH_SECRET`                            | Random 32+ character string used to sign NextAuth sessions.                                                               |
    | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`  | OAuth credentials from the Google Cloud Console.                                                                          |
-   | `ALLOWED_EMAILS`                             | Comma- or whitespace-separated list of Google accounts permitted to sign in. Leave blank to allow any Google account.     |
+   | `ALLOWED_EMAILS`                             | Comma- or whitespace-separated list of Google accounts permitted to sign in. Leave blank to block all Google accounts.    |
    | `TURSO_DATABASE_URL` / `TURSO_DB_AUTH_TOKEN` | Connection details for the Turso (LibSQL) database. `TURSO_DB_URL` is also accepted if you prefer that naming convention. |
 
    **Optional helpers**

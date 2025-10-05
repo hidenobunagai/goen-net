@@ -28,7 +28,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user }) {
       if (allowedEmails.size === 0) {
-        return true;
+        logger.warn("Sign-in blocked: ALLOWED_EMAILS is empty.");
+        return false;
       }
 
       const email = user.email?.toLowerCase();
