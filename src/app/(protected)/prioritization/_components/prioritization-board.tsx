@@ -743,10 +743,27 @@ export function PrioritizationBoard() {
                   handleAddColumn();
                 }
               }}
-              sx={{ flexGrow: 1, maxWidth: 320 }}
+              sx={{
+                flexGrow: 1,
+                maxWidth: 320,
+                "& .MuiInputBase-root": {
+                  color: "#1a1a1a",
+                  backgroundColor: "#ffffff",
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#666666",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#d1d5db",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#9ca3af",
+                },
+              }}
             />
             <Button
               variant="contained"
+              color="secondary"
               startIcon={<AddIcon />}
               onClick={handleAddColumn}
               disabled={!newColumnName.trim()}

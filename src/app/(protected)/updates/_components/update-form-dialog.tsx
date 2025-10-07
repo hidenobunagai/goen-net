@@ -3,22 +3,22 @@
 import type { UpdateRecord } from "@/lib/updates";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-  useMediaQuery,
+    Button,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    TextField,
+    Typography,
+    useMediaQuery,
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import InputLabel from "@mui/material/InputLabel";
@@ -135,6 +135,7 @@ export function UpdateFormDialog({
     <>
       <Button
         variant="contained"
+        color="primary"
         startIcon={<AddIcon />}
         onClick={() => setOpen(true)}
         sx={{ whiteSpace: "nowrap" }}
