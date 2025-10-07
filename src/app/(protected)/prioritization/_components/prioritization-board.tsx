@@ -859,6 +859,43 @@ function Column({ column, items, onDelete }: ColumnProps) {
     data: { type: "column", columnId: column.id },
   });
 
+  // Lazy loading: 初期表示数とロード数
+  const INITIAL_LOAD = 10;
+  const LOAD_MORE = 10;
+  const [displayCount, setDisplayCount] = useState(INITIAL_LOAD);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // 表示するアイテム
+  const displayedItems = useMemo(
+    () => items.slice(0, displayCount),
+    [items, displayCount]
+  );
+
+  const hasMore = displayCount < items.length;
+
+  // Intersection Observer でスクロール時に追加読み込み
+  useEffect(() => {
+    if (!hasMore || !loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setDisplayCount((prev) => Math.min(prev + LOAD_MORE, items.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [hasMore, items.length]);
+
+  // アイテムが変更されたらリセット
+  useEffect(() => {
+    setDisplayCount(INITIAL_LOAD);
+  }, [items.length]);
+
   return (
     <Paper
       variant="outlined"
@@ -867,8 +904,6 @@ function Column({ column, items, onDelete }: ColumnProps) {
         flexDirection: "column",
         gap: 2,
         p: 2,
-        minHeight: 360,
-        maxHeight: "80vh",
         borderRadius: 2,
         bgcolor: "background.paper",
       }}
@@ -910,8 +945,6 @@ function Column({ column, items, onDelete }: ColumnProps) {
         <Stack
           ref={setNodeRef}
           spacing={1}
-          flexGrow={1}
-          minHeight={200}
           sx={{
             borderRadius: 1,
             p: items.length === 0 ? 1 : 0,
@@ -930,13 +963,27 @@ function Column({ column, items, onDelete }: ColumnProps) {
               }
             />
           ) : (
-            items.map((item) => (
-              <SortableUpdateCard
-                key={item.id}
-                item={item}
-                columnId={column.id}
-              />
-            ))
+            <>
+              {displayedItems.map((item) => (
+                <SortableUpdateCard
+                  key={item.id}
+                  item={item}
+                  columnId={column.id}
+                />
+              ))}
+              {hasMore && (
+                <Box
+                  ref={loadMoreRef}
+                  sx={{
+                    py: 2,
+                    textAlign: "center",
+                    color: "rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <CircularProgress size={24} sx={{ color: "rgba(255, 255, 255, 0.5)" }} />
+                </Box>
+              )}
+            </>
           )}
         </Stack>
       </SortableContext>
