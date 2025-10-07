@@ -726,7 +726,7 @@ export function PrioritizationBoard() {
 
         {error ? <Alert severity="warning">{error}</Alert> : null}
 
-        <Paper variant="outlined" sx={{ p: 2 }}>
+        <Paper variant="outlined" sx={{ p: 2, bgcolor: "background.paper" }}>
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={2}
