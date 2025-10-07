@@ -2,46 +2,46 @@
 
 import type { UpdateRecord } from "@/lib/updates";
 import {
-    DndContext,
-    DragOverlay,
-    KeyboardSensor,
-    PointerSensor,
-    closestCorners,
-    useDroppable,
-    useSensor,
-    useSensors,
-    type DragEndEvent,
-    type DragOverEvent,
-    type DragStartEvent,
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
-    SortableContext,
-    arrayMove,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Divider,
-    FormControl,
-    IconButton,
-    InputLabel,
-    MenuItem,
-    Paper,
-    Select,
-    Stack,
-    TextField,
-    Tooltip,
-    Typography,
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Divider,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -740,7 +740,6 @@ export function PrioritizationBoard() {
             alignItems={{ xs: "stretch", sm: "center" }}
           >
             <TextField
-              size="small"
               label="New category"
               InputLabelProps={{ shrink: true }}
               value={newColumnName}
@@ -774,6 +773,12 @@ export function PrioritizationBoard() {
                 },
                 "& .MuiInputBase-input": {
                   color: "rgba(255, 255, 255, 0.9)",
+                  // ブラウザのオートコンプリート時の背景色とテキスト色を調整
+                  "&:-webkit-autofill": {
+                    WebkitBoxShadow: "0 0 0 100px rgba(255, 255, 255, 0.1) inset",
+                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9)",
+                    caretColor: "rgba(255, 255, 255, 0.9)",
+                  },
                 },
               }}
             />
@@ -785,6 +790,7 @@ export function PrioritizationBoard() {
               sx={{
                 borderColor: "rgba(255, 255, 255, 0.3)",
                 color: "rgba(255, 255, 255, 0.9)",
+                whiteSpace: "nowrap",
                 "&:hover": {
                   borderColor: "rgba(255, 255, 255, 0.5)",
                   backgroundColor: "rgba(255, 255, 255, 0.05)",
