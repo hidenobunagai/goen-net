@@ -775,9 +775,22 @@ export function PrioritizationBoard() {
                   color: "rgba(255, 255, 255, 0.9)",
                   // ブラウザのオートコンプリート時の背景色とテキスト色を調整
                   "&:-webkit-autofill": {
-                    WebkitBoxShadow: "0 0 0 100px rgba(255, 255, 255, 0.1) inset",
-                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9)",
+                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
                     caretColor: "rgba(255, 255, 255, 0.9)",
+                    transition: "background-color 5000s ease-in-out 0s",
+                  },
+                  "&:-webkit-autofill:hover": {
+                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+                  },
+                  "&:-webkit-autofill:focus": {
+                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+                  },
+                  "&:-webkit-autofill:active": {
+                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
                   },
                 },
               }}
