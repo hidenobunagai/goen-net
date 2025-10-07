@@ -153,6 +153,19 @@ const theme = createTheme({
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "rgba(0, 0, 0, 0.87)",
+            borderWidth: 1,
+          },
+        },
+        notchedOutline: {
+          borderWidth: 1,
+        },
+      },
+    },
     MuiTableHead: {
       styleOverrides: {
         root: {
