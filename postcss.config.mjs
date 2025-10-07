@@ -1,8 +1,1 @@
-const config = {
-  plugins: {
-    "@tailwindcss/postcss": {},
-    autoprefixer: {},
-  },
-};
-
-export default config;
+// PostCSS configuration removed because Tailwind CSS is no longer used in this project.

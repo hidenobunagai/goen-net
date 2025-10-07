@@ -1,39 +1,34 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
   color-scheme: light;
   --background: #f8f9fa;
   --foreground: #1a202c;
   --accent: #e60012;
   --primary: #003366;
-
-  /* Standard shadcn/ui theme variables */
-  --background: 210 20% 98%; /* #F8F9FA */
-  --foreground: 213 30% 15%; /* #1a202c */
-  --primary: 210 100% 20%; /* #003366 */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 357 100% 45%; /* #E60012 */
-  --secondary-foreground: 0 0% 100%;
-  --muted: 210 15% 94%;
-  --muted-foreground: 213 15% 45%;
-  --accent: 357 100% 45%; /* #E60012 */
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 214 15% 91%;
-  --input: 214 15% 91%;
-  --ring: 210 100% 20%; /* #003366 */
-  --card: 0 0% 100%;
-  --card-foreground: 213 30% 15%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 213 30% 15%;
+  --primary-foreground: #ffffff;
+  --secondary: #e60012;
+  --secondary-foreground: #ffffff;
+  --muted: #e9ecef;
+  --muted-foreground: #4a5568;
+  --destructive: #dc2626;
+  --destructive-foreground: #f8fafc;
+  --border: #d1d5db;
+  --input: #d1d5db;
+  --ring: #003366;
+  --card: #ffffff;
+  --card-foreground: #1a202c;
+  --popover: #ffffff;
+  --popover-foreground: #1a202c;
   --radius: 0.75rem;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
-  background: #FFFFFF;
+  background: #ffffff;
   color: var(--foreground);
   margin: 0;
   padding: 0;
@@ -66,23 +61,15 @@ a:hover {
   color: var(--primary);
 }
 
-/* スムーズスクロール */
-html {
-  scroll-behavior: smooth;
-}
-
-/* フォーカス時のアウトライン */
 *:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
-/* パフォーマンス最適化 */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* アニメーション用ユーティリティ */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -114,7 +101,6 @@ html {
   }
 }
 
-/* プリファーモーション設定の尊重 */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

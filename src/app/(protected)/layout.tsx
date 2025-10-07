@@ -1,4 +1,5 @@
 import { requireUserSession } from "@/lib/session";
+import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
 
 export default async function ProtectedLayout({
@@ -9,8 +10,16 @@ export default async function ProtectedLayout({
   await requireUserSession();
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-10 lg:px-6">
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: "72rem",
+        mx: "auto",
+        px: { xs: 2, lg: 3 },
+        py: 5,
+      }}
+    >
       {children}
-    </div>
+    </Box>
   );
 }
