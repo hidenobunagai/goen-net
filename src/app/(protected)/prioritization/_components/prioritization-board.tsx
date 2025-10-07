@@ -730,7 +730,7 @@ export function PrioritizationBoard() {
           variant="outlined"
           sx={{
             p: 2,
-            bgcolor: "#ffffff",
+            bgcolor: "rgba(255, 255, 255, 0.05)",
             borderColor: "rgba(255, 255, 255, 0.2)",
           }}
         >
@@ -754,17 +754,23 @@ export function PrioritizationBoard() {
                 flexGrow: 1,
                 maxWidth: 320,
                 "& .MuiInputBase-root": {
-                  color: "#1a1a1a",
-                  backgroundColor: "#ffffff",
+                  color: "#ffffff",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
                 },
                 "& .MuiInputLabel-root": {
-                  color: "#666666",
+                  color: "rgba(255, 255, 255, 0.7)",
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#90caf9",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#d1d5db",
+                  borderColor: "rgba(255, 255, 255, 0.3)",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#9ca3af",
+                  borderColor: "rgba(255, 255, 255, 0.5)",
+                },
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#90caf9",
                 },
               }}
             />
