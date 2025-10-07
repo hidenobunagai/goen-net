@@ -397,6 +397,13 @@ export function ObserverWorksheet() {
                 value={form.good ?? ""}
                 onChange={handleChange("good")}
                 placeholder="Notes of what was good"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
 
@@ -417,6 +424,13 @@ export function ObserverWorksheet() {
                 value={form.improve ?? ""}
                 onChange={handleChange("improve")}
                 placeholder="Notes of what could be improved"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
           </Stack>
@@ -467,6 +481,13 @@ export function ObserverWorksheet() {
                     value={form[key] ?? ""}
                     onChange={handleChange(key)}
                     placeholder="Notes"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderWidth: "1px",
+                        },
+                      },
+                    }}
                   />
                 </Stack>
               </Paper>

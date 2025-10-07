@@ -671,6 +671,13 @@ export function CoachWorksheet() {
                   value={form.title ?? ""}
                   onChange={handleChange("title")}
                   placeholder="Title / substance of the issue"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderWidth: "1px",
+                      },
+                    },
+                  }}
                 />
               </Box>
 
@@ -713,6 +720,13 @@ export function CoachWorksheet() {
                   value={form.feelings ?? ""}
                   onChange={handleChange("feelings")}
                   placeholder="Feelings and the strongest one"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderWidth: "1px",
+                      },
+                    },
+                  }}
                 />
               </Box>
 
@@ -736,6 +750,13 @@ export function CoachWorksheet() {
                   value={form.want ?? ""}
                   onChange={handleChange("want")}
                   placeholder="What the presenter wants from peers"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderWidth: "1px",
+                      },
+                    },
+                  }}
                 />
               </Box>
 
@@ -899,6 +920,13 @@ export function CoachWorksheet() {
                   ? `Use at least ${MIN_PASSPHRASE_LENGTH} characters.`
                   : "Secure local storage requires a browser with Web Crypto support."
               }
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderWidth: "1px",
+                  },
+                },
+              }}
             />
 
             <Stack

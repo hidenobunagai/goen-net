@@ -421,6 +421,13 @@ export function PresenterWorksheet() {
                 value={form.context ?? ""}
                 onChange={handleChange("context")}
                 placeholder="Describe the context"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
 
@@ -439,6 +446,13 @@ export function PresenterWorksheet() {
                 value={form.situation ?? ""}
                 onChange={handleChange("situation")}
                 placeholder="Describe the present situation and feelings"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
 
@@ -457,6 +471,13 @@ export function PresenterWorksheet() {
                 value={form.future ?? ""}
                 onChange={handleChange("future")}
                 placeholder="Prospects and feelings"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
 
@@ -475,6 +496,13 @@ export function PresenterWorksheet() {
                 value={form.options ?? ""}
                 onChange={handleChange("options")}
                 placeholder="Options and intended action"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
           </Stack>
@@ -533,6 +561,13 @@ export function PresenterWorksheet() {
                 value={form.issue ?? ""}
                 onChange={handleChange("issue")}
                 placeholder="Define the issue"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
 
@@ -551,6 +586,13 @@ export function PresenterWorksheet() {
                 value={form.ask ?? ""}
                 onChange={handleChange("ask")}
                 placeholder="Your requests to peers"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "1px",
+                    },
+                  },
+                }}
               />
             </Box>
           </Stack>
