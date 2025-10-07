@@ -13,13 +13,21 @@ export default async function ProtectedLayout({
     <Box
       sx={{
         width: "100%",
-        maxWidth: "72rem",
-        mx: "auto",
-        px: { xs: 2, lg: 3 },
-        py: 5,
+        minHeight: "100vh",
+        bgcolor: "background.default",
       }}
     >
-      {children}
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: "72rem",
+          mx: "auto",
+          px: { xs: 2, lg: 3 },
+          py: 5,
+        }}
+      >
+        {children}
+      </Box>
     </Box>
   );
 }
