@@ -750,6 +750,10 @@ export function PrioritizationBoard() {
                   handleAddColumn();
                 }
               }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              placeholder="Enter category name"
               sx={{
                 flexGrow: 1,
                 maxWidth: 320,
@@ -759,6 +763,8 @@ export function PrioritizationBoard() {
                 },
                 "& .MuiInputLabel-root": {
                   color: "rgba(255, 255, 255, 0.7)",
+                  transform: "translate(14px, -9px) scale(0.75)",
+                  backgroundColor: "transparent",
                 },
                 "& .MuiInputLabel-root.Mui-focused": {
                   color: "#90caf9",
@@ -771,6 +777,10 @@ export function PrioritizationBoard() {
                 },
                 "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#90caf9",
+                },
+                "& .MuiInputBase-input::placeholder": {
+                  color: "rgba(255, 255, 255, 0.5)",
+                  opacity: 1,
                 },
               }}
             />
