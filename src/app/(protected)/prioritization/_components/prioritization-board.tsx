@@ -726,7 +726,14 @@ export function PrioritizationBoard() {
 
         {error ? <Alert severity="warning">{error}</Alert> : null}
 
-        <Paper variant="outlined" sx={{ p: 2, bgcolor: "background.paper" }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2,
+            bgcolor: "#ffffff",
+            borderColor: "rgba(255, 255, 255, 0.2)",
+          }}
+        >
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={2}
@@ -773,7 +780,7 @@ export function PrioritizationBoard() {
           </Stack>
         </Paper>
 
-        <Divider />
+        <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.2)" }} />
 
         <DndContext
           sensors={sensors}
