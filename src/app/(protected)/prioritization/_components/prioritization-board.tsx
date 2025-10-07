@@ -316,13 +316,8 @@ export function PrioritizationBoard() {
   }, [memberOptions, selectedMember]);
 
   const visibleUnassignedUpdates = useMemo(() => {
-    const now = new Date();
-    const threeMonthsAgo = new Date(now);
-    threeMonthsAgo.setMonth(now.getMonth() - 3);
-    const threeMonthsAhead = new Date(now);
-    threeMonthsAhead.setMonth(now.getMonth() + 3);
-
     return updates.filter((item) => {
+      // 既に他のカラムに割り当てられているアイテムは除外
       if (board) {
         for (const columnId of board.columnOrder) {
           if (
@@ -333,6 +328,8 @@ export function PrioritizationBoard() {
           }
         }
       }
+
+      // メンバーフィルター
       if (selectedMember !== "all") {
         const key =
           item.uid?.trim() || `by:${item.by.toLowerCase()}` || "unknown";
@@ -340,20 +337,25 @@ export function PrioritizationBoard() {
           return false;
         }
       }
+
+      // 時間フィルター (when フィールドを使用)
       if (selectedTimeframe === "past3") {
-        if (item.createdAt > now || item.createdAt < threeMonthsAgo) {
+        if (item.when !== -1) {
           return false;
         }
       } else if (selectedTimeframe === "next3") {
-        if (item.createdAt <= now || item.createdAt > threeMonthsAhead) {
+        if (item.when !== 1) {
           return false;
         }
       }
+
+      // カテゴリフィルター
       if (selectedCategory !== "all") {
         if (getCategoryPreset(item.category).id !== selectedCategory) {
           return false;
         }
       }
+
       return true;
     });
   }, [board, updates, selectedMember, selectedTimeframe, selectedCategory]);
