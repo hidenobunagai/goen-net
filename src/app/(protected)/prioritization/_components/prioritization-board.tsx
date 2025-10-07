@@ -651,6 +651,20 @@ export function PrioritizationBoard() {
                 value={selectedTimeframe}
                 label="Filter by time"
                 onChange={handleTimeframeChange}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      "& .MuiMenuItem-root": {
+                        "&:focus": {
+                          outline: "none",
+                        },
+                        "&:focus-visible": {
+                          outline: "none",
+                        },
+                      },
+                    },
+                  },
+                }}
                 sx={{
                   color: "rgba(255, 255, 255, 0.9)",
                   ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
@@ -673,6 +687,20 @@ export function PrioritizationBoard() {
                 value={selectedCategory}
                 label="Filter by category"
                 onChange={handleCategoryChange}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      "& .MuiMenuItem-root": {
+                        "&:focus": {
+                          outline: "none",
+                        },
+                        "&:focus-visible": {
+                          outline: "none",
+                        },
+                      },
+                    },
+                  },
+                }}
                 sx={{
                   color: "rgba(255, 255, 255, 0.9)",
                   ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
@@ -692,6 +720,20 @@ export function PrioritizationBoard() {
               <Select
                 labelId="member-filter-label"
                 value={selectedMember}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      "& .MuiMenuItem-root": {
+                        "&:focus": {
+                          outline: "none",
+                        },
+                        "&:focus-visible": {
+                          outline: "none",
+                        },
+                      },
+                    },
+                  },
+                }}
                 sx={{
                   color: "rgba(255, 255, 255, 0.9)",
                   ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
