@@ -673,8 +673,14 @@ export function CoachWorksheet() {
                   placeholder="Title / substance of the issue"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      "& fieldset": {
                         borderWidth: "1px",
+                      },
+                      "&:hover fieldset": {
+                        borderWidth: "1px",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderWidth: "1px !important",
                       },
                     },
                   }}
@@ -722,8 +728,14 @@ export function CoachWorksheet() {
                   placeholder="Feelings and the strongest one"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      "& fieldset": {
                         borderWidth: "1px",
+                      },
+                      "&:hover fieldset": {
+                        borderWidth: "1px",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderWidth: "1px !important",
                       },
                     },
                   }}
@@ -752,8 +764,14 @@ export function CoachWorksheet() {
                   placeholder="What the presenter wants from peers"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      "& fieldset": {
                         borderWidth: "1px",
+                      },
+                      "&:hover fieldset": {
+                        borderWidth: "1px",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderWidth: "1px !important",
                       },
                     },
                   }}
@@ -922,8 +940,14 @@ export function CoachWorksheet() {
               }
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  "& fieldset": {
                     borderWidth: "1px",
+                  },
+                  "&:hover fieldset": {
+                    borderWidth: "1px",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderWidth: "1px !important",
                   },
                 },
               }}

@@ -399,8 +399,14 @@ export function ObserverWorksheet() {
                 placeholder="Notes of what was good"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
@@ -426,8 +432,14 @@ export function ObserverWorksheet() {
                 placeholder="Notes of what could be improved"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
@@ -483,8 +495,14 @@ export function ObserverWorksheet() {
                     placeholder="Notes"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        "& fieldset": {
                           borderWidth: "1px",
+                        },
+                        "&:hover fieldset": {
+                          borderWidth: "1px",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderWidth: "1px !important",
                         },
                       },
                     }}

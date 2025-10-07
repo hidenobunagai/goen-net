@@ -423,8 +423,14 @@ export function PresenterWorksheet() {
                 placeholder="Describe the context"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
@@ -448,8 +454,14 @@ export function PresenterWorksheet() {
                 placeholder="Describe the present situation and feelings"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
@@ -473,8 +485,14 @@ export function PresenterWorksheet() {
                 placeholder="Prospects and feelings"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
@@ -498,8 +516,14 @@ export function PresenterWorksheet() {
                 placeholder="Options and intended action"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
@@ -563,8 +587,14 @@ export function PresenterWorksheet() {
                 placeholder="Define the issue"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
@@ -588,8 +618,14 @@ export function PresenterWorksheet() {
                 placeholder="Your requests to peers"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    "& fieldset": {
                       borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderWidth: "1px !important",
                     },
                   },
                 }}
