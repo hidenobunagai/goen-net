@@ -742,7 +742,7 @@ export function CoachWorksheet() {
                 />
               </Box>
 
-              <Box>
+              <Box sx={{ px: 0.5 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   What does the presenter want from the peers in their
                   responses?

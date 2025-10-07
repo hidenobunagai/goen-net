@@ -380,7 +380,7 @@ export function ObserverWorksheet() {
           }}
         >
           <Stack spacing={3}>
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 1. What was good
               </Typography>
@@ -413,7 +413,7 @@ export function ObserverWorksheet() {
               />
             </Box>
 
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 2. What could be improved
               </Typography>

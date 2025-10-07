@@ -406,7 +406,7 @@ export function PresenterWorksheet() {
               1. Prepare the presentation details
             </Typography>
 
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 (a) Context
               </Typography>
@@ -437,7 +437,7 @@ export function PresenterWorksheet() {
               />
             </Box>
 
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 (b) Present situation and what you feel
               </Typography>
@@ -468,7 +468,7 @@ export function PresenterWorksheet() {
               />
             </Box>
 
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 (c) Prospects for the future
               </Typography>
@@ -499,7 +499,7 @@ export function PresenterWorksheet() {
               />
             </Box>
 
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 (d) Your options and what you want to do
               </Typography>
@@ -570,7 +570,7 @@ export function PresenterWorksheet() {
               </FormGroup>
             </Box>
 
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 Define the issue
               </Typography>
@@ -601,7 +601,7 @@ export function PresenterWorksheet() {
               />
             </Box>
 
-            <Box>
+            <Box sx={{ px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 What would you like your peers to share in their responses?
               </Typography>

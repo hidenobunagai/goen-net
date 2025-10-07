@@ -1,1 +1,6 @@
-// PostCSS configuration removed because Tailwind CSS is no longer used in this project.
+/** @type {import('postcss-load-config').Config} */
+const config = {
+  plugins: {},
+};
+
+export default config;
