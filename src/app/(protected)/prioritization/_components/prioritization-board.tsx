@@ -44,7 +44,7 @@ import {
     Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const STORAGE_KEY = "goen-prioritization-board-v1";
 const BOARD_VERSION = 2;
