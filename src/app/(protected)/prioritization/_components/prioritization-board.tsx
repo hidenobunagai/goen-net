@@ -742,6 +742,7 @@ export function PrioritizationBoard() {
             <TextField
               size="small"
               label="New category"
+              InputLabelProps={{ shrink: true }}
               value={newColumnName}
               onChange={(event) => setNewColumnName(event.target.value)}
               onKeyDown={(event) => {
