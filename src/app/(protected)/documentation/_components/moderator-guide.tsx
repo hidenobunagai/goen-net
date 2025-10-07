@@ -2,14 +2,14 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-  Box,
-  Chip,
-  Container,
-  Paper,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
+    Box,
+    Chip,
+    Container,
+    Paper,
+    Stack,
+    ToggleButton,
+    ToggleButtonGroup,
+    Typography,
 } from "@mui/material";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
@@ -472,13 +472,7 @@ export function ModeratorGuide() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
-        position: "relative",
-      }}
-    >
+    <Box>
     <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
       <Stack spacing={4}>
         <Stack

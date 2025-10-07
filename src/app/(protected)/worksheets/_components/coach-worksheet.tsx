@@ -2,20 +2,20 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Container,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
+    Alert,
+    Avatar,
+    Box,
+    Button,
+    Checkbox,
+    Chip,
+    Container,
+    Divider,
+    FormControlLabel,
+    FormGroup,
+    Paper,
+    Stack,
+    TextField,
+    Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -475,13 +475,7 @@ export function CoachWorksheet() {
   );
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
-        position: "relative",
-      }}
-    >
+    <Box>
       <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 }, pb: 8 }}>
         <Stack spacing={4}>
         {initialError && (

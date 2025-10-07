@@ -574,13 +574,7 @@ export function PrioritizationBoard() {
   const activeItem = activeId ? allItemsById.get(activeId) ?? null : null;
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
-        position: "relative",
-      }}
-    >
+    <Box>
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
         <Stack spacing={5}>
         <Stack
