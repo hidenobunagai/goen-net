@@ -740,6 +740,7 @@ export function PrioritizationBoard() {
             alignItems={{ xs: "stretch", sm: "center" }}
           >
             <TextField
+              size="small"
               label="New category"
               value={newColumnName}
               onChange={(event) => setNewColumnName(event.target.value)}
@@ -752,7 +753,9 @@ export function PrioritizationBoard() {
               sx={{
                 flexGrow: 1,
                 maxWidth: 320,
-                color: "rgba(255, 255, 255, 0.9)",
+                "& .MuiOutlinedInput-root": {
+                  color: "rgba(255, 255, 255, 0.9)",
+                },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "rgba(255, 255, 255, 0.3)",
                 },
@@ -774,11 +777,22 @@ export function PrioritizationBoard() {
               }}
             />
             <Button
-              variant="contained"
-              color="secondary"
+              variant="outlined"
               startIcon={<AddIcon />}
               onClick={handleAddColumn}
               disabled={!newColumnName.trim()}
+              sx={{
+                borderColor: "rgba(255, 255, 255, 0.3)",
+                color: "rgba(255, 255, 255, 0.9)",
+                "&:hover": {
+                  borderColor: "rgba(255, 255, 255, 0.5)",
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                },
+                "&.Mui-disabled": {
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                  color: "rgba(255, 255, 255, 0.3)",
+                },
+              }}
             >
               Add Category
             </Button>
