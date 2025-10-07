@@ -740,7 +740,6 @@ export function PrioritizationBoard() {
             alignItems={{ xs: "stretch", sm: "center" }}
           >
             <TextField
-              size="small"
               label="New category"
               value={newColumnName}
               onChange={(event) => setNewColumnName(event.target.value)}
