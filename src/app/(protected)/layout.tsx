@@ -14,7 +14,7 @@ export default async function ProtectedLayout({
       sx={{
         width: "100%",
         minHeight: "100vh",
-        bgcolor: "background.default",
+        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
       }}
     >
       <Box
