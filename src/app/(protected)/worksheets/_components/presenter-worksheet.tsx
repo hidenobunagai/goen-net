@@ -425,19 +425,16 @@ export function PresenterWorksheet() {
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
                     },
                     "&:hover fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.87)",
                     },
                     "&.Mui-focused fieldset": {
                       borderWidth: "1px !important",
+                      borderColor: "rgba(0, 0, 0, 0.87) !important",
                     },
-                    "&.Mui-focused": {
-                      outline: "none",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    outline: "none",
                   },
                 }}
               />
@@ -462,19 +459,16 @@ export function PresenterWorksheet() {
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
                     },
                     "&:hover fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.87)",
                     },
                     "&.Mui-focused fieldset": {
                       borderWidth: "1px !important",
+                      borderColor: "rgba(0, 0, 0, 0.87) !important",
                     },
-                    "&.Mui-focused": {
-                      outline: "none",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    outline: "none",
                   },
                 }}
               />
@@ -499,19 +493,16 @@ export function PresenterWorksheet() {
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
                     },
                     "&:hover fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.87)",
                     },
                     "&.Mui-focused fieldset": {
                       borderWidth: "1px !important",
+                      borderColor: "rgba(0, 0, 0, 0.87) !important",
                     },
-                    "&.Mui-focused": {
-                      outline: "none",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    outline: "none",
                   },
                 }}
               />
@@ -536,19 +527,16 @@ export function PresenterWorksheet() {
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
                     },
                     "&:hover fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.87)",
                     },
                     "&.Mui-focused fieldset": {
                       borderWidth: "1px !important",
+                      borderColor: "rgba(0, 0, 0, 0.87) !important",
                     },
-                    "&.Mui-focused": {
-                      outline: "none",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    outline: "none",
                   },
                 }}
               />
@@ -613,19 +601,16 @@ export function PresenterWorksheet() {
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
                     },
                     "&:hover fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.87)",
                     },
                     "&.Mui-focused fieldset": {
                       borderWidth: "1px !important",
+                      borderColor: "rgba(0, 0, 0, 0.87) !important",
                     },
-                    "&.Mui-focused": {
-                      outline: "none",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    outline: "none",
                   },
                 }}
               />
@@ -650,19 +635,16 @@ export function PresenterWorksheet() {
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
                     },
                     "&:hover fieldset": {
                       borderWidth: "1px",
+                      borderColor: "rgba(0, 0, 0, 0.87)",
                     },
                     "&.Mui-focused fieldset": {
                       borderWidth: "1px !important",
+                      borderColor: "rgba(0, 0, 0, 0.87) !important",
                     },
-                    "&.Mui-focused": {
-                      outline: "none",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    outline: "none",
                   },
                 }}
               />
