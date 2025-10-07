@@ -682,6 +682,12 @@ export function CoachWorksheet() {
                       "&.Mui-focused fieldset": {
                         borderWidth: "1px !important",
                       },
+                      "&.Mui-focused": {
+                        outline: "none",
+                      },
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      outline: "none",
                     },
                   }}
                 />
@@ -737,6 +743,12 @@ export function CoachWorksheet() {
                       "&.Mui-focused fieldset": {
                         borderWidth: "1px !important",
                       },
+                      "&.Mui-focused": {
+                        outline: "none",
+                      },
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      outline: "none",
                     },
                   }}
                 />
@@ -773,6 +785,12 @@ export function CoachWorksheet() {
                       "&.Mui-focused fieldset": {
                         borderWidth: "1px !important",
                       },
+                      "&.Mui-focused": {
+                        outline: "none",
+                      },
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      outline: "none",
                     },
                   }}
                 />
@@ -949,6 +967,12 @@ export function CoachWorksheet() {
                   "&.Mui-focused fieldset": {
                     borderWidth: "1px !important",
                   },
+                  "&.Mui-focused": {
+                    outline: "none",
+                  },
+                },
+                "& .MuiOutlinedInput-input": {
+                  outline: "none",
                 },
               }}
             />
