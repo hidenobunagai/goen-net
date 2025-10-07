@@ -67,6 +67,14 @@ a:hover {
   outline-offset: 2px;
 }
 
+.MuiInputBase-root input:focus-visible,
+.MuiInputBase-root textarea:focus-visible,
+.MuiOutlinedInput-root input:focus-visible,
+.MuiOutlinedInput-root textarea:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
