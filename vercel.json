@@ -5,6 +5,12 @@
       "schedule": "0 9 * * *"
     }
   ],
+  "github": {
+    "enabled": true,
+    "autoAlias": false,
+    "silent": true,
+    "autoJobCancelation": true
+  },
   "headers": [
     {
       "source": "/(.*)",

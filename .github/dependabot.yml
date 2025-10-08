@@ -7,16 +7,13 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Tokyo"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
     groups:
-      development-dependencies:
-        dependency-type: "development"
+      all-dependencies:
+        patterns:
+          - "*"
         update-types:
           - "minor"
-          - "patch"
-      production-dependencies:
-        dependency-type: "production"
-        update-types:
           - "patch"
     labels:
       - "dependencies"
