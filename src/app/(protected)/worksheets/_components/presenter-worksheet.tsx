@@ -2,20 +2,20 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-    Alert,
-    Avatar,
-    Box,
-    Button,
-    Checkbox,
-    Chip,
-    Container,
-    Divider,
-    FormControlLabel,
-    FormGroup,
-    Paper,
-    Stack,
-    TextField,
-    Typography,
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Container,
+  Divider,
+  FormControlLabel,
+  FormGroup,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -674,6 +674,7 @@ export function PresenterWorksheet() {
             >
               <Button
                 variant="contained"
+                size="small"
                 onClick={handleSave}
                 disabled={loading || saving || clearing}
               >
@@ -682,6 +683,7 @@ export function PresenterWorksheet() {
               <Button
                 variant="outlined"
                 color="warning"
+                size="small"
                 onClick={handleClear}
                 disabled={clearing || saving}
               >

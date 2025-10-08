@@ -2,17 +2,17 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-    Alert,
-    Avatar,
-    Box,
-    Button,
-    Chip,
-    Container,
-    Divider,
-    Paper,
-    Stack,
-    TextField,
-    Typography,
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Divider,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -554,6 +554,7 @@ export function ObserverWorksheet() {
             >
               <Button
                 variant="contained"
+                size="small"
                 onClick={handleSave}
                 disabled={loading || saving || clearing}
               >
@@ -562,6 +563,7 @@ export function ObserverWorksheet() {
               <Button
                 variant="outlined"
                 color="warning"
+                size="small"
                 onClick={handleClear}
                 disabled={clearing || saving}
               >

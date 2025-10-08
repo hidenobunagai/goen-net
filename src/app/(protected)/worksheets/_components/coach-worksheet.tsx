@@ -726,6 +726,7 @@ export function CoachWorksheet() {
             >
               <Button
                 variant="contained"
+                size="small"
                 onClick={() => {
                   void handleSave();
                 }}
@@ -736,6 +737,7 @@ export function CoachWorksheet() {
               <Button
                 variant="outlined"
                 color="warning"
+                size="small"
                 onClick={() => {
                   void handleClear();
                 }}
