@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const SIGNIN_PATH = "/signin";
 const UPDATES_PATH = "/updates";
@@ -9,7 +9,10 @@ const TEST_PASSWORD = process.env.PLAYWRIGHT_TEST_PASSWORD ?? "";
 const canAuthenticate = Boolean(TEST_EMAIL && TEST_PASSWORD);
 
 test.describe("Updates dashboard", () => {
-  test.skip(!canAuthenticate, "PLAYWRIGHT_TEST_EMAIL / PLAYWRIGHT_TEST_PASSWORD が未設定のためスキップします。");
+  test.skip(
+    !canAuthenticate,
+    "PLAYWRIGHT_TEST_EMAIL / PLAYWRIGHT_TEST_PASSWORD が未設定のためスキップします。"
+  );
 
   test("allows creating and reviewing an update", async ({ page }) => {
     await page.goto(SIGNIN_PATH);

@@ -15,9 +15,7 @@ export interface SendEmailResponse {
   };
 }
 
-export async function sendEmail(
-  params: SendEmailParams
-): Promise<SendEmailResponse> {
+export async function sendEmail(params: SendEmailParams): Promise<SendEmailResponse> {
   const config = getConfig();
   const apiKey = config.RESEND_API_KEY;
   if (!apiKey) {
@@ -36,9 +34,7 @@ export async function sendEmail(
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      data.error?.message || `Failed to send email: ${response.statusText}`
-    );
+    throw new Error(data.error?.message || `Failed to send email: ${response.statusText}`);
   }
 
   return data;

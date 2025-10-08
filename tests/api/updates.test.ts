@@ -37,9 +37,7 @@ process.env.GOOGLE_CLIENT_SECRET ??= "test-google-client-secret";
 process.env.NEXTAUTH_SECRET ??= "test-nextauth-secret";
 
 const { getServerSession } = await import("next-auth");
-const { fetchUpdates, getUpdateById, insertUpdate } = await import(
-  "@/lib/updates"
-);
+const { fetchUpdates, getUpdateById, insertUpdate } = await import("@/lib/updates");
 const { requireJson, JsonBodyError } = await import("@/lib/utils");
 const { checkRateLimit } = await import("@/lib/rate-limit");
 const { GET, POST } = await import("@/app/api/updates/route");
@@ -104,9 +102,7 @@ describe("/api/updates route", () => {
     vi.mocked(getServerSession).mockResolvedValueOnce({
       user: { email: "user@example.com" },
     } as never);
-    vi.mocked(requireJson).mockRejectedValueOnce(
-      new JsonBodyError("invalid", 400)
-    );
+    vi.mocked(requireJson).mockRejectedValueOnce(new JsonBodyError("invalid", 400));
     const request = new Request("http://localhost/api/updates", {
       method: "POST",
     });

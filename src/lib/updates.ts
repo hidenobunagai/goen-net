@@ -1,6 +1,7 @@
-import { logger } from "@/lib/logger";
-import { TursoUnavailableError, execute, isTursoConfigured } from "@/lib/turso";
 import type { InArgs } from "@libsql/client";
+
+import { logger } from "@/lib/logger";
+import { execute, isTursoConfigured, TursoUnavailableError } from "@/lib/turso";
 
 export type UpdateCategory = 0 | 1 | 2;
 export type UpdateWhen = -1 | 1;
@@ -52,9 +53,7 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
   }
 
   const result = await execute("PRAGMA table_info('users')");
-  const rows = (result?.rows ?? []) as Array<
-    Record<string, unknown> | unknown[]
-  >;
+  const rows = (result?.rows ?? []) as Array<Record<string, unknown> | unknown[]>;
   const columnMap = new Map<string, string>();
 
   for (const row of rows) {
@@ -68,8 +67,7 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
     throw new Error("[updates] users table is missing or has no columns");
   }
 
-  const idColumn =
-    columnMap.get("uid") ?? columnMap.get("id") ?? columnMap.get("user_id");
+  const idColumn = columnMap.get("uid") ?? columnMap.get("id") ?? columnMap.get("user_id");
 
   if (!idColumn) {
     throw new Error("[updates] users table is missing an id or uid column");
@@ -77,11 +75,7 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
 
   const schema: UsersTableSchema = {
     idColumn,
-    emailColumn: pickColumn(columnMap, [
-      "email",
-      "email_address",
-      "user_email",
-    ]),
+    emailColumn: pickColumn(columnMap, ["email", "email_address", "user_email"]),
     nameColumn: pickColumn(columnMap, ["name", "display_name", "full_name"]),
     createdAtColumn: pickColumn(columnMap, [
       "created_at",
@@ -135,10 +129,7 @@ function extractColumnName(row: unknown): string | null {
   return null;
 }
 
-function pickColumn(
-  columnMap: Map<string, string>,
-  candidates: string[]
-): string | undefined {
+function pickColumn(columnMap: Map<string, string>, candidates: string[]): string | undefined {
   for (const candidate of candidates) {
     const column = columnMap.get(candidate.toLowerCase());
     if (column) {
@@ -175,9 +166,7 @@ async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
   }
 
   const result = await execute("PRAGMA table_info('updates')");
-  const rows = (result?.rows ?? []) as Array<
-    Record<string, unknown> | unknown[]
-  >;
+  const rows = (result?.rows ?? []) as Array<Record<string, unknown> | unknown[]>;
   const columnMap = new Map<string, string>();
 
   for (const row of rows) {
@@ -191,8 +180,7 @@ async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
     throw new Error("[updates] updates table is missing or has no columns");
   }
 
-  const idColumn =
-    pickColumn(columnMap, ["id", "update_id"]) ?? columnMap.get("id");
+  const idColumn = pickColumn(columnMap, ["id", "update_id"]) ?? columnMap.get("id");
 
   if (!idColumn) {
     throw new Error("[updates] updates table is missing an id column");
@@ -207,43 +195,13 @@ async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
       "author_name",
       "authorname",
     ]),
-    categoryColumn: pickColumn(columnMap, [
-      "category",
-      "category_id",
-      "categoryid",
-    ]),
-    priorityColumn: pickColumn(columnMap, [
-      "priority",
-      "priority_level",
-      "prioritylevel",
-    ]),
-    urgentColumn: pickColumn(columnMap, [
-      "urgent",
-      "is_urgent",
-      "urgent_flag",
-      "urgentflag",
-    ]),
-    uidColumn: pickColumn(columnMap, [
-      "uid",
-      "user_id",
-      "userid",
-      "user_uid",
-      "useruid",
-    ]),
+    categoryColumn: pickColumn(columnMap, ["category", "category_id", "categoryid"]),
+    priorityColumn: pickColumn(columnMap, ["priority", "priority_level", "prioritylevel"]),
+    urgentColumn: pickColumn(columnMap, ["urgent", "is_urgent", "urgent_flag", "urgentflag"]),
+    uidColumn: pickColumn(columnMap, ["uid", "user_id", "userid", "user_uid", "useruid"]),
     titleColumn: pickColumn(columnMap, ["title", "headline", "subject"]),
-    bodyColumn: pickColumn(columnMap, [
-      "body",
-      "text",
-      "content",
-      "description",
-      "details",
-    ]),
-    whenValueColumn: pickColumn(columnMap, [
-      "when_value",
-      "when",
-      "timeframe",
-      "period",
-    ]),
+    bodyColumn: pickColumn(columnMap, ["body", "text", "content", "description", "details"]),
+    whenValueColumn: pickColumn(columnMap, ["when_value", "when", "timeframe", "period"]),
     createdAtColumn: pickColumn(columnMap, [
       "created_at",
       "created_on",
@@ -290,27 +248,16 @@ async function renamePriorityColumnToUrgent(columnName: string): Promise<boolean
   const quotedTarget = quoteIdentifier("urgent");
 
   try {
-    await execute(
-      `ALTER TABLE updates RENAME COLUMN ${quotedSource} TO ${quotedTarget}`
-    );
-    logger.info(
-      "[updates] Renamed column to urgent to match application schema.",
-      {
-        columnName,
-      }
-    );
+    await execute(`ALTER TABLE updates RENAME COLUMN ${quotedSource} TO ${quotedTarget}`);
+    logger.info("[updates] Renamed column to urgent to match application schema.", {
+      columnName,
+    });
     return true;
   } catch (error) {
-    logger.warn(
-      "[updates] Failed to rename column to urgent. Falling back to legacy mapping.",
-      {
-        columnName,
-        error:
-          error instanceof Error
-            ? { message: error.message, stack: error.stack }
-            : error,
-      }
-    );
+    logger.warn("[updates] Failed to rename column to urgent. Falling back to legacy mapping.", {
+      columnName,
+      error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+    });
     return false;
   }
 }
@@ -322,10 +269,7 @@ function toRecord(row: unknown): Record<string, unknown> | null {
   return row as Record<string, unknown>;
 }
 
-function getValue(
-  row: Record<string, unknown>,
-  columnName: string | undefined
-): unknown {
+function getValue(row: Record<string, unknown>, columnName: string | undefined): unknown {
   if (!columnName) {
     return undefined;
   }
@@ -384,9 +328,7 @@ function toUpdateRecord(
       ? (categoryValue as UpdateCategory)
       : 0;
   const urgentSource =
-    getNumberValue(row, schema.urgentColumn) ??
-    getNumberValue(row, schema.priorityColumn) ??
-    0;
+    getNumberValue(row, schema.urgentColumn) ?? getNumberValue(row, schema.priorityColumn) ?? 0;
   const whenRaw = getNumberValue(row, schema.whenValueColumn) ?? -1;
   const createdAtValue =
     getStringValue(row, schema.createdAtColumn) ??
@@ -418,10 +360,7 @@ async function ensureUserProfile(uid: string, name: string): Promise<void> {
     const insertColumns: string[] = [schema.idColumn];
     const insertValues: string[] = ["?1"];
 
-    const addArgument = (
-      columnName: string | undefined,
-      value: string | null
-    ) => {
+    const addArgument = (columnName: string | undefined, value: string | null) => {
       if (!columnName) {
         return;
       }
@@ -446,9 +385,7 @@ async function ensureUserProfile(uid: string, name: string): Promise<void> {
     const assignments: string[] = [];
 
     if (schema.emailColumn) {
-      assignments.push(
-        `${schema.emailColumn} = excluded.${schema.emailColumn}`
-      );
+      assignments.push(`${schema.emailColumn} = excluded.${schema.emailColumn}`);
     }
 
     if (schema.nameColumn) {
@@ -461,9 +398,7 @@ async function ensureUserProfile(uid: string, name: string): Promise<void> {
 
     const conflictClause =
       assignments.length > 0
-        ? `ON CONFLICT(${schema.idColumn}) DO UPDATE SET ${assignments.join(
-            ", "
-          )}`
+        ? `ON CONFLICT(${schema.idColumn}) DO UPDATE SET ${assignments.join(", ")}`
         : `ON CONFLICT(${schema.idColumn}) DO NOTHING`;
 
     const sql = `INSERT INTO users (${insertColumns.join(", ")})
@@ -473,10 +408,7 @@ ${conflictClause}`;
     await execute(sql, args as InArgs);
   } catch (error) {
     logger.error("[updates] Failed to ensure user profile", {
-      error:
-        error instanceof Error
-          ? { message: error.message, stack: error.stack }
-          : error,
+      error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
     throw error;
   }
@@ -490,8 +422,7 @@ export async function fetchUpdates(
 
   const schema = await getUpdatesTableSchema();
 
-  const orderBy =
-    schema.createdAtColumn ?? schema.updatedAtColumn ?? schema.idColumn;
+  const orderBy = schema.createdAtColumn ?? schema.updatedAtColumn ?? schema.idColumn;
 
   const result = await execute(
     `SELECT * FROM updates ORDER BY ${orderBy} DESC LIMIT ?1 OFFSET ?2`,
@@ -517,18 +448,14 @@ export async function fetchUpdates(
   return updates;
 }
 
-export async function getUpdateById(
-  id: string,
-  viewerId: string
-): Promise<UpdateRecord | null> {
+export async function getUpdateById(id: string, viewerId: string): Promise<UpdateRecord | null> {
   assertTursoAvailable();
 
   const schema = await getUpdatesTableSchema();
 
-  const result = await execute(
-    `SELECT * FROM updates WHERE ${schema.idColumn} = ?1 LIMIT 1`,
-    [id] as InArgs
-  );
+  const result = await execute(`SELECT * FROM updates WHERE ${schema.idColumn} = ?1 LIMIT 1`, [
+    id,
+  ] as InArgs);
 
   const row = result.rows?.[0];
   const record = toRecord(row);
@@ -560,10 +487,7 @@ export async function insertUpdate(params: {
   const values: string[] = [];
   const args: (string | number | null)[] = [];
 
-  const pushValue = (
-    columnName: string | undefined,
-    value: string | number | null
-  ) => {
+  const pushValue = (columnName: string | undefined, value: string | number | null) => {
     if (!columnName) {
       return;
     }

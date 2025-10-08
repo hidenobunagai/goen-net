@@ -33,13 +33,10 @@ export function PWAServiceWorker() {
         }
 
         // Register service worker (only if not already registered)
-        const registration = await navigator.serviceWorker.register(
-          SERVICE_WORKER_URL,
-          {
-            scope: "/",
-            updateViaCache: "none",
-          }
-        );
+        const registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL, {
+          scope: "/",
+          updateViaCache: "none",
+        });
 
         registeredRef.current = true;
 
@@ -48,10 +45,7 @@ export function PWAServiceWorker() {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener("statechange", () => {
-              if (
-                newWorker.state === "installed" &&
-                navigator.serviceWorker.controller
-              ) {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
                 // New version available, but don't auto-reload
                 // User can manually refresh if needed
                 // eslint-disable-next-line no-console

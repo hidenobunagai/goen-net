@@ -1,5 +1,6 @@
-import { defineConfig } from "vitest/config";
 import path from "node:path";
+
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
@@ -7,6 +8,26 @@ export default defineConfig({
     globals: true,
     alias: {
       "@": path.resolve(__dirname, "src"),
+    },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      exclude: [
+        "node_modules/**",
+        ".next/**",
+        "tests/**",
+        "**/*.config.*",
+        "**/types/**",
+        "src/components/emails/**",
+        "src/lib/shims/**",
+        "turbopack/**",
+      ],
+      thresholds: {
+        lines: 60,
+        functions: 60,
+        branches: 60,
+        statements: 60,
+      },
     },
   },
 });

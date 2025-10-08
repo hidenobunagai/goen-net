@@ -10,12 +10,12 @@ import IconButton from "@mui/material/IconButton";
 import ListSubheader from "@mui/material/ListSubheader";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import { alpha, useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { alpha, useTheme } from "@mui/material/styles";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { MouseEvent, ReactNode, useCallback, useState } from "react";
 
 const primaryLinks = [
@@ -29,9 +29,7 @@ const worksheetLinks = [
   { label: "Observer", path: "/worksheets/observer" },
 ];
 
-const documentationLinks = [
-  { label: "Moderator", path: "/documentation/moderator" },
-];
+const documentationLinks = [{ label: "Moderator", path: "/documentation/moderator" }];
 
 type NavLink = {
   label: string;
@@ -57,9 +55,7 @@ export function Navbar() {
   const theme = useTheme();
 
   const [anchorNav, setAnchorNav] = useState<HTMLElement | null>(null);
-  const [anchorWorksheet, setAnchorWorksheet] = useState<HTMLElement | null>(
-    null
-  );
+  const [anchorWorksheet, setAnchorWorksheet] = useState<HTMLElement | null>(null);
   const [anchorDocs, setAnchorDocs] = useState<HTMLElement | null>(null);
 
   const handleOpenNav = (event: MouseEvent<HTMLElement>) => {
@@ -99,9 +95,7 @@ export function Navbar() {
           px: 2.5,
           py: 0.75,
           letterSpacing: "0.02em",
-          bgcolor: active
-            ? alpha(theme.palette.common.white, 0.16)
-            : "transparent",
+          bgcolor: active ? alpha(theme.palette.common.white, 0.16) : "transparent",
           color: "inherit",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
@@ -119,71 +113,66 @@ export function Navbar() {
   };
 
   // モバイル用：すべてのリンクを含む
-  const mobileMenuContent: ReactNode = isAuthenticated ? (
-    [
-      ...primaryLinks.map(({ path, label }) => (
-        <MenuItem
-          key={`mobile-nav-${path}`}
-          selected={isActive(path)}
-          onClick={() => navigateAndClose(path, handleCloseNav)}
-        >
-          {label}
-        </MenuItem>
-      )),
-      <Divider key="mobile-divider-worksheets" sx={{ my: 0.5 }} />,
-      <ListSubheader key="mobile-subheader-worksheets" disableSticky>
-        Worksheets
-      </ListSubheader>,
-      ...worksheetLinks.map((link) => (
-        <MenuItem
-          key={`mobile-worksheet-${link.path}`}
-          selected={isActive(link.path)}
-          onClick={() => navigateAndClose(link.path, handleCloseNav)}
-        >
-          {link.label}
-        </MenuItem>
-      )),
-      <ListSubheader key="mobile-subheader-docs" disableSticky>
-        Documentation
-      </ListSubheader>,
-      ...documentationLinks.map((link) => (
-        <MenuItem
-          key={`mobile-docs-${link.path}`}
-          selected={isActive(link.path)}
-          onClick={() => navigateAndClose(link.path, handleCloseNav)}
-        >
-          {link.label}
-        </MenuItem>
-      )),
-      <Divider key="mobile-divider-signout" sx={{ my: 0.5 }} />,
-      <MenuItem key="mobile-sign-out" onClick={handleSignOut}>
-        Sign Out
-      </MenuItem>,
-    ]
-  ) : null;
+  const mobileMenuContent: ReactNode = isAuthenticated
+    ? [
+        ...primaryLinks.map(({ path, label }) => (
+          <MenuItem
+            key={`mobile-nav-${path}`}
+            selected={isActive(path)}
+            onClick={() => navigateAndClose(path, handleCloseNav)}
+          >
+            {label}
+          </MenuItem>
+        )),
+        <Divider key="mobile-divider-worksheets" sx={{ my: 0.5 }} />,
+        <ListSubheader key="mobile-subheader-worksheets" disableSticky>
+          Worksheets
+        </ListSubheader>,
+        ...worksheetLinks.map((link) => (
+          <MenuItem
+            key={`mobile-worksheet-${link.path}`}
+            selected={isActive(link.path)}
+            onClick={() => navigateAndClose(link.path, handleCloseNav)}
+          >
+            {link.label}
+          </MenuItem>
+        )),
+        <ListSubheader key="mobile-subheader-docs" disableSticky>
+          Documentation
+        </ListSubheader>,
+        ...documentationLinks.map((link) => (
+          <MenuItem
+            key={`mobile-docs-${link.path}`}
+            selected={isActive(link.path)}
+            onClick={() => navigateAndClose(link.path, handleCloseNav)}
+          >
+            {link.label}
+          </MenuItem>
+        )),
+        <Divider key="mobile-divider-signout" sx={{ my: 0.5 }} />,
+        <MenuItem key="mobile-sign-out" onClick={handleSignOut}>
+          Sign Out
+        </MenuItem>,
+      ]
+    : null;
 
   // デスクトップ用：Sign Outのみ
   const desktopMenuContent: ReactNode = isAuthenticated ? (
-    <MenuItem onClick={handleSignOut}>
-      Sign Out
-    </MenuItem>
+    <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
   ) : null;
   return (
-    <AppBar 
-      position="static" 
-      color="primary" 
-      square 
+    <AppBar
+      position="static"
+      color="primary"
+      square
       elevation={0}
-      sx={{ 
+      sx={{
         borderRadius: 0,
         borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
       }}
     >
       <Container maxWidth="lg">
-        <Toolbar
-          disableGutters
-          sx={{ gap: { xs: 1, md: 1.5 }, py: { xs: 1, md: 1.25 } }}
-        >
+        <Toolbar disableGutters sx={{ gap: { xs: 1, md: 1.5 }, py: { xs: 1, md: 1.25 } }}>
           <Box sx={{ flexGrow: 1 }}>
             <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
               <Typography
@@ -220,8 +209,7 @@ export function Navbar() {
                     py: 0.75,
                     letterSpacing: "0.02em",
                     color: "inherit",
-                    transition:
-                      "background-color 0.2s ease, transform 0.2s ease",
+                    transition: "background-color 0.2s ease, transform 0.2s ease",
                     bgcolor: anchorWorksheet
                       ? alpha(theme.palette.common.white, 0.16)
                       : "transparent",
@@ -238,15 +226,13 @@ export function Navbar() {
                   open={Boolean(anchorWorksheet)}
                   onClose={handleCloseWorksheet}
                   keepMounted
-                disableScrollLock={true}
+                  disableScrollLock={true}
                 >
                   {worksheetLinks.map((link) => (
                     <MenuItem
                       key={link.path}
                       selected={isActive(link.path)}
-                      onClick={() =>
-                        navigateAndClose(link.path, handleCloseWorksheet)
-                      }
+                      onClick={() => navigateAndClose(link.path, handleCloseWorksheet)}
                     >
                       {link.label}
                     </MenuItem>
@@ -262,11 +248,8 @@ export function Navbar() {
                     py: 0.75,
                     letterSpacing: "0.02em",
                     color: "inherit",
-                    transition:
-                      "background-color 0.2s ease, transform 0.2s ease",
-                    bgcolor: anchorDocs
-                      ? alpha(theme.palette.common.white, 0.16)
-                      : "transparent",
+                    transition: "background-color 0.2s ease, transform 0.2s ease",
+                    bgcolor: anchorDocs ? alpha(theme.palette.common.white, 0.16) : "transparent",
                     "&:hover": {
                       bgcolor: alpha(theme.palette.common.white, 0.22),
                       transform: "translateY(-1px)",
@@ -280,15 +263,13 @@ export function Navbar() {
                   open={Boolean(anchorDocs)}
                   onClose={handleCloseDocs}
                   keepMounted
-                disableScrollLock={true}
+                  disableScrollLock={true}
                 >
                   {documentationLinks.map((link) => (
                     <MenuItem
                       key={link.path}
                       selected={isActive(link.path)}
-                      onClick={() =>
-                        navigateAndClose(link.path, handleCloseDocs)
-                      }
+                      onClick={() => navigateAndClose(link.path, handleCloseDocs)}
                     >
                       {link.label}
                     </MenuItem>
@@ -316,12 +297,12 @@ export function Navbar() {
                 keepMounted
                 disableScrollLock={true}
                 anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
+                  vertical: "bottom",
+                  horizontal: "right",
                 }}
                 transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: "top",
+                  horizontal: "right",
                 }}
                 sx={{ display: { xs: "block", md: "none" } }}
               >
@@ -348,12 +329,12 @@ export function Navbar() {
                 keepMounted
                 disableScrollLock={true}
                 anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
+                  vertical: "bottom",
+                  horizontal: "right",
                 }}
                 transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: "top",
+                  horizontal: "right",
                 }}
                 sx={{ display: { xs: "none", md: "block" } }}
               >

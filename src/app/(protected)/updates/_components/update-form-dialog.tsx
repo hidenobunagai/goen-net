@@ -1,24 +1,23 @@
 "use client";
 
-import type { UpdateRecord } from "@/lib/updates";
 import AddIcon from "@mui/icons-material/Add";
 import {
-    Button,
-    Checkbox,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormControlLabel,
-    FormLabel,
-    Radio,
-    RadioGroup,
-    Select,
-    Stack,
-    TextField,
-    Typography,
-    useMediaQuery,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+  useMediaQuery,
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import InputLabel from "@mui/material/InputLabel";
@@ -27,6 +26,8 @@ import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
 import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
+
+import type { UpdateRecord } from "@/lib/updates";
 
 const CATEGORY_OPTIONS = [
   { value: 0, label: "Work" },
@@ -39,10 +40,7 @@ type UpdateFormDialogProps = {
   onCreated?: (update: UpdateRecord | null) => Promise<void> | void;
 };
 
-export function UpdateFormDialog({
-  defaultCategory = 0,
-  onCreated,
-}: UpdateFormDialogProps) {
+export function UpdateFormDialog({ defaultCategory = 0, onCreated }: UpdateFormDialogProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -117,9 +115,7 @@ export function UpdateFormDialog({
           ? (json as { update?: unknown }).update
           : undefined;
       const createdUpdate =
-        rawUpdate && typeof rawUpdate === "object"
-          ? (rawUpdate as UpdateRecord)
-          : null;
+        rawUpdate && typeof rawUpdate === "object" ? (rawUpdate as UpdateRecord) : null;
 
       await onCreated?.(createdUpdate);
       reset();
@@ -196,9 +192,7 @@ export function UpdateFormDialog({
                 </FormControl>
 
                 <FormControlLabel
-                  control={
-                    <Checkbox checked={urgent} onChange={handleUrgentChange} />
-                  }
+                  control={<Checkbox checked={urgent} onChange={handleUrgentChange} />}
                   label="Mark as urgent"
                   sx={{ mt: { xs: 0, sm: "10px" } }}
                 />
@@ -206,21 +200,9 @@ export function UpdateFormDialog({
 
               <FormControl>
                 <FormLabel>Timeframe</FormLabel>
-                <RadioGroup
-                  row={!isMobile}
-                  value={when}
-                  onChange={handleWhenChange}
-                >
-                  <FormControlLabel
-                    value={-1}
-                    control={<Radio />}
-                    label="Past 3 months"
-                  />
-                  <FormControlLabel
-                    value={1}
-                    control={<Radio />}
-                    label="Next 3 months"
-                  />
+                <RadioGroup row={!isMobile} value={when} onChange={handleWhenChange}>
+                  <FormControlLabel value={-1} control={<Radio />} label="Past 3 months" />
+                  <FormControlLabel value={1} control={<Radio />} label="Next 3 months" />
                 </RadioGroup>
               </FormControl>
 

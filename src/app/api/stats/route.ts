@@ -1,7 +1,8 @@
-import { getOptionalUserSession } from "@/lib/session";
-import { logger } from "@/lib/logger";
-import { fetchUpdates } from "@/lib/updates";
 import { NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
+import { getOptionalUserSession } from "@/lib/session";
+import { fetchUpdates } from "@/lib/updates";
 
 export interface StatsData {
   totalUpdates: number;
@@ -26,10 +27,7 @@ export async function GET() {
       };
 
       const response = NextResponse.json(stats);
-      response.headers.set(
-        "Cache-Control",
-        "no-cache, no-store, must-revalidate"
-      );
+      response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
       response.headers.set("Pragma", "no-cache");
       response.headers.set("Expires", "0");
       return response;
@@ -59,23 +57,14 @@ export async function GET() {
 
     logger.debug("Returning stats", { stats });
     const response = NextResponse.json(stats);
-    response.headers.set(
-      "Cache-Control",
-      "no-cache, no-store, must-revalidate"
-    );
+    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
     response.headers.set("Pragma", "no-cache");
     response.headers.set("Expires", "0");
     return response;
   } catch (error) {
     logger.error("Error fetching stats", { error });
-    const response = NextResponse.json(
-      { error: "Failed to fetch stats" },
-      { status: 500 }
-    );
-    response.headers.set(
-      "Cache-Control",
-      "no-cache, no-store, must-revalidate"
-    );
+    const response = NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
+    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
     return response;
   }
 }

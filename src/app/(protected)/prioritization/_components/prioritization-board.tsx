@@ -1,22 +1,21 @@
 "use client";
 
-import type { UpdateRecord } from "@/lib/updates";
 import {
+  closestCorners,
   DndContext,
+  type DragEndEvent,
+  type DragOverEvent,
   DragOverlay,
+  type DragStartEvent,
   KeyboardSensor,
   PointerSensor,
-  closestCorners,
   useDroppable,
   useSensor,
   useSensors,
-  type DragEndEvent,
-  type DragOverEvent,
-  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
@@ -45,6 +44,8 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import type { UpdateRecord } from "@/lib/updates";
 
 const STORAGE_KEY = "goen-prioritization-board-v1";
 const BOARD_VERSION = 2;
@@ -116,8 +117,7 @@ function loadBoardFromStorage(): BoardState | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredBoardState | null;
-    if (!parsed || parsed.version !== BOARD_VERSION || !parsed.board)
-      return null;
+    if (!parsed || parsed.version !== BOARD_VERSION || !parsed.board) return null;
     return parsed.board;
   } catch (error) {
     console.warn("Failed to read prioritization board from storage", error);
@@ -145,17 +145,12 @@ function ensureBacklogColumn(board: BoardState): BoardState {
   };
   return {
     columns: { ...board.columns, [BACKLOG_COLUMN_ID]: backlog },
-    columnOrder: [
-      BACKLOG_COLUMN_ID,
-      ...board.columnOrder.filter((id) => id !== BACKLOG_COLUMN_ID),
-    ],
+    columnOrder: [BACKLOG_COLUMN_ID, ...board.columnOrder.filter((id) => id !== BACKLOG_COLUMN_ID)],
   };
 }
 
 function buildInitialBoard(updates: UpdateItem[]): BoardState {
-  const sorted = [...updates].sort(
-    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-  );
+  const sorted = [...updates].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return {
     columns: {
       [BACKLOG_COLUMN_ID]: {
@@ -169,10 +164,7 @@ function buildInitialBoard(updates: UpdateItem[]): BoardState {
   };
 }
 
-function createBoardWithUpdates(
-  board: BoardState | null,
-  updates: UpdateItem[]
-): BoardState {
+function createBoardWithUpdates(board: BoardState | null, updates: UpdateItem[]): BoardState {
   const baseBoard = ensureBacklogColumn(board ?? buildInitialBoard(updates));
   const itemsById = new Map(updates.map((item) => [item.id, item]));
   const assignedIds = new Set<UniqueId>();
@@ -215,10 +207,7 @@ function createColumnId(title: string): UniqueId {
   return normalized ? `${normalized}-${suffix}` : `custom-${suffix}`;
 }
 
-function findColumnIdByItem(
-  board: BoardState,
-  itemId: UniqueId
-): UniqueId | null {
+function findColumnIdByItem(board: BoardState, itemId: UniqueId): UniqueId | null {
   for (const columnId of board.columnOrder) {
     if (board.columns[columnId]?.itemIds.includes(itemId)) {
       return columnId;
@@ -259,9 +248,7 @@ export function PrioritizationBoard() {
           const message = payload?.error?.message ?? "Failed to load updates.";
           throw new Error(message);
         }
-        const list = Array.isArray(payload?.updates)
-          ? (payload.updates as UpdateRecord[])
-          : [];
+        const list = Array.isArray(payload?.updates) ? (payload.updates as UpdateRecord[]) : [];
         const items = list.map(toUpdateItem);
         const storedBoard = loadBoardFromStorage();
         setUpdates(items);
@@ -269,9 +256,7 @@ export function PrioritizationBoard() {
       } catch (err) {
         if (controller.signal.aborted) return;
         console.error("Failed to load prioritization data", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load updates."
-        );
+        setError(err instanceof Error ? err.message : "Failed to load updates.");
         setUpdates([]);
         setBoard(createBoardWithUpdates(null, []));
       } finally {
@@ -297,8 +282,7 @@ export function PrioritizationBoard() {
   const memberOptions = useMemo(() => {
     const map = new Map<string, string>();
     for (const item of updates) {
-      const key =
-        item.uid?.trim() || `by:${item.by.toLowerCase()}` || "unknown";
+      const key = item.uid?.trim() || `by:${item.by.toLowerCase()}` || "unknown";
       if (!map.has(key)) {
         map.set(key, item.by || "Unknown member");
       }
@@ -331,8 +315,7 @@ export function PrioritizationBoard() {
 
       // メンバーフィルター
       if (selectedMember !== "all") {
-        const key =
-          item.uid?.trim() || `by:${item.by.toLowerCase()}` || "unknown";
+        const key = item.uid?.trim() || `by:${item.by.toLowerCase()}` || "unknown";
         if (key !== selectedMember) {
           return false;
         }
@@ -366,14 +349,9 @@ export function PrioritizationBoard() {
   );
 
   const filtersActive =
-    selectedMember !== "all" ||
-    selectedTimeframe !== "all" ||
-    selectedCategory !== "all";
+    selectedMember !== "all" || selectedTimeframe !== "all" || selectedCategory !== "all";
 
-  const allItemsById = useMemo(
-    () => new Map(updates.map((item) => [item.id, item])),
-    [updates]
-  );
+  const allItemsById = useMemo(() => new Map(updates.map((item) => [item.id, item])), [updates]);
 
   const handleAddColumn = useCallback(() => {
     const trimmed = newColumnName.trim();
@@ -464,11 +442,7 @@ export function PrioritizationBoard() {
       ? String(event.over.data.current.columnId)
       : findColumnIdByItem(board, overId);
 
-    if (
-      !sourceColumnId ||
-      !targetColumnId ||
-      sourceColumnId === targetColumnId
-    ) {
+    if (!sourceColumnId || !targetColumnId || sourceColumnId === targetColumnId) {
       return;
     }
 
@@ -566,360 +540,387 @@ export function PrioritizationBoard() {
   if (!board) {
     return (
       <Container sx={{ py: 6 }}>
-        <Alert severity="error">
-          Failed to initialize prioritization board.
-        </Alert>
+        <Alert severity="error">Failed to initialize prioritization board.</Alert>
       </Container>
     );
   }
 
-  const activeItem = activeId ? allItemsById.get(activeId) ?? null : null;
+  const activeItem = activeId ? (allItemsById.get(activeId) ?? null) : null;
 
   return (
     <Box>
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
         <Stack spacing={5}>
-        <Stack
-          spacing={2}
-          sx={{
-            animation: "fadeInUp 0.8s ease-out",
-          }}
-        >
-          <Box>
+          <Stack
+            spacing={2}
+            sx={{
+              animation: "fadeInUp 0.8s ease-out",
+            }}
+          >
+            <Box>
+              <Typography
+                variant="overline"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.8)",
+                  fontWeight: 700,
+                  letterSpacing: "0.15em",
+                  fontSize: "0.8125rem",
+                  textTransform: "uppercase",
+                  position: "relative",
+                  display: "inline-block",
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: -4,
+                    left: 0,
+                    width: "40px",
+                    height: "2px",
+                    background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent)",
+                  },
+                }}
+              >
+                Session Planning
+              </Typography>
+            </Box>
             <Typography
-              variant="overline"
+              variant="h3"
+              component="h1"
               sx={{
-                color: "rgba(255, 255, 255, 0.8)",
-                fontWeight: 700,
-                letterSpacing: "0.15em",
-                fontSize: "0.8125rem",
-                textTransform: "uppercase",
-                position: "relative",
-                display: "inline-block",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: -4,
-                  left: 0,
-                  width: "40px",
-                  height: "2px",
-                  background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent)",
-                },
+                fontWeight: 800,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.2,
+                color: "rgba(255, 255, 255, 0.95)",
               }}
             >
-              Session Planning
+              Prioritization
             </Typography>
-          </Box>
-          <Typography
-            variant="h3"
-            component="h1"
-            sx={{
-              fontWeight: 800,
-              letterSpacing: "-0.025em",
-              lineHeight: 1.2,
-              color: "rgba(255, 255, 255, 0.95)",
-            }}
-          >
-            Prioritization
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              fontSize: "1.0625rem",
-              lineHeight: 1.75,
-              maxWidth: 760,
-              opacity: 0.9,
-              color: "rgba(255, 255, 255, 0.75)",
-            }}
-          >
-            Organize the latest updates into categories to prepare for the
-            session discussion. Create any categories you need, then drag
-            updates into each column in order of importance.
-          </Typography>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            alignItems={{ xs: "stretch", sm: "center" }}
-            sx={{ mt: 2, flexWrap: "wrap" }}
-          >
-            <FormControl size="small" sx={{ width: { xs: "100%", sm: 220 } }}>
-              <InputLabel id="timeframe-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>
-                Filter by time
-              </InputLabel>
-              <Select
-                labelId="timeframe-filter-label"
-                value={selectedTimeframe}
-                label="Filter by time"
-                onChange={handleTimeframeChange}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      "& .MuiMenuItem-root": {
-                        "&:focus": {
-                          outline: "none",
-                        },
-                        "&:focus-visible": {
-                          outline: "none",
-                        },
-                      },
-                    },
-                  },
-                }}
-                sx={{
-                  color: "rgba(255, 255, 255, 0.9)",
-                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
-                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
-                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
-                }}
-              >
-                <MenuItem value="all">All dates</MenuItem>
-                <MenuItem value="past3">Past 3 months</MenuItem>
-                <MenuItem value="next3">Next 3 months</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ width: { xs: "100%", sm: 220 } }}>
-              <InputLabel id="category-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>
-                Filter by category
-              </InputLabel>
-              <Select
-                labelId="category-filter-label"
-                value={selectedCategory}
-                label="Filter by category"
-                onChange={handleCategoryChange}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      "& .MuiMenuItem-root": {
-                        "&:focus": {
-                          outline: "none",
-                        },
-                        "&:focus-visible": {
-                          outline: "none",
-                        },
-                      },
-                    },
-                  },
-                }}
-                sx={{
-                  color: "rgba(255, 255, 255, 0.9)",
-                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
-                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
-                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
-                }}
-              >
-                <MenuItem value="all">All categories</MenuItem>
-                <MenuItem value="work">Work</MenuItem>
-                <MenuItem value="family">Family</MenuItem>
-                <MenuItem value="personal">Personal</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ width: { xs: "100%", sm: 260 } }}>
-              <InputLabel id="member-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>Filter by member</InputLabel>
-              <Select
-                labelId="member-filter-label"
-                value={selectedMember}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      "& .MuiMenuItem-root": {
-                        "&:focus": {
-                          outline: "none",
-                        },
-                        "&:focus-visible": {
-                          outline: "none",
-                        },
-                      },
-                    },
-                  },
-                }}
-                sx={{
-                  color: "rgba(255, 255, 255, 0.9)",
-                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
-                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
-                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
-                }}
-                label="Filter by member"
-                onChange={handleMemberChange}
-              >
-                <MenuItem value="all">All members</MenuItem>
-                {memberOptions.map((option) => (
-                  <MenuItem key={option.uid} value={option.uid}>
-                    {option.by}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Button
-              variant="text"
-              startIcon={<ClearIcon />}
-              onClick={handleClearFilters}
-              disabled={!filtersActive}
+            <Typography
+              variant="body1"
               sx={{
-                color: "rgba(255, 255, 255, 0.8)",
-                "&:hover": { color: "rgba(255, 255, 255, 1)", backgroundColor: "rgba(255, 255, 255, 0.1)" },
-                "&.Mui-disabled": { color: "rgba(255, 255, 255, 0.3)" },
+                fontSize: "1.0625rem",
+                lineHeight: 1.75,
+                maxWidth: 760,
+                opacity: 0.9,
+                color: "rgba(255, 255, 255, 0.75)",
               }}
             >
-              Clear filters
-            </Button>
+              Organize the latest updates into categories to prepare for the session discussion.
+              Create any categories you need, then drag updates into each column in order of
+              importance.
+            </Typography>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              alignItems={{ xs: "stretch", sm: "center" }}
+              sx={{ mt: 2, flexWrap: "wrap" }}
+            >
+              <FormControl size="small" sx={{ width: { xs: "100%", sm: 220 } }}>
+                <InputLabel
+                  id="timeframe-filter-label"
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.7)",
+                    "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" },
+                  }}
+                >
+                  Filter by time
+                </InputLabel>
+                <Select
+                  labelId="timeframe-filter-label"
+                  value={selectedTimeframe}
+                  label="Filter by time"
+                  onChange={handleTimeframeChange}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        "& .MuiMenuItem-root": {
+                          "&:focus": {
+                            outline: "none",
+                          },
+                          "&:focus-visible": {
+                            outline: "none",
+                          },
+                        },
+                      },
+                    },
+                  }}
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.9)",
+                    ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.5)",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.7)",
+                    },
+                    ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                  }}
+                >
+                  <MenuItem value="all">All dates</MenuItem>
+                  <MenuItem value="past3">Past 3 months</MenuItem>
+                  <MenuItem value="next3">Next 3 months</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ width: { xs: "100%", sm: 220 } }}>
+                <InputLabel
+                  id="category-filter-label"
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.7)",
+                    "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" },
+                  }}
+                >
+                  Filter by category
+                </InputLabel>
+                <Select
+                  labelId="category-filter-label"
+                  value={selectedCategory}
+                  label="Filter by category"
+                  onChange={handleCategoryChange}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        "& .MuiMenuItem-root": {
+                          "&:focus": {
+                            outline: "none",
+                          },
+                          "&:focus-visible": {
+                            outline: "none",
+                          },
+                        },
+                      },
+                    },
+                  }}
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.9)",
+                    ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.5)",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.7)",
+                    },
+                    ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                  }}
+                >
+                  <MenuItem value="all">All categories</MenuItem>
+                  <MenuItem value="work">Work</MenuItem>
+                  <MenuItem value="family">Family</MenuItem>
+                  <MenuItem value="personal">Personal</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ width: { xs: "100%", sm: 260 } }}>
+                <InputLabel
+                  id="member-filter-label"
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.7)",
+                    "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" },
+                  }}
+                >
+                  Filter by member
+                </InputLabel>
+                <Select
+                  labelId="member-filter-label"
+                  value={selectedMember}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        "& .MuiMenuItem-root": {
+                          "&:focus": {
+                            outline: "none",
+                          },
+                          "&:focus-visible": {
+                            outline: "none",
+                          },
+                        },
+                      },
+                    },
+                  }}
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.9)",
+                    ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.5)",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.7)",
+                    },
+                    ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                  }}
+                  label="Filter by member"
+                  onChange={handleMemberChange}
+                >
+                  <MenuItem value="all">All members</MenuItem>
+                  {memberOptions.map((option) => (
+                    <MenuItem key={option.uid} value={option.uid}>
+                      {option.by}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button
+                variant="text"
+                startIcon={<ClearIcon />}
+                onClick={handleClearFilters}
+                disabled={!filtersActive}
+                sx={{
+                  color: "rgba(255, 255, 255, 0.8)",
+                  "&:hover": {
+                    color: "rgba(255, 255, 255, 1)",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
+                  "&.Mui-disabled": { color: "rgba(255, 255, 255, 0.3)" },
+                }}
+              >
+                Clear filters
+              </Button>
+            </Stack>
           </Stack>
-        </Stack>
 
-        {error ? <Alert severity="warning">{error}</Alert> : null}
+          {error ? <Alert severity="warning">{error}</Alert> : null}
 
-        <Paper
-          variant="outlined"
-          sx={{
-            p: 2,
-            bgcolor: "rgba(255, 255, 255, 0.05)",
-            borderColor: "rgba(255, 255, 255, 0.2)",
-          }}
-        >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            alignItems={{ xs: "stretch", sm: "center" }}
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              bgcolor: "rgba(255, 255, 255, 0.05)",
+              borderColor: "rgba(255, 255, 255, 0.2)",
+            }}
           >
-            <TextField
-              label="New category"
-              InputLabelProps={{ shrink: true }}
-              value={newColumnName}
-              onChange={(event) => setNewColumnName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  handleAddColumn();
-                }
-              }}
-              sx={{
-                flexGrow: 1,
-                maxWidth: 320,
-                "& .MuiOutlinedInput-root": {
-                  color: "rgba(255, 255, 255, 0.9)",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              alignItems={{ xs: "stretch", sm: "center" }}
+            >
+              <TextField
+                label="New category"
+                InputLabelProps={{ shrink: true }}
+                value={newColumnName}
+                onChange={(event) => setNewColumnName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleAddColumn();
+                  }
+                }}
+                sx={{
+                  flexGrow: 1,
+                  maxWidth: 320,
+                  "& .MuiOutlinedInput-root": {
+                    color: "rgba(255, 255, 255, 0.9)",
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(255, 255, 255, 0.5)",
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(255, 255, 255, 0.7)",
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "rgba(255, 255, 255, 0.7)",
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "rgba(255, 255, 255, 0.9)",
+                  },
+                  "& .MuiInputBase-input": {
+                    color: "rgba(255, 255, 255, 0.9)",
+                    // ブラウザのオートコンプリート時の背景色とテキスト色を調整
+                    "&:-webkit-autofill": {
+                      WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                      WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+                      caretColor: "rgba(255, 255, 255, 0.9)",
+                      transition: "background-color 5000s ease-in-out 0s",
+                    },
+                    "&:-webkit-autofill:hover": {
+                      WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                      WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+                    },
+                    "&:-webkit-autofill:focus": {
+                      WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                      WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+                    },
+                    "&:-webkit-autofill:active": {
+                      WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
+                      WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+                    },
+                  },
+                }}
+              />
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={handleAddColumn}
+                disabled={!newColumnName.trim()}
+                sx={{
                   borderColor: "rgba(255, 255, 255, 0.3)",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(255, 255, 255, 0.5)",
-                },
-                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(255, 255, 255, 0.7)",
-                },
-                "& .MuiInputLabel-root": {
-                  color: "rgba(255, 255, 255, 0.7)",
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
                   color: "rgba(255, 255, 255, 0.9)",
-                },
-                "& .MuiInputBase-input": {
-                  color: "rgba(255, 255, 255, 0.9)",
-                  // ブラウザのオートコンプリート時の背景色とテキスト色を調整
-                  "&:-webkit-autofill": {
-                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
-                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
-                    caretColor: "rgba(255, 255, 255, 0.9)",
-                    transition: "background-color 5000s ease-in-out 0s",
+                  whiteSpace: "nowrap",
+                  "&:hover": {
+                    borderColor: "rgba(255, 255, 255, 0.5)",
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
                   },
-                  "&:-webkit-autofill:hover": {
-                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
-                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+                  "&.Mui-disabled": {
+                    borderColor: "rgba(255, 255, 255, 0.2)",
+                    color: "rgba(255, 255, 255, 0.3)",
                   },
-                  "&:-webkit-autofill:focus": {
-                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
-                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
-                  },
-                  "&:-webkit-autofill:active": {
-                    WebkitBoxShadow: "0 0 0 100px rgba(30, 41, 59, 1) inset !important",
-                    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
-                  },
-                },
-              }}
-            />
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={handleAddColumn}
-              disabled={!newColumnName.trim()}
+                }}
+              >
+                Add Category
+              </Button>
+            </Stack>
+          </Paper>
+
+          <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.2)" }} />
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            <Box
               sx={{
-                borderColor: "rgba(255, 255, 255, 0.3)",
-                color: "rgba(255, 255, 255, 0.9)",
-                whiteSpace: "nowrap",
-                "&:hover": {
-                  borderColor: "rgba(255, 255, 255, 0.5)",
-                  backgroundColor: "rgba(255, 255, 255, 0.05)",
-                },
-                "&.Mui-disabled": {
-                  borderColor: "rgba(255, 255, 255, 0.2)",
-                  color: "rgba(255, 255, 255, 0.3)",
-                },
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+                gap: 2,
+                overflowX: "auto",
+                pb: 4,
               }}
             >
-              Add Category
-            </Button>
-          </Stack>
-        </Paper>
+              {board.columnOrder.map((columnId) => {
+                const column = board.columns[columnId];
+                if (!column) return null;
+                const items = column.itemIds
+                  .filter((itemId) =>
+                    columnId === BACKLOG_COLUMN_ID ? visibleUnassignedIds.has(itemId) : true
+                  )
+                  .map((itemId) => allItemsById.get(itemId))
+                  .filter((item): item is UpdateItem => Boolean(item));
 
-        <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.2)" }} />
+                return (
+                  <Column
+                    key={column.id}
+                    column={column}
+                    items={items}
+                    onDelete={handleDeleteColumn}
+                  />
+                );
+              })}
+            </Box>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: 2,
-              overflowX: "auto",
-              pb: 4,
-            }}
-          >
-            {board.columnOrder.map((columnId) => {
-              const column = board.columns[columnId];
-              if (!column) return null;
-              const items = column.itemIds
-                .filter((itemId) =>
-                  columnId === BACKLOG_COLUMN_ID
-                    ? visibleUnassignedIds.has(itemId)
-                    : true
-                )
-                .map((itemId) => allItemsById.get(itemId))
-                .filter((item): item is UpdateItem => Boolean(item));
+            <DragOverlay dropAnimation={null}>
+              {activeItem ? <UpdateCard item={activeItem} isDragging /> : null}
+            </DragOverlay>
+          </DndContext>
 
-              return (
-                <Column
-                  key={column.id}
-                  column={column}
-                  items={items}
-                  onDelete={handleDeleteColumn}
-                />
-              );
-            })}
-          </Box>
-
-          <DragOverlay dropAnimation={null}>
-            {activeItem ? <UpdateCard item={activeItem} isDragging /> : null}
-          </DragOverlay>
-        </DndContext>
-
-        {updates.length === 0 ? (
-          <Alert severity="info">
-            No updates available right now. Check back later.
-          </Alert>
-        ) : null}
-        {updates.length > 0 && visibleUnassignedUpdates.length === 0 ? (
-          <Alert severity="info">
-            No unassigned updates match the selected filters.
-          </Alert>
-        ) : null}
-      </Stack>
+          {updates.length === 0 ? (
+            <Alert severity="info">No updates available right now. Check back later.</Alert>
+          ) : null}
+          {updates.length > 0 && visibleUnassignedUpdates.length === 0 ? (
+            <Alert severity="info">No unassigned updates match the selected filters.</Alert>
+          ) : null}
+        </Stack>
       </Container>
     </Box>
   );
@@ -944,10 +945,7 @@ function Column({ column, items, onDelete }: ColumnProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // 表示するアイテム
-  const displayedItems = useMemo(
-    () => items.slice(0, displayCount),
-    [items, displayCount]
-  );
+  const displayedItems = useMemo(() => items.slice(0, displayCount), [items, displayCount]);
 
   const hasMore = displayCount < items.length;
 
@@ -986,18 +984,8 @@ function Column({ column, items, onDelete }: ColumnProps) {
         bgcolor: "background.paper",
       }}
     >
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        gap={1}
-      >
-        <Stack
-          direction="row"
-          alignItems="baseline"
-          spacing={1}
-          sx={{ minWidth: 0 }}
-        >
+      <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+        <Stack direction="row" alignItems="baseline" spacing={1} sx={{ minWidth: 0 }}>
           <Typography variant="h6" fontWeight={600} noWrap>
             {column.title}
           </Typography>
@@ -1034,20 +1022,12 @@ function Column({ column, items, onDelete }: ColumnProps) {
         >
           {items.length === 0 ? (
             <EmptyDropzone
-              label={
-                column.id === BACKLOG_COLUMN_ID
-                  ? "Drop updates here"
-                  : "Drag updates here"
-              }
+              label={column.id === BACKLOG_COLUMN_ID ? "Drop updates here" : "Drag updates here"}
             />
           ) : (
             <>
               {displayedItems.map((item) => (
-                <SortableUpdateCard
-                  key={item.id}
-                  item={item}
-                  columnId={column.id}
-                />
+                <SortableUpdateCard key={item.id} item={item} columnId={column.id} />
               ))}
               {hasMore && (
                 <Box
@@ -1102,14 +1082,7 @@ function SortableUpdateCard({ item, columnId }: SortableUpdateCardProps) {
     data: { type: "item", columnId },
   });
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = sortable;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = sortable;
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -1144,28 +1117,13 @@ function UpdateCard({ item, isDragging }: UpdateCardProps) {
         gap: 1,
       }}
     >
-      <Typography
-        variant="subtitle1"
-        fontWeight={600}
-        noWrap
-        title={item.title}
-      >
+      <Typography variant="subtitle1" fontWeight={600} noWrap title={item.title}>
         {item.title}
       </Typography>
-      <Typography
-        variant="body2"
-        sx={{ color: "text.secondary" }}
-        noWrap
-        title={item.body}
-      >
+      <Typography variant="body2" sx={{ color: "text.secondary" }} noWrap title={item.body}>
         {item.body || "No additional details provided."}
       </Typography>
-      <Stack
-        direction="row"
-        spacing={1}
-        justifyContent="flex-start"
-        alignItems="center"
-      >
+      <Stack direction="row" spacing={1} justifyContent="flex-start" alignItems="center">
         <Typography variant="caption" sx={{ color: "text.secondary" }}>
           {item.by}
         </Typography>

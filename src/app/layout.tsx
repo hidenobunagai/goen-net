@@ -1,26 +1,24 @@
-import { Navbar } from "@/components/navbar";
-import { PWAServiceWorker } from "@/components/pwa-service-worker";
-import { NextAuthSessionProvider } from "@/components/session-provider";
-import TanStackQueryProvider from "@/components/tanstack-query-provider";
-import { ThemeRegistry } from "@/components/theme-registry";
+import "./globals.css";
+
 import Box from "@mui/material/Box";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ReactNode } from "react";
-import "./globals.css";
+
+import { Navbar } from "@/components/navbar";
+import { PWAServiceWorker } from "@/components/pwa-service-worker";
+import { NextAuthSessionProvider } from "@/components/session-provider";
+import TanStackQueryProvider from "@/components/tanstack-query-provider";
+import { ThemeRegistry } from "@/components/theme-registry";
 
 export const metadata: Metadata = {
   title: "Goen Net",
-  description:
-    "Private alumni dashboard for sharing updates and next-session planning.",
+  description: "Private alumni dashboard for sharing updates and next-session planning.",
   applicationName: "Goen Net",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/app-icon.svg", type: "image/svg+xml", sizes: "any" },
-    ],
+    icon: [{ url: "/favicon.ico" }, { url: "/app-icon.svg", type: "image/svg+xml", sizes: "any" }],
   },
   appleWebApp: {
     capable: true,

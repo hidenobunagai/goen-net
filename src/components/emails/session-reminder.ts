@@ -12,7 +12,7 @@ export function generateSessionReminderEmail({
   daysUntil,
 }: SessionReminderEmailProps): string {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://goen-net.vercel.app";
-  
+
   const locationRow = location
     ? `
     <tr>
@@ -20,8 +20,8 @@ export function generateSessionReminderEmail({
       <td style="font-size: 16px; color: #1f2937; font-weight: 500; padding-bottom: 10px;">${location}</td>
     </tr>
     `
-    : '';
-  
+    : "";
+
   return `
     <!DOCTYPE html>
     <html>

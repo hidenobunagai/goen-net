@@ -1,5 +1,7 @@
-import { Meeting } from "@/types/meetings";
 import { NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
+import { Meeting } from "@/types/meetings";
 
 // Mock data for demonstration
 const mockMeetings: Meeting[] = [
@@ -9,14 +11,8 @@ const mockMeetings: Meeting[] = [
     date: new Date("2025-10-05T10:00:00").toISOString(),
     duration: 180, // 3 hours in minutes
     status: "scheduled",
-    attendees: [
-      "alice@example.com",
-      "bob@example.com",
-      "charlie@example.com",
-      "diana@example.com",
-    ],
-    description:
-      "Monthly alumni forum discussing recent updates and strategic initiatives",
+    attendees: ["alice@example.com", "bob@example.com", "charlie@example.com", "diana@example.com"],
+    description: "Monthly alumni forum discussing recent updates and strategic initiatives",
     location: "Conference Room A",
     agenda: [
       "Welcome & Check-ins (15min)",
@@ -48,10 +44,7 @@ export async function GET() {
 
     return NextResponse.json(nextMeeting);
   } catch (error) {
-    console.error("Error fetching upcoming meeting:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch upcoming meeting" },
-      { status: 500 }
-    );
+    logger.error("Error fetching upcoming meeting", { error });
+    return NextResponse.json({ error: "Failed to fetch upcoming meeting" }, { status: 500 });
   }
 }

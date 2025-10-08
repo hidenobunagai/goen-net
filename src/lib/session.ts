@@ -1,7 +1,8 @@
-import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+
+import { authOptions } from "@/lib/auth";
 
 async function resolveServerSession(): Promise<Session | null> {
   try {

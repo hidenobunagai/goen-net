@@ -1,12 +1,5 @@
 "use client";
 
-import {
-    combineDateAndTime,
-    extractDate,
-    extractTime,
-    formatSessionRange,
-    normalizeToDatetimeLocal,
-} from "@/lib/datetime";
 import EditIcon from "@mui/icons-material/Edit";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -25,6 +18,14 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useMemo, useState, useTransition } from "react";
 
+import {
+  combineDateAndTime,
+  extractDate,
+  extractTime,
+  formatSessionRange,
+  normalizeToDatetimeLocal,
+} from "@/lib/datetime";
+
 type InitialSession = {
   startAt: string | null;
   endAt: string | null;
@@ -40,11 +41,7 @@ type FormState = {
 
 type StatusState = { type: "success" | "error"; message: string } | null;
 
-export function NextSessionCard({
-  initial,
-}: {
-  initial: InitialSession | null;
-}) {
+export function NextSessionCard({ initial }: { initial: InitialSession | null }) {
   const normalized = useMemo(() => {
     if (!initial) {
       return { startAt: null, endAt: null, location: "" } as const;
@@ -74,8 +71,7 @@ export function NextSessionCard({
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<StatusState>(null);
   const [form, setForm] = useState<FormState>(() => ({
-    date:
-      extractDate(normalized.startAt) || new Date().toISOString().slice(0, 10),
+    date: extractDate(normalized.startAt) || new Date().toISOString().slice(0, 10),
     startTime: extractTime(normalized.startAt) || "10:00",
     endTime: extractTime(normalized.endAt),
     location: normalized.location || "",
@@ -107,9 +103,7 @@ export function NextSessionCard({
         if (start.toDateString() === end.toDateString()) {
           formattedTime = `${formattedTime} – ${formatTime.format(end)}`;
         } else {
-          formattedTime = `${formattedTime} – ${formatDate.format(
-            end
-          )} ${formatTime.format(end)}`;
+          formattedTime = `${formattedTime} – ${formatDate.format(end)} ${formatTime.format(end)}`;
         }
       }
     }
@@ -119,9 +113,7 @@ export function NextSessionCard({
 
   const openDialog = () => {
     setForm({
-      date:
-        extractDate(normalized.startAt) ||
-        new Date().toISOString().slice(0, 10),
+      date: extractDate(normalized.startAt) || new Date().toISOString().slice(0, 10),
       startTime: extractTime(normalized.startAt) || "10:00",
       endTime: extractTime(normalized.endAt),
       location: normalized.location || "",
@@ -149,9 +141,7 @@ export function NextSessionCard({
     }
 
     const startAt = combineDateAndTime(form.date, form.startTime);
-    const endAt = form.endTime
-      ? combineDateAndTime(form.date, form.endTime)
-      : null;
+    const endAt = form.endTime ? combineDateAndTime(form.date, form.endTime) : null;
 
     startTransition(async () => {
       try {
@@ -166,8 +156,7 @@ export function NextSessionCard({
         });
         const json = await response.json().catch(() => null);
         if (!response.ok || json?.ok === false) {
-          const message =
-            json?.error?.message || "Failed to update next session.";
+          const message = json?.error?.message || "Failed to update next session.";
           throw new Error(message);
         }
         setStatus({
@@ -177,10 +166,7 @@ export function NextSessionCard({
         setDialogOpen(false);
         window.location.reload();
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to update next session.";
+        const message = error instanceof Error ? error.message : "Failed to update next session.";
         setStatus({ type: "error", message });
       }
     });
@@ -229,7 +215,8 @@ export function NextSessionCard({
                   fontSize: "0.75rem",
                   px: 0.5,
                   height: 28,
-                  background: "linear-gradient(135deg, rgba(0, 51, 102, 0.95) 0%, rgba(0, 51, 102, 1) 100%)",
+                  background:
+                    "linear-gradient(135deg, rgba(0, 51, 102, 0.95) 0%, rgba(0, 51, 102, 1) 100%)",
                   boxShadow: "0 2px 8px rgba(0, 51, 102, 0.15)",
                 }}
               />
@@ -257,11 +244,7 @@ export function NextSessionCard({
             <Typography variant="h4" component="h2" sx={{ fontWeight: 700 }}>
               Next Session
             </Typography>
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ fontWeight: 600, lineHeight: 1.35 }}
-            >
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600, lineHeight: 1.35 }}>
               <Box component="span" display="block">
                 {dateLabel}
               </Box>
@@ -302,17 +285,12 @@ export function NextSessionCard({
                 {locationValue}
               </Typography>
             ) : (
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: 600, wordBreak: "break-word" }}
-              >
+              <Typography variant="body1" sx={{ fontWeight: 600, wordBreak: "break-word" }}>
                 {locationLabel}
               </Typography>
             )}
           </Stack>
-          {status ? (
-            <Alert severity={status.type}>{status.message}</Alert>
-          ) : null}
+          {status ? <Alert severity={status.type}>{status.message}</Alert> : null}
         </Stack>
       </CardContent>
 
@@ -325,9 +303,7 @@ export function NextSessionCard({
                 label="Date"
                 type="date"
                 value={form.date}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, date: event.target.value }))
-                }
+                onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
                 InputLabelProps={{ shrink: true }}
                 required
               />
@@ -367,9 +343,7 @@ export function NextSessionCard({
               <TextField
                 label="Location (URL or venue)"
                 value={form.location}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, location: event.target.value }))
-                }
+                onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
                 placeholder="Zoom, NYC office, etc."
                 inputProps={{
                   spellCheck: false,

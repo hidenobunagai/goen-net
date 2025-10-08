@@ -80,10 +80,7 @@ export interface FetchOptions extends RequestInit {
 /**
  * タイムアウト付きfetch
  */
-async function fetchWithTimeout(
-  url: string,
-  options: FetchOptions = {}
-): Promise<Response> {
+async function fetchWithTimeout(url: string, options: FetchOptions = {}): Promise<Response> {
   const { timeout = 30000, ...fetchOptions } = options;
 
   const controller = new AbortController();
@@ -108,10 +105,7 @@ async function fetchWithTimeout(
 /**
  * リトライ付きfetch
  */
-async function fetchWithRetry(
-  url: string,
-  options: FetchOptions = {}
-): Promise<Response> {
+async function fetchWithRetry(url: string, options: FetchOptions = {}): Promise<Response> {
   const { retries = 0, retryDelay = 1000, ...fetchOptions } = options;
 
   let lastError: Error | null = null;
@@ -153,10 +147,7 @@ async function fetchWithRetry(
 /**
  * 型安全なAPIクライアント
  */
-export async function fetchAPI<T>(
-  url: string,
-  options: FetchOptions = {}
-): Promise<T> {
+export async function fetchAPI<T>(url: string, options: FetchOptions = {}): Promise<T> {
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
   };
@@ -192,9 +183,7 @@ export async function fetchAPI<T>(
           : response.statusText;
 
       const errorCode =
-        typeof body === "object" && body !== null && "code" in body
-          ? String(body.code)
-          : undefined;
+        typeof body === "object" && body !== null && "code" in body ? String(body.code) : undefined;
 
       logger.error("API error", {
         url,

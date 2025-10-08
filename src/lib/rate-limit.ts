@@ -1,5 +1,5 @@
-import { execute, isTursoConfigured } from "./turso";
 import { logger } from "./logger";
+import { execute, isTursoConfigured } from "./turso";
 
 // In-memory fallback store
 const globalBucket = globalThis as unknown as {
@@ -37,17 +37,14 @@ async function checkRateLimitPersistent(
     await execute("DELETE FROM rate_limit WHERE expires_at <= ?", [nowUnix]);
 
     // Try to get existing entry
-    const result = await execute(
-      "SELECT count, expires_at FROM rate_limit WHERE key = ?",
-      [key]
-    );
+    const result = await execute("SELECT count, expires_at FROM rate_limit WHERE key = ?", [key]);
 
     if (result.rows.length === 0) {
       // No existing entry, create new one
-      await execute(
-        "INSERT INTO rate_limit (key, count, expires_at) VALUES (?, 1, ?)",
-        [key, expiresAtUnix]
-      );
+      await execute("INSERT INTO rate_limit (key, count, expires_at) VALUES (?, 1, ?)", [
+        key,
+        expiresAtUnix,
+      ]);
       return true;
     }
 
@@ -77,10 +74,7 @@ async function checkRateLimitPersistent(
 /**
  * In-memory rate limiter (fallback)
  */
-function checkRateLimitMemory(
-  key: string,
-  { limit, windowMs }: RateLimitOptions
-): boolean {
+function checkRateLimitMemory(key: string, { limit, windowMs }: RateLimitOptions): boolean {
   const now = Date.now();
   const entry = memoryStore.get(key);
 
@@ -101,10 +95,7 @@ function checkRateLimitMemory(
  * Check rate limit
  * Uses persistent storage if available, otherwise falls back to in-memory
  */
-export async function checkRateLimit(
-  key: string,
-  options: RateLimitOptions
-): Promise<boolean> {
+export async function checkRateLimit(key: string, options: RateLimitOptions): Promise<boolean> {
   if (isTursoConfigured()) {
     return checkRateLimitPersistent(key, options);
   }
@@ -116,9 +107,6 @@ export async function checkRateLimit(
  * Only works with in-memory storage
  * @deprecated Use async checkRateLimit instead
  */
-export function checkRateLimitSync(
-  key: string,
-  options: RateLimitOptions
-): boolean {
+export function checkRateLimitSync(key: string, options: RateLimitOptions): boolean {
   return checkRateLimitMemory(key, options);
 }

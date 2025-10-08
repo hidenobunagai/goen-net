@@ -1,14 +1,13 @@
+import { NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
 import { getOptionalUserSession } from "@/lib/session";
 import { fetchUpdates } from "@/lib/updates";
-import { NextResponse } from "next/server";
 
 export async function GET() {
   const session = await getOptionalUserSession();
   if (!session?.user?.email) {
-    return NextResponse.json(
-      { error: "Authentication required" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   }
 
   try {
@@ -22,9 +21,7 @@ export async function GET() {
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const recentUpdates = updates.filter(
-      (update) => new Date(update.createdAt) > oneWeekAgo
-    );
+    const recentUpdates = updates.filter((update) => new Date(update.createdAt) > oneWeekAgo);
 
     const urgentUpdates = updates.filter((update) => update.urgent);
 
@@ -45,10 +42,7 @@ export async function GET() {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error("Error fetching update statistics:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch update statistics" },
-      { status: 500 }
-    );
+    logger.error("Error fetching update statistics", { error });
+    return NextResponse.json({ error: "Failed to fetch update statistics" }, { status: 500 });
   }
 }

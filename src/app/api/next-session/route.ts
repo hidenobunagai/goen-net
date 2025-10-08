@@ -1,6 +1,8 @@
-import { getOptionalUserSession } from "@/lib/session";
-import { TursoUnavailableError, getNextSession, upsertNextSession } from "@/lib/turso";
 import { NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
+import { getOptionalUserSession } from "@/lib/session";
+import { getNextSession, TursoUnavailableError, upsertNextSession } from "@/lib/turso";
 
 export async function GET() {
   const session = await getOptionalUserSession();
@@ -20,7 +22,7 @@ export async function GET() {
       session: record,
     });
   } catch (error) {
-    console.error("Failed to load next session", error);
+    logger.error("Failed to load next session", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
@@ -63,16 +65,9 @@ export async function POST(request: Request) {
   }
 
   const payload = await request.json();
-  const startAt =
-    typeof payload?.startAt === "string"
-      ? payload.startAt.trim() || null
-      : null;
-  const endAt =
-    typeof payload?.endAt === "string" ? payload.endAt.trim() || null : null;
-  const location =
-    typeof payload?.location === "string"
-      ? payload.location.trim() || null
-      : null;
+  const startAt = typeof payload?.startAt === "string" ? payload.startAt.trim() || null : null;
+  const endAt = typeof payload?.endAt === "string" ? payload.endAt.trim() || null : null;
+  const location = typeof payload?.location === "string" ? payload.location.trim() || null : null;
 
   if (!startAt) {
     return NextResponse.json(
@@ -88,7 +83,7 @@ export async function POST(request: Request) {
     await upsertNextSession({ startAt, endAt, location });
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Failed to update next session", error);
+    logger.error("Failed to update next session", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {

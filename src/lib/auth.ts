@@ -1,5 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+
 import { getConfig } from "./config";
 import { logger } from "./logger";
 

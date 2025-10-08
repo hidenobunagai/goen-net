@@ -1,15 +1,17 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
 import { getOptionalUserSession } from "@/lib/session";
 import { TursoUnavailableError } from "@/lib/turso";
 import { JsonBodyError, requireJson } from "@/lib/utils";
 import {
-    deleteWorksheet,
-    getWorksheet,
-    isValidWorksheetRole,
-    upsertWorksheet,
-    type WorksheetRole,
+  deleteWorksheet,
+  getWorksheet,
+  isValidWorksheetRole,
+  upsertWorksheet,
+  type WorksheetRole,
 } from "@/lib/worksheets";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 
 type RouteContext = {
   params: Promise<{
@@ -34,7 +36,7 @@ async function resolveRole(context: RouteContext): Promise<WorksheetRole | null>
     const params = await context.params;
     return normalizeRole(params?.role);
   } catch (error) {
-    console.error("Failed to resolve worksheet role", error);
+    logger.error("Failed to resolve worksheet role", { error });
     return null;
   }
 }
@@ -110,7 +112,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         : null,
     });
   } catch (error) {
-    console.error("Failed to load worksheet", error);
+    logger.error("Failed to load worksheet", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
@@ -161,7 +163,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     await upsertWorksheet(auth.email, role, payload.data ?? null);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Failed to save worksheet", error);
+    logger.error("Failed to save worksheet", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
@@ -199,7 +201,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     await deleteWorksheet(auth.email, role);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Failed to clear worksheet", error);
+    logger.error("Failed to clear worksheet", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
@@ -215,4 +217,3 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     );
   }
 }
-

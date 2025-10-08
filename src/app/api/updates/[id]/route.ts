@@ -1,13 +1,12 @@
-import { getOptionalUserSession } from "@/lib/session";
-import { TursoUnavailableError } from "@/lib/turso";
-import { deleteUpdate, getUpdateById } from "@/lib/updates";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export async function GET(
-  _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+import { logger } from "@/lib/logger";
+import { getOptionalUserSession } from "@/lib/session";
+import { TursoUnavailableError } from "@/lib/turso";
+import { deleteUpdate, getUpdateById } from "@/lib/updates";
+
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const session = await getOptionalUserSession();
   if (!session) {
@@ -51,7 +50,7 @@ export async function GET(
 
     return NextResponse.json({ ok: true, update });
   } catch (error) {
-    console.error("Failed to load update", error);
+    logger.error("Failed to load update", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
@@ -68,10 +67,7 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const session = await getOptionalUserSession();
   if (!session) {
@@ -115,7 +111,7 @@ export async function DELETE(
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Failed to delete update", error);
+    logger.error("Failed to delete update", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {

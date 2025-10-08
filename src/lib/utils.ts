@@ -8,8 +8,7 @@ export async function requireJson<T = unknown>(request: Request): Promise<T> {
   try {
     payload = await request.json();
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to parse JSON body.";
+    const message = error instanceof Error ? error.message : "Failed to parse JSON body.";
     throw new JsonBodyError(message, 400);
   }
 

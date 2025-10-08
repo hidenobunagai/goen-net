@@ -1,16 +1,13 @@
+import { randomUUID } from "crypto";
+import { NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getOptionalUserSession } from "@/lib/session";
 import { TursoUnavailableError } from "@/lib/turso";
 import type { UpdateRecord } from "@/lib/updates";
-import {
-  deleteAllUpdates,
-  fetchUpdates,
-  getUpdateById,
-  insertUpdate,
-} from "@/lib/updates";
+import { deleteAllUpdates, fetchUpdates, getUpdateById, insertUpdate } from "@/lib/updates";
 import { JsonBodyError, requireJson } from "@/lib/utils";
-import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const session = await getOptionalUserSession();
@@ -60,7 +57,7 @@ export async function GET(request: Request) {
     const updates = await fetchUpdates(email, { limit, offset });
     return NextResponse.json({ ok: true, updates });
   } catch (error) {
-    console.error("Failed to fetch updates", error);
+    logger.error("Failed to fetch updates", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
@@ -111,14 +108,9 @@ export async function POST(request: Request) {
     }
     throw error;
   }
-  const by =
-    typeof body?.by === "string"
-      ? body.by.trim()
-      : session.user?.name ?? "Unknown";
+  const by = typeof body?.by === "string" ? body.by.trim() : (session.user?.name ?? "Unknown");
   const category = Number(body?.category ?? 0);
-  const urgent = Boolean(
-    typeof body?.urgent === "boolean" ? body.urgent : body?.priority
-  );
+  const urgent = Boolean(typeof body?.urgent === "boolean" ? body.urgent : body?.priority);
   const title = typeof body?.title === "string" ? body.title.trim() : "";
   const updateText = typeof body?.update === "string" ? body.update.trim() : "";
   const when = Number(body?.when ?? -1);
@@ -186,7 +178,7 @@ export async function POST(request: Request) {
       when: (when === 1 ? 1 : -1) as -1 | 1,
     });
   } catch (error) {
-    console.error("Failed to create update", error);
+    logger.error("Failed to create update", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {
@@ -206,7 +198,7 @@ export async function POST(request: Request) {
   try {
     created = await getUpdateById(id, uid);
   } catch (error) {
-    console.error("Failed to load created update", error);
+    logger.error("Failed to load created update", { error });
   }
 
   if (!created) {
@@ -256,7 +248,7 @@ export async function DELETE() {
   }
 
   const rateKey = `updates:delete:${uid}`;
-  if (!checkRateLimit(rateKey, { limit: 3, windowMs: 60_000 })) {
+  if (!(await checkRateLimit(rateKey, { limit: 3, windowMs: 60_000 }))) {
     return NextResponse.json(
       {
         ok: false,
@@ -273,7 +265,7 @@ export async function DELETE() {
     const deleted = await deleteAllUpdates();
     return NextResponse.json({ ok: true, deleted });
   } catch (error) {
-    console.error("Failed to delete updates", error);
+    logger.error("Failed to delete updates", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(
       {

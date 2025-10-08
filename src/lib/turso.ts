@@ -1,14 +1,11 @@
 import type { InArgs, ResultSet } from "@libsql/client";
 import { Client, createClient } from "@libsql/client";
+
 import { getConfig } from "./config";
 
 const config = getConfig();
 
-const TURSO_URL_KEYS = [
-  "TURSO_DB_URL",
-  "TURSO_DATABASE_URL",
-  "DATABASE_URL",
-] as const;
+const TURSO_URL_KEYS = ["TURSO_DB_URL", "TURSO_DATABASE_URL", "DATABASE_URL"] as const;
 const TURSO_TOKEN_KEYS = [
   "TURSO_DB_AUTH_TOKEN",
   "TURSO_AUTH_TOKEN",
@@ -50,9 +47,7 @@ function normalizeUrl(url: string): string {
   return url;
 }
 
-function pickEnv(
-  keys: readonly string[]
-): { key: string; value: string } | null {
+function pickEnv(keys: readonly string[]): { key: string; value: string } | null {
   for (const key of keys) {
     const raw = process.env[key];
     if (raw && raw.trim()) {
@@ -125,9 +120,7 @@ export type NextSessionRecord = {
   updatedAt: string | null;
 };
 
-function normalizeRow(
-  row: Record<string, unknown> | undefined
-): NextSessionRecord | null {
+function normalizeRow(row: Record<string, unknown> | undefined): NextSessionRecord | null {
   if (!row) {
     return null;
   }

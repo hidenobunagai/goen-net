@@ -5,19 +5,9 @@ export interface Update {
   userEmail: string;
   title: string;
   content: string;
-  category:
-    | "highlight"
-    | "challenge"
-    | "question"
-    | "decision"
-    | "announcement";
+  category: "highlight" | "challenge" | "question" | "decision" | "announcement";
   priority: "low" | "medium" | "high" | "urgent";
-  timeframe:
-    | "immediate"
-    | "this-week"
-    | "this-month"
-    | "next-month"
-    | "long-term";
+  timeframe: "immediate" | "this-week" | "this-month" | "next-month" | "long-term";
   tags: string[];
   comments: UpdateComment[];
   createdAt: string;

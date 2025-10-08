@@ -1,11 +1,8 @@
-import { TursoUnavailableError, execute, isTursoConfigured } from "@/lib/turso";
 import type { InArgs } from "@libsql/client";
 
-export const WORKSHEET_ROLES = [
-  "presenter",
-  "coach",
-  "observer",
-] as const;
+import { execute, isTursoConfigured, TursoUnavailableError } from "@/lib/turso";
+
+export const WORKSHEET_ROLES = ["presenter", "coach", "observer"] as const;
 
 export type WorksheetRole = (typeof WORKSHEET_ROLES)[number];
 
@@ -55,11 +52,7 @@ function getMemoryWorksheet<T = unknown>(
   };
 }
 
-function upsertMemoryWorksheet<T = unknown>(
-  uid: string,
-  role: WorksheetRole,
-  data: T
-): void {
+function upsertMemoryWorksheet<T = unknown>(uid: string, role: WorksheetRole, data: T): void {
   const updatedAt = new Date().toISOString();
   memoryWorksheetStore.set(getMemoryKey(uid, role), {
     data: (data ?? null) as T | null,
@@ -173,12 +166,7 @@ async function getSchema(): Promise<WorksheetsTableSchema> {
       "modified",
       "updatedat",
     ]),
-    createdAtColumn: pickColumn(columnMap, [
-      "created_at",
-      "createdon",
-      "created",
-      "createdat",
-    ]),
+    createdAtColumn: pickColumn(columnMap, ["created_at", "createdon", "created", "createdat"]),
   };
 
   cachedSchema = schema;
@@ -242,8 +230,8 @@ export async function getWorksheet<T = unknown>(
     typeof updatedAtValue === "string"
       ? updatedAtValue
       : updatedAtValue != null
-      ? String(updatedAtValue)
-      : null;
+        ? String(updatedAtValue)
+        : null;
 
   return {
     uid,
@@ -264,8 +252,7 @@ export async function upsertWorksheet<T = unknown>(
   }
 
   const schema = await getSchema();
-  const { uidColumn, roleColumn, dataColumn, updatedAtColumn, createdAtColumn } =
-    schema;
+  const { uidColumn, roleColumn, dataColumn, updatedAtColumn, createdAtColumn } = schema;
 
   const columns = [uidColumn, roleColumn, dataColumn];
   const placeholders = ["?1", "?2", "?3"];
@@ -290,9 +277,7 @@ export async function upsertWorksheet<T = unknown>(
   ];
 
   if (updatedAtColumn) {
-    updateAssignments.push(
-      `${quoteIdentifier(updatedAtColumn)} = datetime('now')`
-    );
+    updateAssignments.push(`${quoteIdentifier(updatedAtColumn)} = datetime('now')`);
   }
 
   await execute(
@@ -303,10 +288,7 @@ export async function upsertWorksheet<T = unknown>(
   );
 }
 
-export async function deleteWorksheet(
-  uid: string,
-  role: WorksheetRole
-): Promise<void> {
+export async function deleteWorksheet(uid: string, role: WorksheetRole): Promise<void> {
   if (!isTursoConfigured()) {
     deleteMemoryWorksheet(uid, role);
     return;

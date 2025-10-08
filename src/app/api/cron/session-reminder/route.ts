@@ -1,10 +1,11 @@
+import { format, parseISO } from "date-fns";
+import { ja } from "date-fns/locale";
+import { NextRequest, NextResponse } from "next/server";
+
 import { generateSessionReminderEmail } from "@/components/emails/session-reminder";
 import { logger } from "@/lib/logger";
 import { getAllowedEmails, sendEmail } from "@/lib/resend";
 import { getNextSession, isTursoConfigured } from "@/lib/turso";
-import { format, parseISO } from "date-fns";
-import { ja } from "date-fns/locale";
-import { NextRequest, NextResponse } from "next/server";
 
 // Vercel Cronからのリクエストを検証
 function isValidCronRequest(request: NextRequest): boolean {
@@ -29,10 +30,7 @@ function isValidCronRequest(request: NextRequest): boolean {
 export async function GET(request: NextRequest) {
   // Cron認証チェック
   if (!isValidCronRequest(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -47,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     // Next Sessionを取得
     const nextSession = await getNextSession();
-    
+
     if (!nextSession || !nextSession.startAt) {
       logger.info("No upcoming session found or start time not set.");
       return NextResponse.json({
@@ -59,13 +57,13 @@ export async function GET(request: NextRequest) {
     // セッションの日時を解析
     const sessionDate = parseISO(nextSession.startAt);
     const now = new Date();
-    const daysUntil = Math.floor(
-      (sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const daysUntil = Math.floor((sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     // 3日前でない場合はスキップ
     if (daysUntil !== 3) {
-      logger.info(`Session is ${daysUntil} days away. Reminder is only sent 3 days before.`, { daysUntil });
+      logger.info(`Session is ${daysUntil} days away. Reminder is only sent 3 days before.`, {
+        daysUntil,
+      });
       return NextResponse.json({
         success: false,
         message: `Not the right time for reminder. Days until session: ${daysUntil}`,
@@ -74,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     // メール送信先を取得
     const recipients = getAllowedEmails();
-    
+
     if (recipients.length === 0) {
       logger.warn("No recipients found in ALLOWED_EMAILS.");
       return NextResponse.json({

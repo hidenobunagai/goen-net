@@ -22,8 +22,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.12.0'
-          cache: 'npm'
+          node-version: "20.12.0"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -50,8 +50,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.12.0'
-          cache: 'npm'
+          node-version: "20.12.0"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -72,7 +72,7 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || 'test-google-client-id' }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET || 'test-google-client-secret' }}
-          DEGRADE_TO_MEMORY: '1'
+          DEGRADE_TO_MEMORY: "1"
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

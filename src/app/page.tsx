@@ -1,6 +1,3 @@
-import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
-import { getOptionalUserSession } from "@/lib/session";
-import { getNextSession } from "@/lib/turso";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
@@ -8,8 +5,12 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2";
 import { redirect } from "next/navigation";
 
+import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
+import { getOptionalUserSession } from "@/lib/session";
+import { getNextSession } from "@/lib/turso";
+
 // Force dynamic rendering - no caching
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {

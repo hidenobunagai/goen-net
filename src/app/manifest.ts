@@ -4,8 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Goen Net",
     short_name: "Goen Net",
-    description:
-      "Private alumni dashboard for sharing updates and next-session planning.",
+    description: "Private alumni dashboard for sharing updates and next-session planning.",
     start_url: "/",
     display: "standalone",
     background_color: "#0f172a",

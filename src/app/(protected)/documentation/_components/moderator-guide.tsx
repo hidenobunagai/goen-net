@@ -1,18 +1,19 @@
 "use client";
 
-import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-    Box,
-    Chip,
-    Container,
-    Paper,
-    Stack,
-    ToggleButton,
-    ToggleButtonGroup,
-    Typography,
+  Box,
+  Chip,
+  Container,
+  Paper,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
 } from "@mui/material";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
+
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 type Action = {
   title: string;
@@ -57,8 +58,7 @@ First, I would like to confirm confidentiality. Let's make sure that everything 
       },
       {
         title: "0:01 Run the feelings warmup",
-        procedure:
-          "Invite each member to share how they feel right now in about 10 seconds.",
+        procedure: "Invite each member to share how they feel right now in about 10 seconds.",
         reminders: [
           "Keep the check-in quick—feelings only, no stories.",
           "If someone speaks long, gently remind the next speaker to be brief.",
@@ -198,8 +198,7 @@ When choosing whose issue to resolve, pay attention to moments of strong emotion
         title: "1:05 Distribute worksheets",
         procedure:
           "Hand the coaching and presentation worksheets to the assigned presenters and coaches.",
-        script:
-          "“Now, I will hand the worksheets to the presenter and the coach.”",
+        script: "“Now, I will hand the worksheets to the presenter and the coach.”",
       },
       {
         title: "1:06 Walk presenters through the worksheet",
@@ -279,15 +278,12 @@ The second role is to create an environment where it is easy for the presenter t
     actions: [
       {
         title: "1:33 Begin the presentation",
-        procedure:
-          "Call everyone back, set the tone, and transition into Presentation ①.",
+        procedure: "Call everyone back, set the tone, and transition into Presentation ①.",
         script: "“Now, let’s begin the presentation.”",
       },
       {
-        title:
-          "1:33 Assign roles for timekeeper, process observer, and secretary",
-        procedure:
-          "Select members who have not yet taken a role during the session.",
+        title: "1:33 Assign roles for timekeeper, process observer, and secretary",
+        procedure: "Select members who have not yet taken a role during the session.",
         script:
           "“First, I would like to assign a process observer. (Among remaining members) What about you, Mr. XX?”",
       },
@@ -415,20 +411,14 @@ To conclude, please hand your personal notes to the presenter. Thank you for the
   },
 ];
 
-const stripMinutePrefix = (title: string): string =>
-  title.replace(/^[0-9]{1,2}:[0-9]{2}\s+/, "");
+const stripMinutePrefix = (title: string): string => title.replace(/^[0-9]{1,2}:[0-9]{2}\s+/, "");
 
-const cloneSection = (
-  section: Section,
-  options?: { stripActionTimes?: boolean }
-): Section => ({
+const cloneSection = (section: Section, options?: { stripActionTimes?: boolean }): Section => ({
   ...section,
   purpose: [...section.purpose],
   actions: section.actions.map((action) => ({
     ...action,
-    title: options?.stripActionTimes
-      ? stripMinutePrefix(action.title)
-      : action.title,
+    title: options?.stripActionTimes ? stripMinutePrefix(action.title) : action.title,
     steps: action.steps ? [...action.steps] : undefined,
     reminders: action.reminders ? [...action.reminders] : undefined,
     callouts: action.callouts ? [...action.callouts] : undefined,
@@ -462,10 +452,7 @@ export function ModeratorGuide() {
 
   const [scenario, setScenario] = useState<Scenario>("twoPresentations");
 
-  const handleScenarioChange = (
-    _: React.MouseEvent<HTMLElement>,
-    value: Scenario | null
-  ) => {
+  const handleScenarioChange = (_: React.MouseEvent<HTMLElement>, value: Scenario | null) => {
     if (value) {
       setScenario(value);
     }
@@ -473,98 +460,100 @@ export function ModeratorGuide() {
 
   return (
     <Box>
-    <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
-      <Stack spacing={4}>
-        <Stack
-          spacing={2}
-          sx={{
-            animation: "fadeInUp 0.8s ease-out",
-          }}
-        >
-          <Box>
-            <Typography
-              variant="overline"
-              sx={{
-                color: "rgba(255, 255, 255, 0.8)",
-                fontWeight: 700,
-                letterSpacing: "0.15em",
-                fontSize: "0.8125rem",
-                textTransform: "uppercase",
-                position: "relative",
-                display: "inline-block",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: -4,
-                  left: 0,
-                  width: "40px",
-                  height: "2px",
-                  background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent)",
-                },
-              }}
-            >
-              Session Guide
-            </Typography>
-          </Box>
-          <Typography
-            variant="h3"
-            component="h1"
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
+        <Stack spacing={4}>
+          <Stack
+            spacing={2}
             sx={{
-              fontWeight: 800,
-              letterSpacing: "-0.025em",
-              lineHeight: 1.2,
-              color: "rgba(255, 255, 255, 0.95)",
+              animation: "fadeInUp 0.8s ease-out",
             }}
           >
-            Goen Net Moderator Playbook
-          </Typography>
-        </Stack>
-        <Typography sx={{ fontSize: "1.0625rem", lineHeight: 1.75, opacity: 0.9, color: "rgba(255, 255, 255, 0.75)" }}>
-          Keep this tab open during the session and follow the timeline below. ★
-          indicates additional explanations for members who are new to the
-          process.
-        </Typography>
-        <ToggleButtonGroup
-          value={scenario}
-          exclusive
-          onChange={handleScenarioChange}
-          color="primary"
-          aria-label="Moderator agenda scenario"
-          sx={{
-            alignSelf: { xs: "stretch", md: "flex-start" },
-            ".MuiToggleButton-root": {
-              color: "rgba(255, 255, 255, 0.7)",
-              borderColor: "rgba(255, 255, 255, 0.3)",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              },
-              "&.Mui-selected": {
+            <Box>
+              <Typography
+                variant="overline"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.8)",
+                  fontWeight: 700,
+                  letterSpacing: "0.15em",
+                  fontSize: "0.8125rem",
+                  textTransform: "uppercase",
+                  position: "relative",
+                  display: "inline-block",
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: -4,
+                    left: 0,
+                    width: "40px",
+                    height: "2px",
+                    background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent)",
+                  },
+                }}
+              >
+                Session Guide
+              </Typography>
+            </Box>
+            <Typography
+              variant="h3"
+              component="h1"
+              sx={{
+                fontWeight: 800,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.2,
                 color: "rgba(255, 255, 255, 0.95)",
-                backgroundColor: "rgba(255, 255, 255, 0.15)",
-                borderColor: "rgba(255, 255, 255, 0.5)",
+              }}
+            >
+              Goen Net Moderator Playbook
+            </Typography>
+          </Stack>
+          <Typography
+            sx={{
+              fontSize: "1.0625rem",
+              lineHeight: 1.75,
+              opacity: 0.9,
+              color: "rgba(255, 255, 255, 0.75)",
+            }}
+          >
+            Keep this tab open during the session and follow the timeline below. ★ indicates
+            additional explanations for members who are new to the process.
+          </Typography>
+          <ToggleButtonGroup
+            value={scenario}
+            exclusive
+            onChange={handleScenarioChange}
+            color="primary"
+            aria-label="Moderator agenda scenario"
+            sx={{
+              alignSelf: { xs: "stretch", md: "flex-start" },
+              ".MuiToggleButton-root": {
+                color: "rgba(255, 255, 255, 0.7)",
+                borderColor: "rgba(255, 255, 255, 0.3)",
                 "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+                "&.Mui-selected": {
+                  color: "rgba(255, 255, 255, 0.95)",
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  borderColor: "rgba(255, 255, 255, 0.5)",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  },
                 },
               },
-            },
-          }}
-        >
-          <ToggleButton value="twoPresentations">
-            Two Presentations
-          </ToggleButton>
-          <ToggleButton value="singlePresentation">
-            Single Presentation
-          </ToggleButton>
-        </ToggleButtonGroup>
-        <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
-          <Stack spacing={{ xs: 3, md: 4 }}>
-            {schedules[scenario].map((section) => (
-              <SectionCard key={section.id} section={section} />
-            ))}
-          </Stack>
-        </Paper>
-      </Stack>
-    </Container>
+            }}
+          >
+            <ToggleButton value="twoPresentations">Two Presentations</ToggleButton>
+            <ToggleButton value="singlePresentation">Single Presentation</ToggleButton>
+          </ToggleButtonGroup>
+          <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
+            <Stack spacing={{ xs: 3, md: 4 }}>
+              {schedules[scenario].map((section) => (
+                <SectionCard key={section.id} section={section} />
+              ))}
+            </Stack>
+          </Paper>
+        </Stack>
+      </Container>
     </Box>
   );
 }
@@ -595,11 +584,7 @@ function SectionCard({ section }: SectionCardProps) {
             justifyContent="space-between"
           >
             <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-              <Chip
-                label={`${section.start} → ${section.end}`}
-                color="primary"
-                size="small"
-              />
+              <Chip label={`${section.start} → ${section.end}`} color="primary" size="small" />
               <Chip label={section.duration} variant="outlined" size="small" />
             </Stack>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -631,10 +616,7 @@ type ActionCardProps = {
 
 function ActionCard({ action }: ActionCardProps) {
   return (
-    <Paper
-      variant="outlined"
-      sx={{ p: { xs: 2, md: 3 }, borderRadius: 2, bgcolor: "grey.50" }}
-    >
+    <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 2, bgcolor: "grey.50" }}>
       <Stack spacing={1.5}>
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.05rem" }}>
           {action.title}
@@ -708,10 +690,7 @@ function CalloutBox({ items }: CalloutBoxProps) {
         borderColor: "info.100",
       }}
     >
-      <Typography
-        variant="subtitle2"
-        sx={{ fontWeight: 700, color: "info.dark" }}
-      >
+      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "info.dark" }}>
         ★ KEY TALKING POINTS
       </Typography>
       <Stack component="ul" spacing={0.5} sx={{ pl: 2, m: 0 }}>
@@ -738,9 +717,7 @@ function ScriptBox({ children }: ScriptBoxProps) {
         bgcolor: "grey.100",
       }}
     >
-      <Typography sx={{ fontStyle: "italic", whiteSpace: "pre-wrap" }}>
-        {children}
-      </Typography>
+      <Typography sx={{ fontStyle: "italic", whiteSpace: "pre-wrap" }}>{children}</Typography>
     </Box>
   );
 }

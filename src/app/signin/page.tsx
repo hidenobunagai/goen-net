@@ -24,10 +24,7 @@ export default function SignInPage() {
         pb: { xs: 6, md: 10 },
       }}
     >
-      <Paper
-        elevation={2}
-        sx={{ width: "100%", maxWidth: 400, p: { xs: 4, sm: 5 } }}
-      >
+      <Paper elevation={2} sx={{ width: "100%", maxWidth: 400, p: { xs: 4, sm: 5 } }}>
         <Stack spacing={4} alignItems="center" textAlign="center">
           <Stack spacing={1}>
             <Typography variant="h5" component="h1" sx={{ fontWeight: 600 }}>

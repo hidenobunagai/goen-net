@@ -88,8 +88,11 @@ export function isTursoDatabaseConfigured(): boolean {
   }
 
   const hasUrl = hasEnv("TURSO_DB_URL") || hasEnv("TURSO_DATABASE_URL") || hasEnv("DATABASE_URL");
-  const hasToken = hasEnv("TURSO_DB_AUTH_TOKEN") || hasEnv("TURSO_AUTH_TOKEN") || 
-                   hasEnv("LIBSQL_AUTH_TOKEN") || hasEnv("TURSO_DB_TOKEN");
+  const hasToken =
+    hasEnv("TURSO_DB_AUTH_TOKEN") ||
+    hasEnv("TURSO_AUTH_TOKEN") ||
+    hasEnv("LIBSQL_AUTH_TOKEN") ||
+    hasEnv("TURSO_DB_TOKEN");
 
   return hasUrl && hasToken;
 }

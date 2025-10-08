@@ -1,38 +1,40 @@
 "use client";
 
-import { del, get } from "@/lib/api-client";
-import type { UpdateRecord } from "@/lib/updates";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Paper,
-    Select,
-    Snackbar,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
-    useMediaQuery
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Snackbar,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  useMediaQuery,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
 import { useCallback, useMemo, useState } from "react";
+
+import { del, get } from "@/lib/api-client";
+import type { UpdateRecord } from "@/lib/updates";
+
 import { UpdateFormDialog } from "./update-form-dialog";
 import { UpdateStatusBadge } from "./update-status-badge";
 
@@ -83,16 +85,11 @@ function getUserBadgeColor(uid: string): string {
   return USER_BADGE_COLORS[hash % USER_BADGE_COLORS.length];
 }
 
-export function UpdatesBoard({
-  initialUpdates,
-  viewerEmail,
-}: UpdatesBoardProps) {
+export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [updates, setUpdates] = useState<UpdateItem[]>(() =>
-    initialUpdates.map(toUpdateItem)
-  );
+  const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUid, setSelectedUid] = useState<string>("all");
@@ -130,23 +127,15 @@ export function UpdatesBoard({
         }>(`/api/updates?limit=200`);
 
         if (payload.ok === false) {
-          const message =
-            payload.error?.message ??
-            "Failed to load updates. Please try again.";
+          const message = payload.error?.message ?? "Failed to load updates. Please try again.";
           throw new Error(message);
         }
 
-        const list = Array.isArray(payload.updates)
-          ? payload.updates
-          : [];
+        const list = Array.isArray(payload.updates) ? payload.updates : [];
         const nextItems = list.map(toUpdateItem);
         let updated = false;
         setUpdates((prev) => {
-          if (
-            preserveExistingOnEmpty &&
-            prev.length > 0 &&
-            nextItems.length === 0
-          ) {
+          if (preserveExistingOnEmpty && prev.length > 0 && nextItems.length === 0) {
             return prev;
           }
           updated = true;
@@ -158,9 +147,7 @@ export function UpdatesBoard({
         return "success";
       } catch (error) {
         const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to load updates. Please try again.";
+          error instanceof Error ? error.message : "Failed to load updates. Please try again.";
         setFetchError(message);
         setSnackbar({ severity: "error", message });
         return "error";
@@ -224,10 +211,7 @@ export function UpdatesBoard({
   }, [updates, selectedUid]);
 
   const groupedUpdates = useMemo(() => {
-    const grouped: Record<
-      number,
-      { past: UpdateItem[]; future: UpdateItem[] }
-    > = {};
+    const grouped: Record<number, { past: UpdateItem[]; future: UpdateItem[] }> = {};
 
     for (const category of CATEGORIES) {
       grouped[category.id] = { past: [], future: [] };
@@ -280,17 +264,13 @@ export function UpdatesBoard({
     try {
       await del(`/api/updates/${encodeURIComponent(deleteTarget.id)}`);
 
-      setUpdates((prev) =>
-        prev.filter((update) => update.id !== deleteTarget.id)
-      );
+      setUpdates((prev) => prev.filter((update) => update.id !== deleteTarget.id));
       setSnackbar({ severity: "success", message: "Update deleted." });
       setDeleteDialogOpen(false);
       setDeleteTarget(null);
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to delete update. Please try again.";
+        error instanceof Error ? error.message : "Failed to delete update. Please try again.";
       setSnackbar({ severity: "error", message });
     } finally {
       setDeleteLoading(false);
@@ -314,9 +294,7 @@ export function UpdatesBoard({
       setDeleteAllDialogOpen(false);
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to delete updates. Please try again.";
+        error instanceof Error ? error.message : "Failed to delete updates. Please try again.";
       setSnackbar({ severity: "error", message });
     } finally {
       setDeleteAllLoading(false);
@@ -433,424 +411,395 @@ export function UpdatesBoard({
     <Box>
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Stack spacing={4}>
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          justifyContent="space-between"
-          alignItems={{ xs: "flex-start", md: "center" }}
-        >
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
-              sx={{
-                color: "rgba(255, 255, 255, 0.8)",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                fontSize: "0.875rem",
-              }}
-            >
-              Peer Updates
-            </Typography>
-            <Typography
-              variant="h3"
-              component="h1"
-              sx={{
-                fontWeight: 800,
-                letterSpacing: "-0.02em",
-                color: "rgba(255, 255, 255, 0.95)",
-              }}
-            >
-              Updates
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                maxWidth: 680,
-                fontSize: "1.0625rem",
-                lineHeight: 1.7,
-                mb: { xs: 2, sm: 0 },
-                color: "rgba(255, 255, 255, 0.75)",
-              }}
-            >
-              Share your team&apos;s latest updates and ideas to keep everyone
-              aligned on what matters most.
-            </Typography>
-          </Stack>
           <Stack
-            direction={{ xs: "column", sm: "row" }}
+            direction={{ xs: "column", md: "row" }}
             spacing={2}
-            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", md: "center" }}
           >
-            <FormControl
-              size="small"
-              sx={{ minWidth: { xs: "100%", sm: 220 } }}
-            >
-              <InputLabel id="updates-member-filter-label" sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" } }}>Member</InputLabel>
-              <Select
-                labelId="updates-member-filter-label"
-                label="Member"
-                value={selectedUid}
-                onChange={handleMemberFilterChange}
-                sx={{
-                  color: "rgba(255, 255, 255, 0.9)",
-                  ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
-                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.7)" },
-                  ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
-                }}
-              >
-                <MenuItem value="all">All members</MenuItem>
-                {memberOptions.map((member) => (
-                  <MenuItem key={member.uid} value={member.uid}>
-                    {member.by}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <UpdateFormDialog
-              defaultCategory={0}
-              onCreated={handleUpdateCreated}
-            />
-          </Stack>
-        </Stack>
-
-        {fetchError ? (
-          <Alert
-            severity="error"
-            action={
-              <Button
-                color="inherit"
-                size="small"
-                onClick={() => handleReload()}
-              >
-                Retry
-              </Button>
-            }
-          >
-            {fetchError}
-          </Alert>
-        ) : null}
-
-        {refreshing ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress />
-          </Box>
-        ) : null}
-
-        {!isMobile ? (
-          <TableContainer
-            component={Paper}
-            variant="outlined"
-            sx={{
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <Table sx={{ tableLayout: "fixed" }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    sx={{
-                      fontWeight: 700,
-                      width: CATEGORY_COL_WIDTH,
-                      bgcolor: "#f5f5f5",
-                      fontSize: "0.875rem",
-                      borderRight: "2px solid #d0d0d0",
-                    }}
-                  >
-                    Category
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: 700,
-                      width: FLEX_COL_WIDTH,
-                      bgcolor: "#f5f5f5",
-                      fontSize: "0.875rem",
-                      borderRight: "2px solid #d0d0d0",
-                    }}
-                  >
-                    Reflect on the past 3 months
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: 700,
-                      width: FLEX_COL_WIDTH,
-                      bgcolor: "#f5f5f5",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    Next 3 months
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {CATEGORIES.map((category, index) => (
-                  <TableRow key={category.id}>
-                    <TableCell
-                      sx={{
-                        fontWeight: 600,
-                        whiteSpace: "nowrap",
-                        verticalAlign: "top",
-                        fontSize: "0.9375rem",
-                        bgcolor: "#f5f5f5",
-                        borderRight: "2px solid #d0d0d0",
-                        borderBottom: index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
-                      }}
-                    >
-                      {category.label}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        verticalAlign: "top",
-                        p: 2,
-                        borderRight: "2px solid #d0d0d0",
-                        borderBottom: index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
-                      }}
-                    >
-                      {renderCell(groupedUpdates[category.id]?.past ?? [])}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        verticalAlign: "top",
-                        p: 2,
-                        borderBottom: index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
-                      }}
-                    >
-                      {renderCell(groupedUpdates[category.id]?.future ?? [])}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Stack spacing={2}>
-            {CATEGORIES.map((category) => (
-              <Paper key={category.id} variant="outlined" sx={{ p: 1.5 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: 600, mb: 0.5 }}
-                >
-                  {category.label}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Reflect on the past 3 months
-                </Typography>
-                <Box sx={{ mt: 0.5, mb: 1 }}>
-                  {renderCell(groupedUpdates[category.id]?.past ?? [])}
-                </Box>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Next 3 months
-                </Typography>
-                <Box sx={{ mt: 0.5 }}>
-                  {renderCell(groupedUpdates[category.id]?.future ?? [])}
-                </Box>
-              </Paper>
-            ))}
-          </Stack>
-        )}
-      </Stack>
-
-      {/* Delete all updates button - below main content */}
-      <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          variant="text"
-          size="small"
-          onClick={openDeleteAll}
-          disabled={updates.length === 0}
-          sx={{
-            color: "rgba(255, 255, 255, 0.8)",
-            fontSize: "0.8125rem",
-            textTransform: "none",
-            "&:hover": {
-              color: "rgba(255, 255, 255, 1)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            },
-            "&.Mui-disabled": {
-              color: "rgba(255, 255, 255, 0.3)",
-            },
-          }}
-        >
-          Delete all updates
-        </Button>
-      </Box>
-
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={cancelDelete}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Delete update?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Delete this update? This action cannot be undone.
-          </DialogContentText>
-          {deleteTarget ? (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mt: 1 }}
-            >
-              Title: {deleteTarget.title || "Untitled"}
-            </Typography>
-          ) : null}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={cancelDelete} disabled={deleteLoading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={confirmDelete}
-            color="error"
-            variant="contained"
-            disabled={deleteLoading}
-          >
-            {deleteLoading ? <CircularProgress size={20} /> : "Delete"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={deleteAllDialogOpen}
-        onClose={cancelDeleteAll}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Delete all updates?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            This will permanently delete every update. The change affects the
-            entire team and cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={cancelDeleteAll} disabled={deleteAllLoading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={confirmDeleteAll}
-            color="error"
-            variant="contained"
-            disabled={deleteAllLoading}
-          >
-            {deleteAllLoading ? <CircularProgress size={20} /> : "Delete all"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={Boolean(detailsItem)}
-        onClose={handleDetailsClose}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogContent sx={{ pt: 3 }}>
-          {detailsItem ? (
             <Stack spacing={1.5}>
-              <Box
-                sx={{
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: 999,
-                  bgcolor: getUserBadgeColor(detailsItem.uid),
-                  color: "white",
-                  fontWeight: 700,
-                  fontSize: "0.95rem",
-                  letterSpacing: 0.3,
-                  lineHeight: 1.3,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  alignSelf: "flex-start",
-                }}
-              >
-                {detailsItem.by}
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: 2,
-                  wordBreak: "break-word",
-                  overflowWrap: "anywhere",
-                }}
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    variant="h6"
-                    component="h2"
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: "1.1rem",
-                      lineHeight: 1.3,
-                      mb: 1,
-                    }}
-                  >
-                    {detailsItem.title || "Untitled"}
-                  </Typography>
-                </Box>
-                {detailsItem.urgent ? (
-                  <UpdateStatusBadge urgent={detailsItem.urgent} />
-                ) : null}
-              </Box>
               <Typography
-                variant="body2"
+                variant="overline"
                 sx={{
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                  overflowWrap: "anywhere",
+                  color: "rgba(255, 255, 255, 0.8)",
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  fontSize: "0.875rem",
                 }}
               >
-                {detailsItem.body}
+                Peer Updates
+              </Typography>
+              <Typography
+                variant="h3"
+                component="h1"
+                sx={{
+                  fontWeight: 800,
+                  letterSpacing: "-0.02em",
+                  color: "rgba(255, 255, 255, 0.95)",
+                }}
+              >
+                Updates
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  maxWidth: 680,
+                  fontSize: "1.0625rem",
+                  lineHeight: 1.7,
+                  mb: { xs: 2, sm: 0 },
+                  color: "rgba(255, 255, 255, 0.75)",
+                }}
+              >
+                Share your team&apos;s latest updates and ideas to keep everyone aligned on what
+                matters most.
               </Typography>
             </Stack>
-          ) : null}
-        </DialogContent>
-        <DialogActions>
-          {detailsItem?.viewerIsOwner ? (
-            <Button
-              onClick={() => {
-                handleDetailsClose();
-                if (detailsItem) {
-                  requestDelete(detailsItem);
-                }
-              }}
-              color="error"
-              startIcon={<DeleteOutlineIcon />}
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              alignItems={{ xs: "stretch", sm: "center" }}
             >
-              Delete
-            </Button>
-          ) : null}
-          <Box sx={{ flex: 1 }} />
-          <Button onClick={handleDetailsClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
+              <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 220 } }}>
+                <InputLabel
+                  id="updates-member-filter-label"
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.7)",
+                    "&.Mui-focused": { color: "rgba(255, 255, 255, 0.9)" },
+                  }}
+                >
+                  Member
+                </InputLabel>
+                <Select
+                  labelId="updates-member-filter-label"
+                  label="Member"
+                  value={selectedUid}
+                  onChange={handleMemberFilterChange}
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.9)",
+                    ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.5)",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(255, 255, 255, 0.7)",
+                    },
+                    ".MuiSvgIcon-root": { color: "rgba(255, 255, 255, 0.7)" },
+                  }}
+                >
+                  <MenuItem value="all">All members</MenuItem>
+                  {memberOptions.map((member) => (
+                    <MenuItem key={member.uid} value={member.uid}>
+                      {member.by}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <UpdateFormDialog defaultCategory={0} onCreated={handleUpdateCreated} />
+            </Stack>
+          </Stack>
 
-      {snackbar ? (
-        <Snackbar
-          open
-          autoHideDuration={6000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={handleSnackbarClose}
-            severity={snackbar.severity}
-            sx={{ width: "100%" }}
+          {fetchError ? (
+            <Alert
+              severity="error"
+              action={
+                <Button color="inherit" size="small" onClick={() => handleReload()}>
+                  Retry
+                </Button>
+              }
+            >
+              {fetchError}
+            </Alert>
+          ) : null}
+
+          {refreshing ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : null}
+
+          {!isMobile ? (
+            <TableContainer
+              component={Paper}
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <Table sx={{ tableLayout: "fixed" }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        width: CATEGORY_COL_WIDTH,
+                        bgcolor: "#f5f5f5",
+                        fontSize: "0.875rem",
+                        borderRight: "2px solid #d0d0d0",
+                      }}
+                    >
+                      Category
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        width: FLEX_COL_WIDTH,
+                        bgcolor: "#f5f5f5",
+                        fontSize: "0.875rem",
+                        borderRight: "2px solid #d0d0d0",
+                      }}
+                    >
+                      Reflect on the past 3 months
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        width: FLEX_COL_WIDTH,
+                        bgcolor: "#f5f5f5",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      Next 3 months
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {CATEGORIES.map((category, index) => (
+                    <TableRow key={category.id}>
+                      <TableCell
+                        sx={{
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                          verticalAlign: "top",
+                          fontSize: "0.9375rem",
+                          bgcolor: "#f5f5f5",
+                          borderRight: "2px solid #d0d0d0",
+                          borderBottom:
+                            index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
+                        }}
+                      >
+                        {category.label}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          verticalAlign: "top",
+                          p: 2,
+                          borderRight: "2px solid #d0d0d0",
+                          borderBottom:
+                            index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
+                        }}
+                      >
+                        {renderCell(groupedUpdates[category.id]?.past ?? [])}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          verticalAlign: "top",
+                          p: 2,
+                          borderBottom:
+                            index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
+                        }}
+                      >
+                        {renderCell(groupedUpdates[category.id]?.future ?? [])}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Stack spacing={2}>
+              {CATEGORIES.map((category) => (
+                <Paper key={category.id} variant="outlined" sx={{ p: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {category.label}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Reflect on the past 3 months
+                  </Typography>
+                  <Box sx={{ mt: 0.5, mb: 1 }}>
+                    {renderCell(groupedUpdates[category.id]?.past ?? [])}
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Next 3 months
+                  </Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    {renderCell(groupedUpdates[category.id]?.future ?? [])}
+                  </Box>
+                </Paper>
+              ))}
+            </Stack>
+          )}
+        </Stack>
+
+        {/* Delete all updates button - below main content */}
+        <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="text"
+            size="small"
+            onClick={openDeleteAll}
+            disabled={updates.length === 0}
+            sx={{
+              color: "rgba(255, 255, 255, 0.8)",
+              fontSize: "0.8125rem",
+              textTransform: "none",
+              "&:hover": {
+                color: "rgba(255, 255, 255, 1)",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+              },
+              "&.Mui-disabled": {
+                color: "rgba(255, 255, 255, 0.3)",
+              },
+            }}
           >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      ) : null}
+            Delete all updates
+          </Button>
+        </Box>
+
+        <Dialog open={deleteDialogOpen} onClose={cancelDelete} maxWidth="xs" fullWidth>
+          <DialogTitle>Delete update?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Delete this update? This action cannot be undone.</DialogContentText>
+            {deleteTarget ? (
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                Title: {deleteTarget.title || "Untitled"}
+              </Typography>
+            ) : null}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={cancelDelete} disabled={deleteLoading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDelete}
+              color="error"
+              variant="contained"
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? <CircularProgress size={20} /> : "Delete"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={deleteAllDialogOpen} onClose={cancelDeleteAll} maxWidth="xs" fullWidth>
+          <DialogTitle>Delete all updates?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              This will permanently delete every update. The change affects the entire team and
+              cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={cancelDeleteAll} disabled={deleteAllLoading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDeleteAll}
+              color="error"
+              variant="contained"
+              disabled={deleteAllLoading}
+            >
+              {deleteAllLoading ? <CircularProgress size={20} /> : "Delete all"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={Boolean(detailsItem)} onClose={handleDetailsClose} fullWidth maxWidth="sm">
+          <DialogContent sx={{ pt: 3 }}>
+            {detailsItem ? (
+              <Stack spacing={1.5}>
+                <Box
+                  sx={{
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 999,
+                    bgcolor: getUserBadgeColor(detailsItem.uid),
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    letterSpacing: 0.3,
+                    lineHeight: 1.3,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  {detailsItem.by}
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: 2,
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "1.1rem",
+                        lineHeight: 1.3,
+                        mb: 1,
+                      }}
+                    >
+                      {detailsItem.title || "Untitled"}
+                    </Typography>
+                  </Box>
+                  {detailsItem.urgent ? <UpdateStatusBadge urgent={detailsItem.urgent} /> : null}
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  {detailsItem.body}
+                </Typography>
+              </Stack>
+            ) : null}
+          </DialogContent>
+          <DialogActions>
+            {detailsItem?.viewerIsOwner ? (
+              <Button
+                onClick={() => {
+                  handleDetailsClose();
+                  if (detailsItem) {
+                    requestDelete(detailsItem);
+                  }
+                }}
+                color="error"
+                startIcon={<DeleteOutlineIcon />}
+              >
+                Delete
+              </Button>
+            ) : null}
+            <Box sx={{ flex: 1 }} />
+            <Button onClick={handleDetailsClose}>Close</Button>
+          </DialogActions>
+        </Dialog>
+
+        {snackbar ? (
+          <Snackbar
+            open
+            autoHideDuration={6000}
+            onClose={handleSnackbarClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            <Alert
+              onClose={handleSnackbarClose}
+              severity={snackbar.severity}
+              sx={{ width: "100%" }}
+            >
+              {snackbar.message}
+            </Alert>
+          </Snackbar>
+        ) : null}
       </Container>
     </Box>
   );
