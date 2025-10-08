@@ -24,16 +24,16 @@
     "@libsql/client": "^0.15.15",
     "@mui/icons-material": "^5.15.20",
     "@mui/material": "^5.15.20",
-    "@mui/material-nextjs": "^7.3.2",
+    "@mui/material-nextjs": "^7.3.3",
     "@tanstack/react-query": "^5.90.2",
     "@vercel/analytics": "^1.5.0",
     "date-fns": "^4.1.0",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "next": "15.5.4",
     "next-auth": "^4.24.11",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "zod": "^4.1.11"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
