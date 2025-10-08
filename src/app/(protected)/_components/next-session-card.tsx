@@ -12,7 +12,6 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
@@ -288,7 +287,17 @@ export function NextSessionCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 variant="body1"
-                sx={{ fontWeight: 600, wordBreak: "break-word" }}
+                sx={{
+                  fontWeight: 600,
+                  wordBreak: "break-word",
+                  color: "primary.main",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    textDecoration: "underline",
+                    color: "primary.dark",
+                  },
+                }}
               >
                 {locationValue}
               </Typography>
@@ -306,48 +315,6 @@ export function NextSessionCard({
           ) : null}
         </Stack>
       </CardContent>
-      <CardActions
-        sx={{
-          px: { xs: 3.5, sm: 4, md: 4.5 },
-          pb: { xs: 3.5, sm: 4, md: 4.5 },
-          pt: 0,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {locationIsUrl ? (
-          <Button
-            component="a"
-            href={locationValue}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="contained"
-            size="large"
-            sx={{
-              color: '#fff !important',
-              fontWeight: 600,
-              px: 4,
-              py: 1.5,
-              borderRadius: 2,
-              textTransform: "none",
-              fontSize: "1rem",
-              boxShadow: "0 4px 12px rgba(0, 51, 102, 0.2)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              '&:hover': {
-                color: '#fff !important',
-                transform: "translateY(-2px)",
-                boxShadow: "0 6px 20px rgba(0, 51, 102, 0.3)",
-              },
-              '&:active': {
-                color: '#fff !important',
-                transform: "translateY(0)",
-              },
-            }}
-          >
-            Open location
-          </Button>
-        ) : null}
-      </CardActions>
 
       <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle sx={{ fontWeight: 700 }}>Edit next session</DialogTitle>
