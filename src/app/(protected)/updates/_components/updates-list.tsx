@@ -356,8 +356,11 @@ export function UpdatesBoard({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: 1.5,
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+          },
+          gap: { xs: 1, sm: 1.5 },
         }}
       >
         {items.map((item) => {
@@ -367,7 +370,7 @@ export function UpdatesBoard({
               variant="outlined"
               onClick={() => handleDetailsOpen(item)}
               sx={{
-                p: 1.5,
+                p: { xs: 1.25, sm: 1.5 },
                 borderRadius: 2,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
