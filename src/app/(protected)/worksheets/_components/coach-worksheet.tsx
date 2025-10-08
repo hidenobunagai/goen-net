@@ -2,154 +2,23 @@
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-    Alert,
-    Avatar,
-    Box,
-    Button,
-    Checkbox,
-    Chip,
-    Container,
-    Divider,
-    FormControlLabel,
-    FormGroup,
-    Paper,
-    Stack,
-    TextField,
-    Typography,
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Container,
+  Divider,
+  FormControlLabel,
+  FormGroup,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-const ENC_VERSION = "v1";
-const SALT_BYTES = 16;
-const IV_BYTES = 12;
-const MIN_PASSPHRASE_LENGTH = 8;
-
-const isWebCryptoAvailable = () =>
-  typeof window !== "undefined" && Boolean(window.crypto?.subtle);
-
-const toBase64 = (value: Uint8Array): string => {
-  if (typeof window !== "undefined" && typeof window.btoa === "function") {
-    let binary = "";
-    value.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
-    return window.btoa(binary);
-  }
-  if (typeof Buffer !== "undefined") {
-    return Buffer.from(value).toString("base64");
-  }
-  throw new Error("Base64 encoding is not supported in this environment.");
-};
-
-const fromBase64 = (encoded: string): Uint8Array => {
-  if (typeof window !== "undefined" && typeof window.atob === "function") {
-    const binary = window.atob(encoded);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes;
-  }
-  if (typeof Buffer !== "undefined") {
-    return new Uint8Array(Buffer.from(encoded, "base64"));
-  }
-  throw new Error("Base64 decoding is not supported in this environment.");
-};
-
-async function deriveKey(passphrase: string, salt: Uint8Array) {
-  if (!isWebCryptoAvailable()) {
-    throw new Error("Web Crypto API is not available.");
-  }
-
-  const encoder = new TextEncoder();
-  const material = await window.crypto.subtle.importKey(
-    "raw",
-    encoder.encode(passphrase),
-    "PBKDF2",
-    false,
-    ["deriveKey"]
-  );
-
-  return window.crypto.subtle.deriveKey(
-    {
-      name: "PBKDF2",
-      salt: salt.buffer as ArrayBuffer,
-      iterations: 250_000,
-      hash: "SHA-256",
-    },
-    material,
-    {
-      name: "AES-GCM",
-      length: 256,
-    },
-    false,
-    ["encrypt", "decrypt"]
-  );
-}
-
-async function encryptFormData(
-  passphrase: string,
-  form: CoachForm
-): Promise<string> {
-  if (!isWebCryptoAvailable()) {
-    throw new Error("Web Crypto API is not available.");
-  }
-
-  const salt = window.crypto.getRandomValues(new Uint8Array(SALT_BYTES));
-  const iv = window.crypto.getRandomValues(new Uint8Array(IV_BYTES));
-  const key = await deriveKey(passphrase, salt);
-  const encoder = new TextEncoder();
-  const payload = encoder.encode(JSON.stringify(form));
-  const encrypted = await window.crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
-    key,
-    payload
-  );
-
-  return [
-    ENC_VERSION,
-    toBase64(salt),
-    toBase64(iv),
-    toBase64(new Uint8Array(encrypted)),
-  ].join(":");
-}
-
-async function decryptFormData(
-  passphrase: string,
-  record: string
-): Promise<CoachForm | null> {
-  if (!isWebCryptoAvailable()) {
-    return null;
-  }
-
-  try {
-    const [version, saltEncoded, ivEncoded, payloadEncoded] = record.split(":");
-    if (
-      version !== ENC_VERSION ||
-      !saltEncoded ||
-      !ivEncoded ||
-      !payloadEncoded
-    ) {
-      return null;
-    }
-
-    const salt = fromBase64(saltEncoded);
-    const iv = fromBase64(ivEncoded);
-    const payload = fromBase64(payloadEncoded);
-    const key = await deriveKey(passphrase, salt);
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
-      key,
-      payload.buffer as ArrayBuffer
-    );
-    const decoder = new TextDecoder();
-    const json = decoder.decode(decrypted);
-    return JSON.parse(json) as CoachForm;
-  } catch (error) {
-    console.warn("Failed to decrypt coach worksheet", error);
-    return null;
-  }
-}
 
 type ConfidentialLevel = "HIGH" | "MEDIUM" | "NORMAL" | "";
 
@@ -170,25 +39,18 @@ type ChangeHandler = (
 export function CoachWorksheet() {
   useDocumentTitle("Coach Worksheet");
   const [form, setForm] = useState<CoachForm>({});
-  const [passphrase, setPassphrase] = useState<string>("");
-  const [storedCipher, setStoredCipher] = useState<string | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
   const [saving, setSaving] = useState(false);
-  const [unlocking, setUnlocking] = useState(false);
-  const [initialError, setInitialError] = useState<string | null>(null);
-
-  const cryptoSupported = isWebCryptoAvailable();
-  const hasSavedData = Boolean(storedCipher);
+  const [clearing, setClearing] = useState(false);
+  const [status, setStatus] = useState<
+    { type: "success" | "error"; message: string }
+  | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
-      setInitialError(null);
+      setLoadError(null);
       try {
         const response = await fetch("/api/worksheets/coach", {
           method: "GET",
@@ -213,13 +75,8 @@ export function CoachWorksheet() {
         }
 
         const data = payload?.worksheet?.data;
-        if (typeof data === "string") {
-          setStoredCipher(data);
-        } else if (data && typeof data === "object") {
+        if (data && typeof data === "object") {
           setForm(data as CoachForm);
-          setStoredCipher(null);
-        } else {
-          setStoredCipher(null);
         }
       } catch (error) {
         if (cancelled) {
@@ -229,7 +86,7 @@ export function CoachWorksheet() {
           error instanceof Error
             ? error.message
             : "Unable to load saved worksheet data.";
-        setInitialError(message);
+        setLoadError(message);
       }
     };
 
@@ -248,7 +105,7 @@ export function CoachWorksheet() {
       ...prev,
       [key]: value,
     }));
-    setSaveStatus(null);
+    setStatus(null);
   };
 
   const handleConfidentialChange = (level: ConfidentialLevel) => () => {
@@ -256,86 +113,18 @@ export function CoachWorksheet() {
       ...prev,
       confidential: prev.confidential === level ? "" : level,
     }));
-    setSaveStatus(null);
-  };
-
-  const handlePassphraseChange = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setPassphrase(event.target.value);
-    setLoadError(null);
-    setSaveStatus(null);
-  };
-
-  const handleUnlock = async () => {
-    if (!cryptoSupported) {
-      setLoadError("This browser does not support secure storage.");
-      return;
-    }
-
-    if (!hasSavedData) {
-      setLoadError("No encrypted notes were found for this account.");
-      return;
-    }
-
-    const secret = passphrase.trim();
-
-    if (secret.length < MIN_PASSPHRASE_LENGTH) {
-      setLoadError(
-        `Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters to unlock saved notes.`
-      );
-      return;
-    }
-
-    setUnlocking(true);
-    setLoadError(null);
-    try {
-      const decrypted = await decryptFormData(secret, storedCipher!);
-      if (!decrypted) {
-        setLoadError(
-          "Unable to unlock saved notes with the provided passphrase."
-        );
-        return;
-      }
-      setForm(decrypted);
-      setLoadError(null);
-      setSaveStatus(null);
-    } catch {
-      setLoadError("Unable to unlock saved notes right now.");
-    } finally {
-      setUnlocking(false);
-    }
+    setStatus(null);
   };
 
   const handleSave = async () => {
-    if (!cryptoSupported) {
-      setSaveStatus({
-        type: "error",
-        message:
-          "This browser does not support the required security features.",
-      });
-      return;
-    }
-
-    const secret = passphrase.trim();
-
-    if (secret.length < MIN_PASSPHRASE_LENGTH) {
-      setSaveStatus({
-        type: "error",
-        message: `Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters to save notes.`,
-      });
-      return;
-    }
-
     setSaving(true);
-    setSaveStatus(null);
+    setStatus(null);
     try {
-      const encrypted = await encryptFormData(secret, form);
       const response = await fetch("/api/worksheets/coach", {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: encrypted }),
+        body: JSON.stringify({ data: form }),
       });
       const payload = (await response.json().catch(() => null)) as
         | { ok: true }
@@ -351,10 +140,9 @@ export function CoachWorksheet() {
         throw new Error(message);
       }
 
-      setStoredCipher(encrypted);
-      setSaveStatus({
+      setStatus({
         type: "success",
-        message: "Saved encrypted notes.",
+        message: "Saved successfully.",
       });
     } catch (error) {
       console.warn("Failed to persist coach worksheet", error);
@@ -362,7 +150,7 @@ export function CoachWorksheet() {
         error instanceof Error
           ? error.message
           : "Failed to save notes. Please try again.";
-      setSaveStatus({
+      setStatus({
         type: "error",
         message,
       });
@@ -381,7 +169,8 @@ export function CoachWorksheet() {
       }
     }
 
-    setSaveStatus(null);
+    setClearing(true);
+    setStatus(null);
     try {
       const response = await fetch("/api/worksheets/coach", {
         method: "DELETE",
@@ -402,11 +191,7 @@ export function CoachWorksheet() {
       }
 
       setForm({});
-      setStoredCipher(null);
-      setPassphrase("");
-      setLoadError(null);
-      setInitialError(null);
-      setSaveStatus({
+      setStatus({
         type: "success",
         message: "Saved notes have been removed.",
       });
@@ -415,7 +200,9 @@ export function CoachWorksheet() {
         error instanceof Error
           ? error.message
           : "Unable to clear notes right now.";
-      setSaveStatus({ type: "error", message });
+      setStatus({ type: "error", message });
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -478,9 +265,9 @@ export function CoachWorksheet() {
     <Box>
       <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 }, pb: 8 }}>
         <Stack spacing={4}>
-        {initialError && (
+        {loadError && (
           <Alert severity="error" variant="outlined">
-            {initialError}
+            {loadError}
           </Alert>
         )}
         <Paper
@@ -932,82 +719,19 @@ export function CoachWorksheet() {
           }}
         >
           <Stack spacing={2.5}>
-            <Stack spacing={0.5}>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                Protect your notes
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Set a personal passphrase to encrypt anything you save for this
-                account. The same passphrase is required to unlock the notes
-                later.
-              </Typography>
-            </Stack>
-
-            <TextField
-              label="Encryption passphrase"
-              type="password"
-              value={passphrase}
-              onChange={handlePassphraseChange}
-              fullWidth
-              autoComplete="new-password"
-              disabled={!cryptoSupported}
-              helperText={
-                cryptoSupported
-                  ? `Use at least ${MIN_PASSPHRASE_LENGTH} characters.`
-                  : "Secure local storage requires a browser with Web Crypto support."
-              }
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderWidth: "1px",
-                  },
-                  "&:hover fieldset": {
-                    borderWidth: "1px",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderWidth: "1px !important",
-                  },
-                  "&.Mui-focused": {
-                    outline: "none",
-                  },
-                },
-                "& .MuiOutlinedInput-input": {
-                  outline: "none",
-                },
-              }}
-            />
-
             <Stack
               direction={{ xs: "column", sm: "row" }}
               spacing={1}
               justifyContent="flex-end"
             >
               <Button
-                variant="outlined"
-                onClick={() => {
-                  void handleUnlock();
-                }}
-                disabled={
-                  !cryptoSupported ||
-                  !hasSavedData ||
-                  passphrase.trim().length < MIN_PASSPHRASE_LENGTH ||
-                  unlocking
-                }
-              >
-                {unlocking ? "Unlocking…" : "Unlock saved data"}
-              </Button>
-              <Button
                 variant="contained"
                 onClick={() => {
                   void handleSave();
                 }}
-                disabled={
-                  !cryptoSupported ||
-                  passphrase.trim().length < MIN_PASSPHRASE_LENGTH ||
-                  saving
-                }
+                disabled={saving}
               >
-                {saving ? "Saving…" : "Save securely"}
+                {saving ? "Saving…" : "Save"}
               </Button>
               <Button
                 variant="outlined"
@@ -1015,32 +739,20 @@ export function CoachWorksheet() {
                 onClick={() => {
                   void handleClear();
                 }}
+                disabled={clearing}
               >
-                Clear
+                {clearing ? "Clearing…" : "Clear"}
               </Button>
             </Stack>
 
-            {loadError ? (
-              <Typography color="error.main" variant="body2">
-                {loadError}
-              </Typography>
-            ) : null}
-
-            {saveStatus ? (
+            {status ? (
               <Typography
                 color={
-                  saveStatus.type === "success" ? "success.main" : "error.main"
+                  status.type === "success" ? "success.main" : "error.main"
                 }
                 variant="body2"
               >
-                {saveStatus.message}
-              </Typography>
-            ) : null}
-
-            {!cryptoSupported ? (
-              <Typography color="warning.main" variant="body2">
-                Your browser does not support the Web Crypto API. Saved notes
-                will remain unavailable until you switch to a supported browser.
+                {status.message}
               </Typography>
             ) : null}
           </Stack>
