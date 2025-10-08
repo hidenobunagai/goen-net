@@ -158,7 +158,6 @@ export function UpdateFormDialog({ defaultCategory = 0, onCreated }: UpdateFormD
                 label="Title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Short title"
                 fullWidth
                 required
               />
