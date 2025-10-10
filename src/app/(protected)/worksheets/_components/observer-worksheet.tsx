@@ -9,8 +9,6 @@ import {
   Chip,
   Container,
   Divider,
-  FormControlLabel,
-  FormGroup,
   Paper,
   Stack,
   TextField,
@@ -505,19 +503,27 @@ export function ObserverWorksheet() {
                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                       {title}
                     </Typography>
-                    <FormGroup sx={{ gap: 0.75 }}>
+                    <Stack spacing={0.75}>
                       {prompts.map((prompt) =>
                         prompt.type === "checkbox" ? (
-                          <FormControlLabel
+                          <Stack
                             key={prompt.text}
-                            control={<Checkbox size="small" sx={{ mt: -0.25 }} />}
-                            label={
-                              <Typography variant="body2" sx={{ color: "text.primary" }}>
-                                {prompt.text}
-                              </Typography>
-                            }
-                            sx={{ alignItems: "flex-start", m: 0 }}
-                          />
+                            direction="row"
+                            spacing={1}
+                            alignItems="flex-start"
+                          >
+                            <Checkbox
+                              size="small"
+                              sx={{
+                                p: 0,
+                                mt: 0.25,
+                                "& .MuiSvgIcon-root": { fontSize: 20 },
+                              }}
+                            />
+                            <Typography variant="body2" sx={{ pt: 0.25 }}>
+                              {prompt.text}
+                            </Typography>
+                          </Stack>
                         ) : (
                           <Stack
                             key={prompt.text}
@@ -537,7 +543,7 @@ export function ObserverWorksheet() {
                           </Stack>
                         )
                       )}
-                    </FormGroup>
+                    </Stack>
                     <TextField
                       fullWidth
                       multiline
