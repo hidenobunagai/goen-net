@@ -5,9 +5,12 @@ import {
   Avatar,
   Box,
   Button,
+  Checkbox,
   Chip,
   Container,
   Divider,
+  FormControlLabel,
+  FormGroup,
   Paper,
   Stack,
   TextField,
@@ -30,6 +33,14 @@ type ObserverForm = {
 type ChangeHandler = (
   key: keyof ObserverForm
 ) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+
+type ProtocolPrompt = { type: "checkbox" | "bullet"; text: string };
+
+type ProtocolSection = {
+  key: keyof ObserverForm;
+  title: string;
+  prompts: ProtocolPrompt[];
+};
 
 function normalizeFormValue(value: unknown): ObserverForm {
   if (!value || typeof value !== "object") {
@@ -174,42 +185,72 @@ export function ObserverWorksheet() {
     }
   };
 
-  const protocolSections = useMemo(
+  const protocolSections = useMemo<ProtocolSection[]>(
     () => [
       {
-        key: "protocolListen" as const,
+        key: "protocolListen",
         title: "Listen closely",
         prompts: [
-          "□ Did peers show genuine interest? Did they try to understand the presenter's emotions?",
-          "□ Did anyone listen without looking in the other person's face or show a lack of interest?",
+          {
+            type: "checkbox",
+            text: "Did peers show genuine interest? Did they try to understand the presenter's emotions?",
+          },
+          {
+            type: "checkbox",
+            text: "Did anyone listen without looking in the other person's face or show a lack of interest?",
+          },
         ],
       },
       {
-        key: "protocolAccept" as const,
+        key: "protocolAccept",
         title: "Accept / Empathize",
         prompts: [
-          "□ Did all peers accept the other person's thoughts and values? Did anyone behave or say things that appeared to label people based on their own values?",
-          "□ Was there an atmosphere of mutual support and endorsement?",
+          {
+            type: "checkbox",
+            text: "Did all peers accept the other person's thoughts and values? Did anyone behave or say things that appeared to label people based on their own values?",
+          },
+          {
+            type: "checkbox",
+            text: "Was there an atmosphere of mutual support and endorsement?",
+          },
         ],
       },
       {
-        key: "protocolQuestion" as const,
+        key: "protocolQuestion",
         title: "Question",
         prompts: [
-          "□ Did anyone feel offended by “why” questions without sharing the intentions behind his/her questions?",
-          "□ Did anyone ask questions leading up to their own opinions? “Shouldn't you xxx?” or “Why don't you xxx?”",
+          {
+            type: "checkbox",
+            text: 'Did anyone feel offended by "why" questions without sharing the intentions behind his/her questions?',
+          },
+          {
+            type: "checkbox",
+            text: 'Did anyone ask questions leading up to their own opinions? "Shouldn\'t you xxx?" or "Why don\'t you xxx?"',
+          },
         ],
       },
       {
-        key: "protocolSupport" as const,
+        key: "protocolSupport",
         title: "Support",
         prompts: [
-          "• Share experiences",
-          "• “I”-statements",
-          "□ Did anyone stop at sharing their own experience? Did they also share lessons learned?",
-          "□ Did anyone try to convince the presenter or force advice instead of “I” statements?",
-          "□ Did anyone act irresponsibly, sharing general advice instead of their own experience?",
-          "□ Did anyone force their opinions on others?",
+          { type: "bullet", text: "Share experiences" },
+          { type: "bullet", text: "“I”-statements" },
+          {
+            type: "checkbox",
+            text: "Did anyone stop at sharing their own experience? Did they also share lessons learned?",
+          },
+          {
+            type: "checkbox",
+            text: "Did anyone try to convince the presenter or force advice instead of “I” statements?",
+          },
+          {
+            type: "checkbox",
+            text: "Did anyone act irresponsibly, sharing general advice instead of their own experience?",
+          },
+          {
+            type: "checkbox",
+            text: "Did anyone force their opinions on others?",
+          },
         ],
       },
     ],
@@ -464,11 +505,39 @@ export function ObserverWorksheet() {
                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                       {title}
                     </Typography>
-                    <Stack spacing={0.75}>
-                      {prompts.map((prompt) => (
-                        <Typography key={prompt}>{prompt}</Typography>
-                      ))}
-                    </Stack>
+                    <FormGroup sx={{ gap: 0.75 }}>
+                      {prompts.map((prompt) =>
+                        prompt.type === "checkbox" ? (
+                          <FormControlLabel
+                            key={prompt.text}
+                            control={<Checkbox size="small" sx={{ mt: -0.25 }} />}
+                            label={
+                              <Typography variant="body2" sx={{ color: "text.primary" }}>
+                                {prompt.text}
+                              </Typography>
+                            }
+                            sx={{ alignItems: "flex-start", m: 0 }}
+                          />
+                        ) : (
+                          <Stack
+                            key={prompt.text}
+                            direction="row"
+                            spacing={1}
+                            alignItems="flex-start"
+                            sx={{ pl: "6px" }}
+                          >
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              sx={{ lineHeight: "24px" }}
+                            >
+                              •
+                            </Typography>
+                            <Typography variant="body2">{prompt.text}</Typography>
+                          </Stack>
+                        )
+                      )}
+                    </FormGroup>
                     <TextField
                       fullWidth
                       multiline

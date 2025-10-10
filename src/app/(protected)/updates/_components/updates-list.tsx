@@ -487,6 +487,20 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
                   label="Member"
                   value={selectedUid}
                   onChange={handleMemberFilterChange}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        "& .MuiMenuItem-root": {
+                          "&:focus": {
+                            outline: "none",
+                          },
+                          "&:focus-visible": {
+                            outline: "none",
+                          },
+                        },
+                      },
+                    },
+                  }}
                   sx={{
                     color: "rgba(255, 255, 255, 0.9)",
                     ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
