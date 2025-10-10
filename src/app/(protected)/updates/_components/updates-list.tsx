@@ -85,6 +85,15 @@ function getUserBadgeColor(uid: string): string {
   return USER_BADGE_COLORS[hash % USER_BADGE_COLORS.length];
 }
 
+function getFirstName(fullName: string): string {
+  const trimmed = fullName.trim();
+  if (!trimmed) {
+    return fullName;
+  }
+  const [first] = trimmed.split(/\s+/);
+  return first || trimmed;
+}
+
 export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -342,6 +351,8 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
         }}
       >
         {items.map((item) => {
+          const displayName = getFirstName(item.by);
+
           return (
             <Paper
               key={item.id}
@@ -384,7 +395,7 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
                   }}
                   title={item.by}
                 >
-                  {item.by}
+                  {displayName}
                 </Box>
 
                 {/* Title */}
@@ -723,7 +734,7 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
                     alignSelf: "flex-start",
                   }}
                 >
-                  {detailsItem.by}
+                  {getFirstName(detailsItem.by)}
                 </Box>
                 <Box
                   sx={{
