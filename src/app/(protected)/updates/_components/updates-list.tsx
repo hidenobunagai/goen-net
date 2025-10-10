@@ -388,6 +388,8 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
                     lineHeight: 1.3,
                     display: "inline-flex",
                     alignItems: "center",
+                    alignSelf: "flex-start",
+                    width: "fit-content",
                     maxWidth: "60%",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -732,6 +734,11 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
                     display: "inline-flex",
                     alignItems: "center",
                     alignSelf: "flex-start",
+                    width: "fit-content",
+                    maxWidth: "100%",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {getFirstName(detailsItem.by)}
