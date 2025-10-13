@@ -84,6 +84,7 @@ a:hover {
 
 .MuiInputLabel-shrink {
   line-height: 1 !important;
+  transform: translate(14px, -9px) scale(0.75) !important;
 }
 
 * {

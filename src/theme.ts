@@ -122,6 +122,7 @@ const theme = createTheme({
           lineHeight: "1 !important",
           "&.MuiInputLabel-shrink": {
             lineHeight: "1 !important",
+            transform: "translate(14px, -9px) scale(0.75)",
           },
           "&.MuiInputLabel-sizeSmall": {
             lineHeight: "1 !important",
