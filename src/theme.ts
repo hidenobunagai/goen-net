@@ -136,6 +136,19 @@ const theme = createTheme({
         },
       },
     },
+    MuiInputBase: {
+      styleOverrides: {
+        input: {
+          lineHeight: 1.5,
+        },
+        root: {
+          "& input::placeholder": {
+            lineHeight: 1.5,
+            opacity: 0.7,
+          },
+        },
+      },
+    },
     MuiPaper: {
       defaultProps: {
         elevation: 0,
@@ -183,6 +196,9 @@ const theme = createTheme({
         },
         notchedOutline: {
           borderWidth: 1,
+        },
+        input: {
+          lineHeight: 1.5,
         },
       },
     },
