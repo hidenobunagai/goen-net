@@ -118,21 +118,25 @@ const theme = createTheme({
     },
     MuiInputLabel: {
       defaultProps: {
-        shrink: undefined,
+        shrink: true,
       },
       styleOverrides: {
         root: {
           position: "relative",
-          transform: "none",
+          transform: "none !important",
           fontSize: "1rem",
           marginBottom: 8,
           color: "rgba(0, 0, 0, 0.6)",
           "&.Mui-focused": {
             color: "rgba(0, 0, 0, 0.87)",
+            transform: "none !important",
           },
           "&.Mui-error": {
             color: "#d32f2f",
           },
+        },
+        shrink: {
+          transform: "none !important",
         },
         asterisk: {
           color: "#d32f2f",
@@ -143,8 +147,11 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           position: "relative",
-          transform: "none",
+          transform: "none !important",
           fontSize: "1rem",
+          "&.Mui-focused": {
+            transform: "none !important",
+          },
         },
         asterisk: {
           color: "#d32f2f",
