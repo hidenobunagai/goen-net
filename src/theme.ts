@@ -117,23 +117,37 @@ const theme = createTheme({
       },
     },
     MuiInputLabel: {
+      defaultProps: {
+        shrink: undefined,
+      },
       styleOverrides: {
         root: {
-          lineHeight: "1 !important",
-          "&.MuiInputLabel-shrink": {
-            lineHeight: "1 !important",
-            transform: "translate(14px, -9px) scale(0.75)",
+          position: "relative",
+          transform: "none",
+          fontSize: "1rem",
+          marginBottom: 8,
+          color: "rgba(0, 0, 0, 0.6)",
+          "&.Mui-focused": {
+            color: "rgba(0, 0, 0, 0.87)",
           },
-          "&.MuiInputLabel-sizeSmall": {
-            lineHeight: "1 !important",
+          "&.Mui-error": {
+            color: "#d32f2f",
           },
+        },
+        asterisk: {
+          color: "#d32f2f",
         },
       },
     },
     MuiFormLabel: {
       styleOverrides: {
         root: {
-          lineHeight: "1 !important",
+          position: "relative",
+          transform: "none",
+          fontSize: "1rem",
+        },
+        asterisk: {
+          color: "#d32f2f",
         },
       },
     },
@@ -187,6 +201,20 @@ const theme = createTheme({
         },
       },
     },
+    MuiTextField: {
+      defaultProps: {
+        variant: "outlined",
+      },
+      styleOverrides: {
+        root: {
+          "& .MuiInputLabel-root": {
+            position: "relative",
+            transform: "none",
+            marginBottom: 8,
+          },
+        },
+      },
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
@@ -197,6 +225,9 @@ const theme = createTheme({
         },
         notchedOutline: {
           borderWidth: 1,
+          legend: {
+            display: "none",
+          },
         },
         input: {
           lineHeight: 1.5,
