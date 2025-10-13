@@ -116,6 +116,26 @@ const theme = createTheme({
         },
       },
     },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          lineHeight: 1.2,
+          "&.MuiInputLabel-shrink": {
+            lineHeight: 1.2,
+          },
+          "&.MuiInputLabel-sizeSmall": {
+            lineHeight: 1.2,
+          },
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          lineHeight: 1.2,
+        },
+      },
+    },
     MuiPaper: {
       defaultProps: {
         elevation: 0,
