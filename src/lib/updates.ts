@@ -63,6 +63,29 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
     }
   }
 
+  // If the users table is empty or missing, attempt to create a minimal default schema.
+  if (columnMap.size === 0) {
+    try {
+      await execute(
+        "CREATE TABLE IF NOT EXISTS users (uid TEXT PRIMARY KEY, email TEXT, name TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))"
+      );
+      await execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+
+      const refreshed = await execute("PRAGMA table_info('users')");
+      const refreshedRows = (refreshed?.rows ?? []) as Array<Record<string, unknown> | unknown[]>;
+      for (const row of refreshedRows) {
+        const name = extractColumnName(row);
+        if (name) {
+          columnMap.set(name.toLowerCase(), name);
+        }
+      }
+    } catch (error) {
+      logger.error("[updates] Failed to auto-create users table", {
+        error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+      });
+    }
+  }
+
   if (columnMap.size === 0) {
     throw new Error("[updates] users table is missing or has no columns");
   }
