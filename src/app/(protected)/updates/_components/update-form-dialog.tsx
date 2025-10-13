@@ -160,6 +160,9 @@ export function UpdateFormDialog({ defaultCategory = 0, onCreated }: UpdateFormD
                 onChange={(event) => setTitle(event.target.value)}
                 fullWidth
                 required
+                InputLabelProps={{
+                  sx: { lineHeight: 1 },
+                }}
               />
 
               <TextField
@@ -171,6 +174,9 @@ export function UpdateFormDialog({ defaultCategory = 0, onCreated }: UpdateFormD
                 multiline
                 minRows={4}
                 required
+                InputLabelProps={{
+                  sx: { lineHeight: 1 },
+                }}
               />
 
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>

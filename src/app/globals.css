@@ -77,6 +77,15 @@ a:hover {
   outline-offset: 0;
 }
 
+.MuiInputLabel-root,
+.MuiFormLabel-root {
+  line-height: 1 !important;
+}
+
+.MuiInputLabel-shrink {
+  line-height: 1 !important;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }

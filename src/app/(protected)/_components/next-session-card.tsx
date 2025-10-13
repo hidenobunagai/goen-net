@@ -304,7 +304,7 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                 type="date"
                 value={form.date}
                 onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true, sx: { lineHeight: 1 } }}
                 required
               />
               <Grid container spacing={2} columns={{ xs: 1, sm: 2 }}>
@@ -319,7 +319,7 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                         startTime: event.target.value,
                       }))
                     }
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ shrink: true, sx: { lineHeight: 1 } }}
                     inputProps={{ step: 1800 }}
                     required
                   />
@@ -335,7 +335,7 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                         endTime: event.target.value,
                       }))
                     }
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ shrink: true, sx: { lineHeight: 1 } }}
                     inputProps={{ step: 1800 }}
                   />
                 </Grid>
@@ -345,6 +345,7 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                 value={form.location}
                 onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
                 placeholder="Zoom, NYC office, etc."
+                InputLabelProps={{ sx: { lineHeight: 1 } }}
                 inputProps={{
                   spellCheck: false,
                   autoCorrect: "off",

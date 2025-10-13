@@ -119,12 +119,12 @@ const theme = createTheme({
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          lineHeight: 1,
+          lineHeight: "1 !important",
           "&.MuiInputLabel-shrink": {
-            lineHeight: 1,
+            lineHeight: "1 !important",
           },
           "&.MuiInputLabel-sizeSmall": {
-            lineHeight: 1,
+            lineHeight: "1 !important",
           },
         },
       },
@@ -132,7 +132,7 @@ const theme = createTheme({
     MuiFormLabel: {
       styleOverrides: {
         root: {
-          lineHeight: 1,
+          lineHeight: "1 !important",
         },
       },
     },
