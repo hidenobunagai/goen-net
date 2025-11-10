@@ -129,6 +129,50 @@ describe("/api/updates route", () => {
     expect(body.error.code).toBe("INVALID_BODY");
   });
 
+  it("rejects POST with invalid category", async () => {
+    vi.mocked(getServerSession).mockResolvedValueOnce({
+      user: { email: "user@example.com", name: "User" },
+    } as never);
+    vi.mocked(requireJson).mockResolvedValueOnce({
+      title: "Update title",
+      update: "text",
+      when: 1,
+      category: 5,
+    });
+
+    const request = new Request("http://localhost/api/updates", {
+      method: "POST",
+    });
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error.code).toBe("INVALID_BODY");
+    expect(body.error.message).toContain("category must be one of 0, 1, or 2.");
+  });
+
+  it("rejects POST with invalid when", async () => {
+    vi.mocked(getServerSession).mockResolvedValueOnce({
+      user: { email: "user@example.com", name: "User" },
+    } as never);
+    vi.mocked(requireJson).mockResolvedValueOnce({
+      title: "Update title",
+      update: "text",
+      when: 0,
+      category: 1,
+    });
+
+    const request = new Request("http://localhost/api/updates", {
+      method: "POST",
+    });
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error.code).toBe("INVALID_BODY");
+    expect(body.error.message).toContain("when must be either -1 or 1.");
+  });
+
   it("enforces POST rate limit", async () => {
     vi.mocked(getServerSession).mockResolvedValueOnce({
       user: { email: "user@example.com", name: "User" },
