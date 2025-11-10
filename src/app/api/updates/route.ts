@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -74,15 +75,25 @@ export async function GET(request: Request) {
   }
 }
 
-type CreateUpdatePayload = {
-  by?: string;
-  category?: number;
-  urgent?: boolean;
-  priority?: boolean;
-  title?: string | null;
-  update?: string;
-  when?: number;
-};
+const createUpdateSchema = z.object({
+  by: z.string().optional(),
+  category: z
+    .number()
+    .refine((value): value is 0 | 1 | 2 => value === 0 || value === 1 || value === 2, {
+      message: "category must be one of 0, 1, or 2.",
+    })
+    .optional(),
+  urgent: z.boolean().optional(),
+  priority: z.boolean().optional(),
+  title: z.string().nullable().optional(),
+  update: z.string().optional(),
+  when: z
+    .number()
+    .refine((value): value is -1 | 1 => value === -1 || value === 1, {
+      message: "when must be either -1 or 1.",
+    })
+    .optional(),
+});
 
 export async function POST(request: Request) {
   const session = await getOptionalUserSession();
@@ -96,9 +107,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: CreateUpdatePayload;
+  let payload: unknown;
   try {
-    body = await requireJson<CreateUpdatePayload>(request);
+    payload = await requireJson(request);
   } catch (error: unknown) {
     if (error instanceof JsonBodyError) {
       return NextResponse.json(
@@ -108,12 +119,38 @@ export async function POST(request: Request) {
     }
     throw error;
   }
+  const parsed = createUpdateSchema.safeParse(payload);
+  if (!parsed.success) {
+    const issueMessages = parsed.error.issues.map((issue) => {
+      if (issue.path[0] === "category") {
+        return issue.code === "invalid_type"
+          ? "category must be a number."
+          : "category must be one of 0, 1, or 2.";
+      }
+      if (issue.path[0] === "when") {
+        return issue.code === "invalid_type"
+          ? "when must be a number."
+          : "when must be either -1 or 1.";
+      }
+      const path = issue.path.join(".") || "body";
+      return `${path}: ${issue.message}`;
+    });
+    const message = `Invalid request body. ${issueMessages.join(" ")}`.trim();
+    return NextResponse.json(
+      {
+        ok: false,
+        error: { code: "INVALID_BODY", message },
+      },
+      { status: 422 }
+    );
+  }
+  const body = parsed.data;
   const by = typeof body?.by === "string" ? body.by.trim() : (session.user?.name ?? "Unknown");
-  const category = Number(body?.category ?? 0);
+  const category = body.category ?? 0;
   const urgent = Boolean(typeof body?.urgent === "boolean" ? body.urgent : body?.priority);
   const title = typeof body?.title === "string" ? body.title.trim() : "";
   const updateText = typeof body?.update === "string" ? body.update.trim() : "";
-  const when = Number(body?.when ?? -1);
+  const when = body.when ?? -1;
 
   if (!title) {
     return NextResponse.json(
