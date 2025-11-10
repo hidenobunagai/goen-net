@@ -130,5 +130,19 @@ describe("/api/updates/[id] route", () => {
       expect(response.status).toBe(200);
       expect(json.ok).toBe(true);
     });
+
+    it("returns 503 when deleteUpdate throws", async () => {
+      vi.mocked(getServerSession).mockResolvedValueOnce({
+        user: { email: "user@example.com" },
+      } as never);
+      vi.mocked(deleteUpdate).mockRejectedValueOnce(new Error("boom"));
+      const response = await DELETE(
+        new NextRequest("http://localhost/api/updates/1", { method: "DELETE" }),
+        createContext("1")
+      );
+      const json = await response.json();
+      expect(response.status).toBe(503);
+      expect(json.error.code).toBe("DELETE_FAILED");
+    });
   });
 });

@@ -15,6 +15,7 @@ vi.mock("@/lib/updates", () => ({
   fetchUpdates: vi.fn(),
   getUpdateById: vi.fn(),
   insertUpdate: vi.fn(),
+  deleteAllUpdates: vi.fn(),
 }));
 
 vi.mock("@/lib/utils", () => ({
@@ -37,10 +38,12 @@ process.env.GOOGLE_CLIENT_SECRET ??= "test-google-client-secret";
 process.env.NEXTAUTH_SECRET ??= "test-nextauth-secret";
 
 const { getServerSession } = await import("next-auth");
-const { fetchUpdates, getUpdateById, insertUpdate } = await import("@/lib/updates");
+const { fetchUpdates, getUpdateById, insertUpdate, deleteAllUpdates } = await import(
+  "@/lib/updates"
+);
 const { requireJson, JsonBodyError } = await import("@/lib/utils");
 const { checkRateLimit } = await import("@/lib/rate-limit");
-const { GET, POST } = await import("@/app/api/updates/route");
+const { GET, POST, DELETE } = await import("@/app/api/updates/route");
 
 describe("/api/updates route", () => {
   beforeEach(() => {
@@ -96,6 +99,76 @@ describe("/api/updates route", () => {
     expect(response.status).toBe(200);
     expect(Array.isArray(body.updates)).toBe(true);
     expect(body.updates).toHaveLength(1);
+  });
+
+  describe("DELETE", () => {
+    it("rejects unauthenticated DELETE", async () => {
+      vi.mocked(getServerSession).mockResolvedValueOnce(null as never);
+
+      const request = new Request("http://localhost/api/updates", {
+        method: "DELETE",
+      });
+
+      const response = await DELETE(request);
+      const body = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(body.error.code).toBe("UNAUTHENTICATED");
+    });
+
+    it("rejects DELETE when rate limit exceeded", async () => {
+      vi.mocked(getServerSession).mockResolvedValueOnce({
+        user: { email: "user@example.com" },
+      } as never);
+      vi.mocked(checkRateLimit).mockResolvedValueOnce(false);
+
+      const request = new Request("http://localhost/api/updates", {
+        method: "DELETE",
+      });
+
+      const response = await DELETE(request);
+      const body = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(body.error.code).toBe("RATE_LIMIT");
+    });
+
+    it("returns ok when delete succeeds", async () => {
+      vi.mocked(getServerSession).mockResolvedValueOnce({
+        user: { email: "user@example.com" },
+      } as never);
+      vi.mocked(checkRateLimit).mockResolvedValueOnce(true);
+      vi.mocked(deleteAllUpdates).mockResolvedValueOnce(3);
+
+      const request = new Request("http://localhost/api/updates", {
+        method: "DELETE",
+      });
+
+      const response = await DELETE(request);
+      const body = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(body.ok).toBe(true);
+      expect(body.deleted).toBe(3);
+    });
+
+    it("returns 503 when deleteAllUpdates throws", async () => {
+      vi.mocked(getServerSession).mockResolvedValueOnce({
+        user: { email: "user@example.com" },
+      } as never);
+      vi.mocked(checkRateLimit).mockResolvedValueOnce(true);
+      vi.mocked(deleteAllUpdates).mockRejectedValueOnce(new Error("boom"));
+
+      const request = new Request("http://localhost/api/updates", {
+        method: "DELETE",
+      });
+
+      const response = await DELETE(request);
+      const body = await response.json();
+
+      expect(response.status).toBe(503);
+      expect(body.error.code).toBe("DELETE_FAILED");
+    });
   });
 
   it("rejects POST without JSON body", async () => {
