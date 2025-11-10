@@ -12,12 +12,14 @@ CREATE TABLE IF NOT EXISTS next_session (
 
 -- User updates
 CREATE TABLE IF NOT EXISTS updates (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
+  by_name TEXT,
+  category INTEGER NOT NULL DEFAULT 0,
+  urgent INTEGER NOT NULL DEFAULT 0,
   uid TEXT NOT NULL,
-  content TEXT NOT NULL,
-  timeframe TEXT,
-  urgent BOOLEAN DEFAULT 0,
-  tags TEXT,
+  title TEXT,
+  body TEXT NOT NULL,
+  when_value INTEGER NOT NULL DEFAULT -1,
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );
