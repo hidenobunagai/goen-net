@@ -78,7 +78,7 @@ export async function GET(request: Request) {
 const createUpdateSchema = z.object({
   by: z.string().optional(),
   category: z
-    .number({ invalid_type_error: "category must be a number." })
+    .number()
     .refine((value): value is 0 | 1 | 2 => value === 0 || value === 1 || value === 2, {
       message: "category must be one of 0, 1, or 2.",
     })
@@ -88,7 +88,7 @@ const createUpdateSchema = z.object({
   title: z.string().nullable().optional(),
   update: z.string().optional(),
   when: z
-    .number({ invalid_type_error: "when must be a number." })
+    .number()
     .refine((value): value is -1 | 1 => value === -1 || value === 1, {
       message: "when must be either -1 or 1.",
     })
@@ -123,10 +123,14 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     const issueMessages = parsed.error.issues.map((issue) => {
       if (issue.path[0] === "category") {
-        return "category must be one of 0, 1, or 2.";
+        return issue.code === "invalid_type"
+          ? "category must be a number."
+          : "category must be one of 0, 1, or 2.";
       }
       if (issue.path[0] === "when") {
-        return "when must be either -1 or 1.";
+        return issue.code === "invalid_type"
+          ? "when must be a number."
+          : "when must be either -1 or 1.";
       }
       const path = issue.path.join(".") || "body";
       return `${path}: ${issue.message}`;
