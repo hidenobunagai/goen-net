@@ -45,6 +45,7 @@ import {
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { logger } from "@/lib/logger";
 import type { UpdateRecord } from "@/lib/updates";
 
 const STORAGE_KEY = "goen-prioritization-board-v1";
@@ -255,7 +256,12 @@ export function PrioritizationBoard() {
         setBoard(createBoardWithUpdates(storedBoard, items));
       } catch (err) {
         if (controller.signal.aborted) return;
-        console.error("Failed to load prioritization data", err);
+        logger.error("Failed to load prioritization data", {
+          url: "/api/updates",
+          limit: 200,
+          error:
+            err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : err,
+        });
         setError(err instanceof Error ? err.message : "Failed to load updates.");
         setUpdates([]);
         setBoard(createBoardWithUpdates(null, []));

@@ -3,6 +3,7 @@ import type { Session } from "next-auth";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 async function resolveServerSession(): Promise<Session | null> {
   try {
@@ -14,7 +15,14 @@ async function resolveServerSession(): Promise<Session | null> {
         : undefined;
 
     if (digest !== "DYNAMIC_SERVER_USAGE" && digest !== "NEXT_REDIRECT") {
-      console.error("Failed to resolve server session", error);
+      const context = {
+        digest,
+        error:
+          error instanceof Error
+            ? { name: error.name, message: error.message, stack: error.stack }
+            : error,
+      };
+      logger.error("Failed to resolve server session", context);
     }
     return null;
   }
