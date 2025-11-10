@@ -34,6 +34,7 @@ class Logger {
 
     switch (level) {
       case "error":
+        // eslint-disable-next-line no-console
         console.error(JSON.stringify(logEntry));
         break;
       case "warn":
