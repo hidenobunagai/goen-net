@@ -5,7 +5,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "jsdom",
-    environmentMatchGlobs: [["tests/api/**", "node"]],
+    environmentMatchGlobs: [
+      ["tests/api/**", "node"],
+      ["tests/actions/**", "node"],
+    ],
     globals: true,
     alias: {
       "@": path.resolve(__dirname, "src"),

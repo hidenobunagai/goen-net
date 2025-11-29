@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:updates": "vitest --run tests/api",
+    "test:updates": "vitest --run tests/actions",
     "test:coverage": "vitest run --coverage",
     "test:playwright": "playwright test",
     "format": "prettier --write .",

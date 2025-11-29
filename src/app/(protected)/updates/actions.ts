@@ -75,7 +75,6 @@ export async function createUpdateAction(
       body,
       when: (data.when === 1 ? 1 : -1) as -1 | 1,
     });
-
     revalidatePath("/updates");
     return { ok: true };
   } catch (error) {
@@ -123,12 +122,6 @@ export async function deleteAllUpdatesAction(): Promise<ActionState> {
   if (!uid) {
     return { ok: false, error: "Authentication required." };
   }
-
-  // Only allow specific users or admins if needed, but for now open to auth users as per existing logic
-  // Existing logic in route.ts didn't restrict delete ALL?
-  // Wait, route.ts DELETE handler calls `deleteAllUpdates()`?
-  // Let's check route.ts again.
-  // Yes, `deleteAllUpdates()` is called. It seems dangerous but I will replicate it.
 
   try {
     await deleteAllUpdates();

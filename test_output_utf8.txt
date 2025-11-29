@@ -1,0 +1,28 @@
+﻿
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mC:/Users/hiden/Projects/goen-net[39m
+
+ [32m笨・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mcreateUpdateAction[2m > [22mreturns error when unauthenticated
+ [31mﾃ・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mcreateUpdateAction[2m > [22mreturns error when rate limit exceeded
+[31m   竊・expected true to be false // Object.is equality[39m
+ [31mﾃ・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mcreateUpdateAction[2m > [22mreturns error when validation fails
+[31m   竊・expected true to be false // Object.is equality[39m
+ [31mﾃ・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mcreateUpdateAction[2m > [22mcreates update successfully
+[31m   竊・expected "spy" to be called with arguments: [ ObjectContaining{窶ｦ} ][90m
+
+Received: 
+
+[31m[90m
+
+Number of calls: [1m0[22m
+[31m[39m
+ [32m笨・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mdeleteUpdateAction[2m > [22mreturns error when unauthenticated
+ [31mﾃ・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mdeleteUpdateAction[2m > [22mdeletes update successfully
+[31m   竊・expected false to be true // Object.is equality[39m
+ [32m笨・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mdeleteAllUpdatesAction[2m > [22mreturns error when unauthenticated
+ [32m笨・[39m tests/actions/updates.test.ts[2m > [22mUpdates Server Actions[2m > [22mdeleteAllUpdatesAction[2m > [22mdeletes all updates successfully
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 20:17:39
+[2m   Duration [22m 858ms[2m (transform 108ms, setup 0ms, collect 116ms, tests 28ms, environment 0ms, prepare 317ms)[22m
+
