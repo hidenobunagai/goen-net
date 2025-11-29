@@ -25,9 +25,11 @@ import MenuItem from "@mui/material/MenuItem";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
 import type { ChangeEvent, FormEvent } from "react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import type { UpdateRecord } from "@/lib/updates";
+
+import { createUpdateAction } from "../actions";
 
 const CATEGORY_OPTIONS = [
   { value: 0, label: "Work" },
@@ -50,7 +52,7 @@ export function UpdateFormDialog({ defaultCategory = 0, onCreated }: UpdateFormD
   const [category, setCategory] = useState<number>(defaultCategory);
   const [urgent, setUrgent] = useState(false);
   const [when, setWhen] = useState<-1 | 1>(-1);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const reset = () => {
@@ -74,7 +76,7 @@ export function UpdateFormDialog({ defaultCategory = 0, onCreated }: UpdateFormD
     setWhen(Number(event.target.value) === 1 ? 1 : -1);
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
@@ -89,42 +91,27 @@ export function UpdateFormDialog({ defaultCategory = 0, onCreated }: UpdateFormD
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const response = await fetch("/api/updates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title: trimmedTitle,
-          update: body.trim(),
-          category,
-          urgent,
-          when,
-        }),
-      });
+    const formData = new FormData();
+    formData.append("title", trimmedTitle);
+    formData.append("body", body.trim());
+    formData.append("category", String(category));
+    formData.append("urgent", String(urgent));
+    formData.append("when", String(when));
 
-      const json = await response.json().catch(() => null);
-      if (!response.ok || json?.ok === false) {
-        const message = json?.error?.message || "Failed to submit update.";
-        throw new Error(message);
+    startTransition(async () => {
+      try {
+        const result = await createUpdateAction({ ok: false }, formData);
+        if (result.ok) {
+          await onCreated?.(null);
+          reset();
+          setOpen(false);
+        } else {
+          setError(result.error || "Failed to submit update.");
+        }
+      } catch {
+        setError("Failed to submit update.");
       }
-
-      const rawUpdate =
-        json && typeof json === "object" && "update" in json
-          ? (json as { update?: unknown }).update
-          : undefined;
-      const createdUpdate =
-        rawUpdate && typeof rawUpdate === "object" ? (rawUpdate as UpdateRecord) : null;
-
-      await onCreated?.(createdUpdate);
-      reset();
-      setOpen(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to submit update.");
-    } finally {
-      setSubmitting(false);
-    }
+    });
   };
 
   return (

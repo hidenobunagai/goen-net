@@ -45,7 +45,6 @@ import {
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { logger } from "@/lib/logger";
 import type { UpdateRecord } from "@/lib/updates";
 
 const STORAGE_KEY = "goen-prioritization-board-v1";
@@ -217,11 +216,13 @@ function findColumnIdByItem(board: BoardState, itemId: UniqueId): UniqueId | nul
   return null;
 }
 
-export function PrioritizationBoard() {
-  const [updates, setUpdates] = useState<UpdateItem[]>([]);
+type PrioritizationBoardProps = {
+  initialUpdates: UpdateRecord[];
+};
+
+export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps) {
+  const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
   const [board, setBoard] = useState<BoardState | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [newColumnName, setNewColumnName] = useState("");
   const [activeId, setActiveId] = useState<UniqueId | null>(null);
   const [selectedMember, setSelectedMember] = useState<string>("all");
@@ -234,47 +235,14 @@ export function PrioritizationBoard() {
   );
 
   useEffect(() => {
-    const controller = new AbortController();
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch("/api/updates?limit=200", {
-          method: "GET",
-          credentials: "include",
-          signal: controller.signal,
-        });
-        const payload = await response.json().catch(() => null);
-        if (!response.ok || payload?.ok === false) {
-          const message = payload?.error?.message ?? "Failed to load updates.";
-          throw new Error(message);
-        }
-        const list = Array.isArray(payload?.updates) ? (payload.updates as UpdateRecord[]) : [];
-        const items = list.map(toUpdateItem);
-        const storedBoard = loadBoardFromStorage();
-        setUpdates(items);
-        setBoard(createBoardWithUpdates(storedBoard, items));
-      } catch (err) {
-        if (controller.signal.aborted) return;
-        logger.error("Failed to load prioritization data", {
-          url: "/api/updates",
-          limit: 200,
-          error:
-            err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : err,
-        });
-        setError(err instanceof Error ? err.message : "Failed to load updates.");
-        setUpdates([]);
-        setBoard(createBoardWithUpdates(null, []));
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    };
+    const storedBoard = loadBoardFromStorage();
+    setBoard(createBoardWithUpdates(storedBoard, updates));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount to initialize board with updates
 
-    void load();
-    return () => controller.abort();
-  }, []);
+  useEffect(() => {
+    setUpdates(initialUpdates.map(toUpdateItem));
+  }, [initialUpdates]);
 
   useEffect(() => {
     if (!board) return;
@@ -530,23 +498,15 @@ export function PrioritizationBoard() {
     });
   };
 
-  if (loading) {
+  if (!board) {
     return (
       <Container sx={{ py: 6 }}>
         <Stack spacing={2} alignItems="center">
           <CircularProgress sx={{ color: "rgba(255, 255, 255, 0.8)" }} />
           <Typography variant="body1" sx={{ color: "rgba(255, 255, 255, 0.75)" }}>
-            Loading updates…
+            Initializing board…
           </Typography>
         </Stack>
-      </Container>
-    );
-  }
-
-  if (!board) {
-    return (
-      <Container sx={{ py: 6 }}>
-        <Alert severity="error">Failed to initialize prioritization board.</Alert>
       </Container>
     );
   }
@@ -780,8 +740,6 @@ export function PrioritizationBoard() {
               </Button>
             </Stack>
           </Stack>
-
-          {error ? <Alert severity="warning">{error}</Alert> : null}
 
           <Paper
             variant="outlined"

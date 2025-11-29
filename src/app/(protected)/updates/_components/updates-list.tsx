@@ -1,17 +1,10 @@
 "use client";
 
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   FormControl,
   InputLabel,
   MenuItem,
@@ -30,13 +23,15 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 
-import { del, get } from "@/lib/api-client";
 import type { UpdateRecord } from "@/lib/updates";
 
+import { deleteAllUpdatesAction, deleteUpdateAction } from "../actions";
+import { DeleteAllUpdatesDialog, DeleteUpdateDialog } from "./delete-dialogs";
+import { UpdateCard } from "./update-card";
+import { UpdateDetailsDialog } from "./update-details-dialog";
 import { UpdateFormDialog } from "./update-form-dialog";
-import { UpdateStatusBadge } from "./update-status-badge";
 
 const CATEGORIES = [
   { id: 0, label: "Work" },
@@ -52,122 +47,29 @@ type SnackbarState = {
   message: string;
 } | null;
 
-type UpdateItem = UpdateRecord & { createdAtDate: Date };
-
 type UpdatesBoardProps = {
   initialUpdates: UpdateRecord[];
-  viewerEmail: string | null | undefined;
 };
 
-const toUpdateItem = (record: UpdateRecord): UpdateItem => ({
-  ...record,
-  createdAtDate: new Date(record.createdAt),
-});
-
-// Color palette for user badges (distinct, accessible colors)
-const USER_BADGE_COLORS = [
-  "#1976d2", // blue
-  "#2e7d32", // green
-  "#ed6c02", // orange
-  "#9c27b0", // purple
-  "#d32f2f", // red
-  "#0288d1", // light blue
-  "#f57c00", // deep orange
-  "#7b1fa2", // deep purple
-  "#00796b", // teal
-  "#c62828", // dark red
-];
-
-// Deterministic color assignment based on user ID
-function getUserBadgeColor(uid: string): string {
-  if (!uid) return USER_BADGE_COLORS[0];
-  const hash = uid.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return USER_BADGE_COLORS[hash % USER_BADGE_COLORS.length];
-}
-
-function getFirstName(fullName: string): string {
-  const trimmed = fullName.trim();
-  if (!trimmed) {
-    return fullName;
-  }
-  const [first] = trimmed.split(/\s+/);
-  return first || trimmed;
-}
-
-export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps) {
+export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  // We use initialUpdates directly. When server action revalidates,
+  // the page re-renders and passes new initialUpdates.
+  const updates = initialUpdates;
+
   const [selectedUid, setSelectedUid] = useState<string>("all");
-  const [detailsItem, setDetailsItem] = useState<UpdateItem | null>(null);
+  const [detailsItem, setDetailsItem] = useState<UpdateRecord | null>(null);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<UpdateItem | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<UpdateRecord | null>(null);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
-  const [deleteAllLoading, setDeleteAllLoading] = useState(false);
+  const [isDeletingAll, startDeleteAllTransition] = useTransition();
+
   const [snackbar, setSnackbar] = useState<SnackbarState>(null);
-  type ReloadResult = "success" | "preserved" | "skipped" | "error";
-
-  const handleReload = useCallback(
-    async ({
-      silent = false,
-      preserveExistingOnEmpty = false,
-    }: {
-      silent?: boolean;
-      preserveExistingOnEmpty?: boolean;
-    } = {}): Promise<ReloadResult> => {
-      if (!viewerEmail) {
-        return "skipped";
-      }
-
-      if (!silent) {
-        setRefreshing(true);
-      }
-
-      setFetchError(null);
-      try {
-        const payload = await get<{
-          ok: boolean;
-          updates?: UpdateRecord[];
-          error?: { message?: string };
-        }>(`/api/updates?limit=200`);
-
-        if (payload.ok === false) {
-          const message = payload.error?.message ?? "Failed to load updates. Please try again.";
-          throw new Error(message);
-        }
-
-        const list = Array.isArray(payload.updates) ? payload.updates : [];
-        const nextItems = list.map(toUpdateItem);
-        let updated = false;
-        setUpdates((prev) => {
-          if (preserveExistingOnEmpty && prev.length > 0 && nextItems.length === 0) {
-            return prev;
-          }
-          updated = true;
-          return nextItems;
-        });
-        if (!updated && preserveExistingOnEmpty && nextItems.length === 0) {
-          return "preserved";
-        }
-        return "success";
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to load updates. Please try again.";
-        setFetchError(message);
-        setSnackbar({ severity: "error", message });
-        return "error";
-      } finally {
-        if (!silent) {
-          setRefreshing(false);
-        }
-      }
-    },
-    [viewerEmail]
-  );
 
   const memberOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -181,46 +83,15 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
       .sort((a, b) => a.by.localeCompare(b.by));
   }, [updates]);
 
-  const handleUpdateCreated = useCallback(
-    async (record: UpdateRecord | null) => {
-      if (record) {
-        const newItem = toUpdateItem(record);
-        setUpdates((prev) => {
-          const filtered = prev.filter((item) => item.id !== newItem.id);
-          return [newItem, ...filtered];
-        });
-      }
-
-      const reloadResult = await handleReload({
-        silent: true,
-        preserveExistingOnEmpty: true,
-      });
-
-      if (reloadResult === "error") {
-        return;
-      }
-
-      if (reloadResult === "preserved" && typeof window !== "undefined") {
-        window.setTimeout(() => {
-          void handleReload({ silent: true });
-        }, 1500);
-      }
-
-      setSnackbar({ severity: "success", message: "Update added." });
-    },
-    [handleReload]
-  );
-
   const filteredUpdates = useMemo(() => {
     if (selectedUid === "all") {
       return updates;
     }
-
     return updates.filter((update) => update.uid === selectedUid);
   }, [updates, selectedUid]);
 
   const groupedUpdates = useMemo(() => {
-    const grouped: Record<number, { past: UpdateItem[]; future: UpdateItem[] }> = {};
+    const grouped: Record<number, { past: UpdateRecord[]; future: UpdateRecord[] }> = {};
 
     for (const category of CATEGORIES) {
       grouped[category.id] = { past: [], future: [] };
@@ -232,8 +103,8 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
       grouped[update.category][bucket].push(update);
     }
 
-    const groupUpdatesByUser = (items: UpdateItem[]) => {
-      const groups = new Map<string, UpdateItem[]>();
+    const groupUpdatesByUser = (items: UpdateRecord[]) => {
+      const groups = new Map<string, UpdateRecord[]>();
       const order: string[] = [];
 
       for (const item of items) {
@@ -255,59 +126,64 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
     return grouped;
   }, [filteredUpdates]);
 
-  const requestDelete = (item: UpdateItem) => {
+  const handleUpdateCreated = () => {
+    setSnackbar({ severity: "success", message: "Update added." });
+  };
+
+  const requestDelete = (item: UpdateRecord) => {
     setDeleteTarget(item);
     setDeleteDialogOpen(true);
   };
 
   const cancelDelete = () => {
-    if (deleteLoading) return;
+    if (isDeleting) return;
     setDeleteDialogOpen(false);
     setDeleteTarget(null);
-    setDeleteLoading(false);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!deleteTarget) return;
-    setDeleteLoading(true);
-    try {
-      await del(`/api/updates/${encodeURIComponent(deleteTarget.id)}`);
 
-      setUpdates((prev) => prev.filter((update) => update.id !== deleteTarget.id));
-      setSnackbar({ severity: "success", message: "Update deleted." });
-      setDeleteDialogOpen(false);
-      setDeleteTarget(null);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete update. Please try again.";
-      setSnackbar({ severity: "error", message });
-    } finally {
-      setDeleteLoading(false);
-    }
+    startDeleteTransition(async () => {
+      try {
+        const result = await deleteUpdateAction(deleteTarget.id);
+        if (result.ok) {
+          setSnackbar({ severity: "success", message: "Update deleted." });
+          setDeleteDialogOpen(false);
+          setDeleteTarget(null);
+          if (detailsItem?.id === deleteTarget.id) {
+            setDetailsItem(null);
+          }
+        } else {
+          setSnackbar({ severity: "error", message: result.error || "Failed to delete update." });
+        }
+      } catch {
+        setSnackbar({ severity: "error", message: "Failed to delete update." });
+      }
+    });
   };
 
   const openDeleteAll = () => setDeleteAllDialogOpen(true);
 
   const cancelDeleteAll = () => {
-    if (deleteAllLoading) return;
+    if (isDeletingAll) return;
     setDeleteAllDialogOpen(false);
   };
 
-  const confirmDeleteAll = async () => {
-    setDeleteAllLoading(true);
-    try {
-      await del(`/api/updates`);
-
-      await handleReload({ silent: true });
-      setSnackbar({ severity: "success", message: "All updates deleted." });
-      setDeleteAllDialogOpen(false);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete updates. Please try again.";
-      setSnackbar({ severity: "error", message });
-    } finally {
-      setDeleteAllLoading(false);
-    }
+  const confirmDeleteAll = () => {
+    startDeleteAllTransition(async () => {
+      try {
+        const result = await deleteAllUpdatesAction();
+        if (result.ok) {
+          setSnackbar({ severity: "success", message: "All updates deleted." });
+          setDeleteAllDialogOpen(false);
+        } else {
+          setSnackbar({ severity: "error", message: result.error || "Failed to delete updates." });
+        }
+      } catch {
+        setSnackbar({ severity: "error", message: "Failed to delete updates." });
+      }
+    });
   };
 
   const handleSnackbarClose = () => setSnackbar(null);
@@ -316,15 +192,7 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
     setSelectedUid(event.target.value);
   };
 
-  const handleDetailsOpen = (item: UpdateItem) => {
-    setDetailsItem(item);
-  };
-
-  const handleDetailsClose = () => {
-    setDetailsItem(null);
-  };
-
-  const renderCell = (items: UpdateItem[]) => {
+  const renderCell = (items: UpdateRecord[]) => {
     if (items.length === 0) {
       return (
         <Typography
@@ -350,72 +218,9 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
           gap: { xs: 1, sm: 1.5 },
         }}
       >
-        {items.map((item) => {
-          const displayName = getFirstName(item.by);
-
-          return (
-            <Paper
-              key={item.id}
-              variant="outlined"
-              onClick={() => handleDetailsOpen(item)}
-              sx={{
-                p: { xs: 1.25, sm: 1.5 },
-                borderRadius: 2,
-                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                bgcolor: item.urgent ? "#fff4e5" : "#ffffff",
-                borderColor: item.urgent ? "#ff9800" : "divider",
-                borderLeftWidth: item.urgent ? 4 : 1,
-                cursor: "pointer",
-                "&:hover": {
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  transform: "translateY(-2px)",
-                },
-              }}
-            >
-              <Stack spacing={1}>
-                {/* Header: Name badge */}
-                <Box
-                  sx={{
-                    px: 1.2,
-                    py: 0.4,
-                    borderRadius: 999,
-                    bgcolor: getUserBadgeColor(item.uid),
-                    color: "white",
-                    fontWeight: 600,
-                    fontSize: "0.75rem",
-                    letterSpacing: 0.2,
-                    lineHeight: 1.3,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    alignSelf: "flex-start",
-                    width: "fit-content",
-                    maxWidth: "60%",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                  title={item.by}
-                >
-                  {displayName}
-                </Box>
-
-                {/* Title */}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 600,
-                    wordBreak: "break-word",
-                    color: "text.primary",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {item.title || "Untitled"}
-                </Typography>
-              </Stack>
-            </Paper>
-          );
-        })}
+        {items.map((item) => (
+          <UpdateCard key={item.id} item={item} onClick={setDetailsItem} />
+        ))}
       </Box>
     );
   };
@@ -524,25 +329,6 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
               <UpdateFormDialog defaultCategory={0} onCreated={handleUpdateCreated} />
             </Stack>
           </Stack>
-
-          {fetchError ? (
-            <Alert
-              severity="error"
-              action={
-                <Button color="inherit" size="small" onClick={() => handleReload()}>
-                  Retry
-                </Button>
-              }
-            >
-              {fetchError}
-            </Alert>
-          ) : null}
-
-          {refreshing ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress />
-            </Box>
-          ) : null}
 
           {!isMobile ? (
             <TableContainer
@@ -682,147 +468,35 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
           </Button>
         </Box>
 
-        <Dialog open={deleteDialogOpen} onClose={cancelDelete} maxWidth="xs" fullWidth>
-          <DialogTitle>Delete update?</DialogTitle>
-          <DialogContent>
-            <DialogContentText>Delete this update? This action cannot be undone.</DialogContentText>
-            {deleteTarget ? (
-              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-                Title: {deleteTarget.title || "Untitled"}
-              </Typography>
-            ) : null}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={cancelDelete} disabled={deleteLoading}>
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmDelete}
-              color="error"
-              variant="contained"
-              disabled={deleteLoading}
-            >
-              {deleteLoading ? <CircularProgress size={20} /> : "Delete"}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <DeleteUpdateDialog
+          open={deleteDialogOpen}
+          target={deleteTarget}
+          loading={isDeleting}
+          onClose={cancelDelete}
+          onConfirm={confirmDelete}
+        />
 
-        <Dialog open={deleteAllDialogOpen} onClose={cancelDeleteAll} maxWidth="xs" fullWidth>
-          <DialogTitle>Delete all updates?</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              This will permanently delete every update. The change affects the entire team and
-              cannot be undone.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={cancelDeleteAll} disabled={deleteAllLoading}>
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmDeleteAll}
-              color="error"
-              variant="contained"
-              disabled={deleteAllLoading}
-            >
-              {deleteAllLoading ? <CircularProgress size={20} /> : "Delete all"}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <DeleteAllUpdatesDialog
+          open={deleteAllDialogOpen}
+          loading={isDeletingAll}
+          onClose={cancelDeleteAll}
+          onConfirm={confirmDeleteAll}
+        />
 
-        <Dialog open={Boolean(detailsItem)} onClose={handleDetailsClose} fullWidth maxWidth="sm">
-          <DialogContent sx={{ pt: 3 }}>
-            {detailsItem ? (
-              <Stack spacing={1.5}>
-                <Box
-                  sx={{
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: 999,
-                    bgcolor: getUserBadgeColor(detailsItem.uid),
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                    letterSpacing: 0.3,
-                    lineHeight: 1.3,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    alignSelf: "flex-start",
-                    width: "fit-content",
-                    maxWidth: "100%",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {getFirstName(detailsItem.by)}
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 2,
-                    wordBreak: "break-word",
-                    overflowWrap: "anywhere",
-                  }}
-                >
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      variant="h6"
-                      component="h2"
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: "1.1rem",
-                        lineHeight: 1.3,
-                        mb: 1,
-                      }}
-                    >
-                      {detailsItem.title || "Untitled"}
-                    </Typography>
-                  </Box>
-                  {detailsItem.urgent ? <UpdateStatusBadge urgent={detailsItem.urgent} /> : null}
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    overflowWrap: "anywhere",
-                  }}
-                >
-                  {detailsItem.body}
-                </Typography>
-              </Stack>
-            ) : null}
-          </DialogContent>
-          <DialogActions>
-            {detailsItem?.viewerIsOwner ? (
-              <Button
-                onClick={() => {
-                  handleDetailsClose();
-                  if (detailsItem) {
-                    requestDelete(detailsItem);
-                  }
-                }}
-                color="error"
-                startIcon={<DeleteOutlineIcon />}
-              >
-                Delete
-              </Button>
-            ) : null}
-            <Box sx={{ flex: 1 }} />
-            <Button onClick={handleDetailsClose}>Close</Button>
-          </DialogActions>
-        </Dialog>
+        <UpdateDetailsDialog
+          item={detailsItem}
+          onClose={() => setDetailsItem(null)}
+          onDelete={requestDelete}
+          deleteLoading={isDeleting && deleteTarget?.id === detailsItem?.id}
+        />
 
-        {snackbar ? (
-          <Snackbar
-            open
-            autoHideDuration={6000}
-            onClose={handleSnackbarClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
+        <Snackbar
+          open={Boolean(snackbar)}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          {snackbar ? (
             <Alert
               onClose={handleSnackbarClose}
               severity={snackbar.severity}
@@ -830,8 +504,8 @@ export function UpdatesBoard({ initialUpdates, viewerEmail }: UpdatesBoardProps)
             >
               {snackbar.message}
             </Alert>
-          </Snackbar>
-        ) : null}
+          ) : undefined}
+        </Snackbar>
       </Container>
     </Box>
   );

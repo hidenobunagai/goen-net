@@ -26,5 +26,5 @@ export default async function UpdatesPage() {
     }
   }
 
-  return <UpdatesBoard initialUpdates={updates} viewerEmail={viewerEmail} />;
+  return <UpdatesBoard initialUpdates={updates} />;
 }

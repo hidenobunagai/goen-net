@@ -1,4 +1,5 @@
 import type { InArgs } from "@libsql/client";
+import { z } from "zod";
 
 import { logger } from "@/lib/logger";
 import { execute, isTursoConfigured, TursoUnavailableError } from "@/lib/turso";
@@ -18,6 +19,29 @@ export type UpdateRecord = {
   createdAt: string;
   viewerIsOwner: boolean;
 };
+
+export const CreateUpdateSchema = z.object({
+  by: z.string().optional(),
+  category: z
+    .number()
+    .refine((value): value is 0 | 1 | 2 => value === 0 || value === 1 || value === 2, {
+      message: "Category must be one of 0 (Work), 1 (Family), or 2 (Personal).",
+    })
+    .optional(),
+  urgent: z.boolean().optional(),
+  priority: z.boolean().optional(), // Legacy support
+  title: z.string().nullable().optional(),
+  update: z.string().optional(), // Legacy support
+  body: z.string().optional(),
+  when: z
+    .number()
+    .refine((value): value is -1 | 1 => value === -1 || value === 1, {
+      message: "When must be either -1 (Past) or 1 (Future).",
+    })
+    .optional(),
+});
+
+export type CreateUpdateInput = z.infer<typeof CreateUpdateSchema>;
 
 export class UpdateNotFoundError extends Error {
   constructor(message = "Update not found") {
