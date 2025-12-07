@@ -1,12 +1,10 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+const path = require("path");
 
-import type { NextConfig } from "next";
+const __dirname_local = process.cwd();
+const hranaLicenseShim = path.resolve(__dirname_local, "src/lib/shims/hrana-license.ts");
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const hranaLicenseShim = path.resolve(__dirname, "src/lib/shims/hrana-license.ts");
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   experimental: {
     optimizeCss: false,
   },
@@ -55,11 +53,11 @@ const nextConfig: NextConfig = {
 
     config.module.rules.push({
       test: /@libsql[\\/]+hrana-client[\\/]+LICENSE$/,
-      use: [path.resolve(__dirname, "turbopack/license-loader.cjs")],
+      use: [path.resolve(__dirname_local, "turbopack/license-loader.cjs")],
     });
 
     return config;
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

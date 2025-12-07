@@ -1,0 +1,9 @@
+
+> goen-net@0.1.0 build
+> next build
+
+ ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
+
+> Build error occurred
+ReferenceError: exports is not defined in ES module scope
+    at <unknown> (next.config.compiled.js:2:23)
