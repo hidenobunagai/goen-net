@@ -1,0 +1,116 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "addresses": [],
+      "artifacts": [
+        {
+          "length": -1,
+          "location": {
+            "index": -1,
+            "uri": "file:///C:/Users/hiden/Projects/goen-net/pnpm-lock.yaml"
+          },
+          "parentIndex": -1,
+          "roles": []
+        }
+      ],
+      "graphs": [],
+      "invocations": [],
+      "language": "en-US",
+      "logicalLocations": [],
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ],
+      "policies": [],
+      "redactionTokens": [],
+      "results": [
+        {
+          "attachments": [],
+          "codeFlows": [],
+          "fixes": [],
+          "graphTraversals": [],
+          "graphs": [],
+          "kind": "fail",
+          "level": "warning",
+          "locations": [
+            {
+              "annotations": [],
+              "id": -1,
+              "logicalLocations": [],
+              "physicalLocation": {
+                "artifactLocation": {
+                  "index": -1,
+                  "uri": "file:///C:/Users/hiden/Projects/goen-net/pnpm-lock.yaml"
+                }
+              },
+              "relationships": []
+            }
+          ],
+          "message": {
+            "arguments": [],
+            "text": "Package 'esbuild@0.21.5' is vulnerable to 'GHSA-67mh-4wv8-2f99'."
+          },
+          "rank": -1,
+          "relatedLocations": [],
+          "ruleId": "GHSA-67mh-4wv8-2f99",
+          "ruleIndex": 0,
+          "stacks": [],
+          "taxa": []
+        }
+      ],
+      "runAggregates": [],
+      "taxonomies": [],
+      "threadFlowLocations": [],
+      "tool": {
+        "driver": {
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "informationUri": "https://github.com/google/osv-scanner",
+          "isComprehensive": false,
+          "language": "en-US",
+          "locations": [],
+          "name": "osv-scanner",
+          "notifications": [],
+          "rules": [
+            {
+              "deprecatedIds": [
+                "GHSA-67mh-4wv8-2f99"
+              ],
+              "fullDescription": {
+                "markdown": "### Summary\n\nesbuild allows any websites to send any request to the development server and read the response due to default CORS settings.\n\n### Details\n\nesbuild sets `Access-Control-Allow-Origin: *` header to all requests, including the SSE connection, which allows any websites to send any request to the development server and read the response.\n\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L121\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L363\n\n**Attack scenario**:\n\n1. The attacker serves a malicious web page (`http://malicious.example.com`).\n1. The user accesses the malicious web page.\n1. The attacker sends a `fetch('http://127.0.0.1:8000/main.js')` request by JS in that malicious web page. This request is normally blocked by same-origin policy, but that's not the case for the reasons above.\n1. The attacker gets the content of `http://127.0.0.1:8000/main.js`.\n\nIn this scenario, I assumed that the attacker knows the URL of the bundle output file name. But the attacker can also get that information by\n\n- Fetching `/index.html`: normally you have a script tag here\n- Fetching `/assets`: it's common to have a `assets` directory when you have JS files and CSS files in a different directory and the directory listing feature tells the attacker the list of files\n- Connecting `/esbuild` SSE endpoint: the SSE endpoint sends the URL path of the changed files when the file is changed (`new EventSource('/esbuild').addEventListener('change', e =\u003e console.log(e.type, e.data))`)\n- Fetching URLs in the known file: once the attacker knows one file, the attacker can know the URLs imported from that file\n\nThe scenario above fetches the compiled content, but if the victim has the source map option enabled, the attacker can also get the non-compiled content by fetching the source map file.\n\n### PoC\n\n1. Download [reproduction.zip](https://github.com/user-attachments/files/18561484/reproduction.zip)\n2. Extract it and move to that directory\n1. Run `npm i`\n1. Run `npm run watch`\n1. Run `fetch('http://127.0.0.1:8000/app.js').then(r =\u003e r.text()).then(content =\u003e console.log(content))` in a different website's dev tools.\n\n![image](https://github.com/user-attachments/assets/08fc2e4d-e1ec-44ca-b0ea-78a73c3c40e9)\n\n### Impact\n\nUsers using the serve feature may get the source code stolen by malicious websites.",
+                "text": "### Summary\n\nesbuild allows any websites to send any request to the development server and read the response due to default CORS settings.\n\n### Details\n\nesbuild sets `Access-Control-Allow-Origin: *` header to all requests, including the SSE connection, which allows any websites to send any request to the development server and read the response.\n\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L121\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L363\n\n**Attack scenario**:\n\n1. The attacker serves a malicious web page (`http://malicious.example.com`).\n1. The user accesses the malicious web page.\n1. The attacker sends a `fetch('http://127.0.0.1:8000/main.js')` request by JS in that malicious web page. This request is normally blocked by same-origin policy, but that's not the case for the reasons above.\n1. The attacker gets the content of `http://127.0.0.1:8000/main.js`.\n\nIn this scenario, I assumed that the attacker knows the URL of the bundle output file name. But the attacker can also get that information by\n\n- Fetching `/index.html`: normally you have a script tag here\n- Fetching `/assets`: it's common to have a `assets` directory when you have JS files and CSS files in a different directory and the directory listing feature tells the attacker the list of files\n- Connecting `/esbuild` SSE endpoint: the SSE endpoint sends the URL path of the changed files when the file is changed (`new EventSource('/esbuild').addEventListener('change', e =\u003e console.log(e.type, e.data))`)\n- Fetching URLs in the known file: once the attacker knows one file, the attacker can know the URLs imported from that file\n\nThe scenario above fetches the compiled content, but if the victim has the source map option enabled, the attacker can also get the non-compiled content by fetching the source map file.\n\n### PoC\n\n1. Download [reproduction.zip](https://github.com/user-attachments/files/18561484/reproduction.zip)\n2. Extract it and move to that directory\n1. Run `npm i`\n1. Run `npm run watch`\n1. Run `fetch('http://127.0.0.1:8000/app.js').then(r =\u003e r.text()).then(content =\u003e console.log(content))` in a different website's dev tools.\n\n![image](https://github.com/user-attachments/assets/08fc2e4d-e1ec-44ca-b0ea-78a73c3c40e9)\n\n### Impact\n\nUsers using the serve feature may get the source code stolen by malicious websites."
+              },
+              "help": {
+                "markdown": "**Your dependency is vulnerable to [GHSA-67mh-4wv8-2f99](https://osv.dev/GHSA-67mh-4wv8-2f99)**.\n\n## [GHSA-67mh-4wv8-2f99](https://osv.dev/GHSA-67mh-4wv8-2f99)\n\n\u003cdetails\u003e\n\u003csummary\u003eDetails\u003c/summary\u003e\n\n\u003e ### Summary\n\u003e \n\u003e esbuild allows any websites to send any request to the development server and read the response due to default CORS settings.\n\u003e \n\u003e ### Details\n\u003e \n\u003e esbuild sets `Access-Control-Allow-Origin: *` header to all requests, including the SSE connection, which allows any websites to send any request to the development server and read the response.\n\u003e \n\u003e https://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L121\n\u003e https://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L363\n\u003e \n\u003e **Attack scenario**:\n\u003e \n\u003e 1. The attacker serves a malicious web page (`http://malicious.example.com`).\n\u003e 1. The user accesses the malicious web page.\n\u003e 1. The attacker sends a `fetch('http://127.0.0.1:8000/main.js')` request by JS in that malicious web page. This request is normally blocked by same-origin policy, but that's not the case for the reasons above.\n\u003e 1. The attacker gets the content of `http://127.0.0.1:8000/main.js`.\n\u003e \n\u003e In this scenario, I assumed that the attacker knows the URL of the bundle output file name. But the attacker can also get that information by\n\u003e \n\u003e - Fetching `/index.html`: normally you have a script tag here\n\u003e - Fetching `/assets`: it's common to have a `assets` directory when you have JS files and CSS files in a different directory and the directory listing feature tells the attacker the list of files\n\u003e - Connecting `/esbuild` SSE endpoint: the SSE endpoint sends the URL path of the changed files when the file is changed (`new EventSource('/esbuild').addEventListener('change', e =\u003e console.log(e.type, e.data))`)\n\u003e - Fetching URLs in the known file: once the attacker knows one file, the attacker can know the URLs imported from that file\n\u003e \n\u003e The scenario above fetches the compiled content, but if the victim has the source map option enabled, the attacker can also get the non-compiled content by fetching the source map file.\n\u003e \n\u003e ### PoC\n\u003e \n\u003e 1. Download [reproduction.zip](https://github.com/user-attachments/files/18561484/reproduction.zip)\n\u003e 2. Extract it and move to that directory\n\u003e 1. Run `npm i`\n\u003e 1. Run `npm run watch`\n\u003e 1. Run `fetch('http://127.0.0.1:8000/app.js').then(r =\u003e r.text()).then(content =\u003e console.log(content))` in a different website's dev tools.\n\u003e \n\u003e ![image](https://github.com/user-attachments/assets/08fc2e4d-e1ec-44ca-b0ea-78a73c3c40e9)\n\u003e \n\u003e ### Impact\n\u003e \n\u003e Users using the serve feature may get the source code stolen by malicious websites.\n\n\u003c/details\u003e\n\n---\n\n### Affected Packages\n\n| Source | Package Name | Package Version |\n| --- | --- | --- |\n| lockfile:C:/Users/hiden/Projects/goen-net/pnpm-lock.yaml | esbuild | 0.21.5 |\n\n## Remediation\n\nTo fix these vulnerabilities, update the vulnerabilities past the listed fixed versions below.\n\n### Fixed Versions\n\n| Vulnerability ID | Package Name | Fixed Version |\n| --- | --- | --- |\n| GHSA-67mh-4wv8-2f99 | esbuild | 0.25.0 |\n\nIf you believe these vulnerabilities do not affect your code and wish to ignore them, add them to the ignore list in an\n`osv-scanner.toml` file located in the same directory as the lockfile containing the vulnerable dependency.\n\nSee the format and more options in our documentation here: https://google.github.io/osv-scanner/configuration/\n\nAdd or append these values to the following config files to ignore this vulnerability:\n\n`C:\\Users\\hiden\\Projects\\goen-net\\osv-scanner.toml`\n\n```\n[[IgnoredVulns]]\nid = \"GHSA-67mh-4wv8-2f99\"\nreason = \"Your reason for ignoring this vulnerability\"\n```\n",
+                "text": "**Your dependency is vulnerable to [GHSA-67mh-4wv8-2f99](https://osv.dev/GHSA-67mh-4wv8-2f99)**.\n\n## [GHSA-67mh-4wv8-2f99](https://osv.dev/GHSA-67mh-4wv8-2f99)\n\n\u003cdetails\u003e\n\u003csummary\u003eDetails\u003c/summary\u003e\n\n\u003e ### Summary\n\u003e \n\u003e esbuild allows any websites to send any request to the development server and read the response due to default CORS settings.\n\u003e \n\u003e ### Details\n\u003e \n\u003e esbuild sets `Access-Control-Allow-Origin: *` header to all requests, including the SSE connection, which allows any websites to send any request to the development server and read the response.\n\u003e \n\u003e https://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L121\n\u003e https://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L363\n\u003e \n\u003e **Attack scenario**:\n\u003e \n\u003e 1. The attacker serves a malicious web page (`http://malicious.example.com`).\n\u003e 1. The user accesses the malicious web page.\n\u003e 1. The attacker sends a `fetch('http://127.0.0.1:8000/main.js')` request by JS in that malicious web page. This request is normally blocked by same-origin policy, but that's not the case for the reasons above.\n\u003e 1. The attacker gets the content of `http://127.0.0.1:8000/main.js`.\n\u003e \n\u003e In this scenario, I assumed that the attacker knows the URL of the bundle output file name. But the attacker can also get that information by\n\u003e \n\u003e - Fetching `/index.html`: normally you have a script tag here\n\u003e - Fetching `/assets`: it's common to have a `assets` directory when you have JS files and CSS files in a different directory and the directory listing feature tells the attacker the list of files\n\u003e - Connecting `/esbuild` SSE endpoint: the SSE endpoint sends the URL path of the changed files when the file is changed (`new EventSource('/esbuild').addEventListener('change', e =\u003e console.log(e.type, e.data))`)\n\u003e - Fetching URLs in the known file: once the attacker knows one file, the attacker can know the URLs imported from that file\n\u003e \n\u003e The scenario above fetches the compiled content, but if the victim has the source map option enabled, the attacker can also get the non-compiled content by fetching the source map file.\n\u003e \n\u003e ### PoC\n\u003e \n\u003e 1. Download [reproduction.zip](https://github.com/user-attachments/files/18561484/reproduction.zip)\n\u003e 2. Extract it and move to that directory\n\u003e 1. Run `npm i`\n\u003e 1. Run `npm run watch`\n\u003e 1. Run `fetch('http://127.0.0.1:8000/app.js').then(r =\u003e r.text()).then(content =\u003e console.log(content))` in a different website's dev tools.\n\u003e \n\u003e ![image](https://github.com/user-attachments/assets/08fc2e4d-e1ec-44ca-b0ea-78a73c3c40e9)\n\u003e \n\u003e ### Impact\n\u003e \n\u003e Users using the serve feature may get the source code stolen by malicious websites.\n\n\u003c/details\u003e\n\n---\n\n### Affected Packages\n\n| Source | Package Name | Package Version |\n| --- | --- | --- |\n| lockfile:C:/Users/hiden/Projects/goen-net/pnpm-lock.yaml | esbuild | 0.21.5 |\n\n## Remediation\n\nTo fix these vulnerabilities, update the vulnerabilities past the listed fixed versions below.\n\n### Fixed Versions\n\n| Vulnerability ID | Package Name | Fixed Version |\n| --- | --- | --- |\n| GHSA-67mh-4wv8-2f99 | esbuild | 0.25.0 |\n\nIf you believe these vulnerabilities do not affect your code and wish to ignore them, add them to the ignore list in an\n`osv-scanner.toml` file located in the same directory as the lockfile containing the vulnerable dependency.\n\nSee the format and more options in our documentation here: https://google.github.io/osv-scanner/configuration/\n\nAdd or append these values to the following config files to ignore this vulnerability:\n\n`C:\\Users\\hiden\\Projects\\goen-net\\osv-scanner.toml`\n\n```\n[[IgnoredVulns]]\nid = \"GHSA-67mh-4wv8-2f99\"\nreason = \"Your reason for ignoring this vulnerability\"\n```\n"
+              },
+              "id": "GHSA-67mh-4wv8-2f99",
+              "name": "GHSA-67mh-4wv8-2f99",
+              "properties": {
+                "security-severity": "5.3"
+              },
+              "relationships": [],
+              "shortDescription": {
+                "markdown": "GHSA-67mh-4wv8-2f99: esbuild enables any website to send any requests to the development server and read the response",
+                "text": "GHSA-67mh-4wv8-2f99: esbuild enables any website to send any requests to the development server and read the response"
+              }
+            }
+          ],
+          "supportedTaxonomies": [],
+          "taxa": [],
+          "version": "2.3.0"
+        },
+        "extensions": []
+      },
+      "translations": [],
+      "versionControlProvenance": [],
+      "webRequests": [],
+      "webResponses": []
+    }
+  ],
+  "properties": {}
+}
