@@ -31,8 +31,8 @@
     "dotenv": "^17.2.3",
     "next": "^16.0.10",
     "next-auth": "^4.24.12",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
