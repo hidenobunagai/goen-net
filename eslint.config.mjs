@@ -1,4 +1,6 @@
 import { FlatCompat } from "@eslint/eslintrc";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
 import { dirname } from "path";
@@ -48,9 +50,18 @@ const eslintConfig = [
     ],
   },
   {
+    files: ["**/*.{js,jsx,ts,tsx,mjs,cjs}"],
     plugins: {
       "simple-import-sort": simpleImportSort,
       "unused-imports": unusedImports,
+      "@typescript-eslint": tsPlugin,
+    },
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
     },
     rules: {
       // console.log等のコンソールメソッド使用を警告
