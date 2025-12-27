@@ -29,7 +29,7 @@ export default function SignInPage() {
           width: "100%",
           maxWidth: 420,
           p: { xs: 4, sm: 6 },
-          backgroundColor: (theme) => `rgba(255, 255, 255, 0.03)`,
+          backgroundColor: () => `rgba(255, 255, 255, 0.03)`,
           backdropFilter: "blur(24px)",
           borderRadius: 4,
           border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -80,7 +80,6 @@ export default function SignInPage() {
             onClick={() => signIn("google", { callbackUrl: "/" })}
             sx={{
               py: 1.5,
-              fontSize: "1rem",
               fontWeight: 600,
               color: "#0F172A",
               bgcolor: "#F8FAFC",

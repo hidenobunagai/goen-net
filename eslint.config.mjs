@@ -1,6 +1,7 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
 import { dirname } from "path";
@@ -55,6 +56,7 @@ const eslintConfig = [
       "simple-import-sort": simpleImportSort,
       "unused-imports": unusedImports,
       "@typescript-eslint": tsPlugin,
+      "react-hooks": reactHooksPlugin,
     },
     languageOptions: {
       parser: tsParser,
