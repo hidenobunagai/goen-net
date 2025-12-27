@@ -13,9 +13,9 @@ import MenuItem from "@mui/material/MenuItem";
 import { alpha, useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
 import { MouseEvent, ReactNode, useCallback, useState } from "react";
 
 const primaryLinks = [
@@ -162,13 +162,16 @@ export function Navbar() {
   ) : null;
   return (
     <AppBar
-      position="static"
-      color="primary"
-      square
+      position="sticky"
+      color="inherit" // Force inherit to rely on sx
       elevation={0}
       sx={{
-        borderRadius: 0,
-        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        borderBottom: "1px solid rgba(255,255,255,0.1)",
+        backdropFilter: "blur(12px)",
+        // Dark glass background to ensure white text is visible on all pages
+        backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.85),
+        color: "#fff",
       }}
     >
       <Container maxWidth="lg">

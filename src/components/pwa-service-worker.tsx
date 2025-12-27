@@ -19,6 +19,14 @@ export function PWAServiceWorker() {
 
     // Disable in development to avoid reload loops
     if (process.env.NODE_ENV === "development") {
+      // Actively unregister if found (to fix stale cache issues)
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+          // eslint-disable-next-line no-console
+          console.log("Service Worker unregistered in dev mode.");
+        }
+      });
       return;
     }
 

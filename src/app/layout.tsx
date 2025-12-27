@@ -3,7 +3,7 @@ import "./globals.css";
 import Box from "@mui/material/Box";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import { ReactNode } from "react";
 
 import { Navbar } from "@/components/navbar";
@@ -45,8 +45,14 @@ export const viewport: Viewport = {
 
 const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
 });
 
 // Force dynamic rendering to prevent static page caching
@@ -56,7 +62,7 @@ export const revalidate = 0;
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${outfit.variable}`}>
         <ThemeRegistry>
           <TanStackQueryProvider>
             <NextAuthSessionProvider>

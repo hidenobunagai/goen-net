@@ -1,15 +1,17 @@
 import { alpha, createTheme } from "@mui/material/styles";
 
-// グロービススタイルのカラーパレット
-const primaryMain = "#003366"; // 深い知的な青
-const primaryDark = "#002244";
-const primaryLight = "#0055AA";
-const accentMain = "#E60012"; // グロービスレッド
-const accentDark = "#CC0010";
-const accentLight = "#FF3340";
-const canvas = "#F8F9FA"; // 柔らかいグレー背景
-const surface = "#FFFFFF";
-const outline = "#E1E4E8";
+// UI/UX Pro Max - Premium Executive Palette
+const primaryMain = "#0F172A"; // Slate 900 - Deep, authoritative, trust
+const primaryDark = "#020617"; // Slate 950
+const primaryLight = "#334155"; // Slate 700
+
+const secondaryMain = "#D4AF37"; // Metallic Gold - Visionary, Premium
+const secondaryDark = "#B45309"; // Darker Gold/Bronze
+const secondaryLight = "#FCD34D"; // Lighter Gold
+
+const backgroundDefault = "#F8FAFC"; // Slate 50 - Clean, airy
+const backgroundPaper = "#FFFFFF";
+const outline = alpha("#0F172A", 0.12);
 
 const theme = createTheme({
   palette: {
@@ -17,169 +19,133 @@ const theme = createTheme({
       main: primaryMain,
       dark: primaryDark,
       light: primaryLight,
-      contrastText: "#ffffff",
+      contrastText: "#FFFFFF",
     },
     secondary: {
-      main: accentMain,
-      dark: accentDark,
-      light: accentLight,
-      contrastText: "#ffffff",
+      main: secondaryMain,
+      dark: secondaryDark,
+      light: secondaryLight,
+      contrastText: "#0F172A",
     },
     background: {
-      default: canvas,
-      paper: surface,
+      default: backgroundDefault,
+      paper: backgroundPaper,
     },
     text: {
-      primary: "#1b1e29",
-      secondary: "#4b5164",
+      primary: "#0F172A", // Slate 900
+      secondary: "#475569", // Slate 600
     },
     divider: outline,
   },
   shape: {
-    borderRadius: 4,
+    borderRadius: 8, // Modern standard
   },
   typography: {
     fontFamily:
-      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-    h1: { fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.2 },
-    h2: { fontWeight: 700, letterSpacing: "-0.015em", lineHeight: 1.3 },
-    h3: { fontWeight: 700, letterSpacing: "-0.01em", lineHeight: 1.4 },
-    h4: { fontWeight: 700, lineHeight: 1.4 },
-    h5: { fontWeight: 600, lineHeight: 1.5 },
-    h6: { fontWeight: 600, lineHeight: 1.5 },
-    subtitle1: { fontWeight: 500, lineHeight: 1.6 },
-    body1: { lineHeight: 1.7 },
-    body2: { lineHeight: 1.6 },
-    button: { fontWeight: 600, letterSpacing: "0.02em" },
+      "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    h1: {
+      fontFamily: "var(--font-outfit)",
+      fontWeight: 700,
+      letterSpacing: "-0.02em",
+      lineHeight: 1.2,
+      color: primaryMain,
+    },
+    h2: {
+      fontFamily: "var(--font-outfit)",
+      fontWeight: 700,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.25,
+      color: primaryMain,
+    },
+    h3: {
+      fontFamily: "var(--font-outfit)",
+      fontWeight: 600,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.3,
+      color: primaryMain,
+    },
+    h4: {
+      fontFamily: "var(--font-outfit)",
+      fontWeight: 600,
+      lineHeight: 1.4,
+    },
+    h5: {
+      fontFamily: "var(--font-outfit)",
+      fontWeight: 600,
+    },
+    h6: {
+      fontFamily: "var(--font-outfit)",
+      fontWeight: 600,
+    },
+    subtitle1: {
+      fontWeight: 500,
+      letterSpacing: "0.01em",
+      color: primaryLight,
+    },
+    button: {
+      fontFamily: "var(--font-outfit)",
+      fontWeight: 600,
+      letterSpacing: "0.02em",
+      textTransform: "none",
+    },
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
+          backgroundColor: backgroundDefault,
           backgroundImage:
-            "radial-gradient(circle at 0% 0%, rgba(0, 51, 102, 0.04), transparent 60%), radial-gradient(circle at 100% 100%, rgba(230, 0, 18, 0.03), transparent 60%)",
+            "radial-gradient(circle at 50% 0%, rgba(15, 23, 42, 0.03) 0%, transparent 50%)",
         },
       },
     },
     MuiAppBar: {
       defaultProps: {
         elevation: 0,
+        position: "sticky",
       },
       styleOverrides: {
         root: {
-          backgroundImage: "linear-gradient(135deg, #003366 0%, #0055AA 100%)",
-          backdropFilter: "blur(12px)",
-          borderBottom: `1px solid ${alpha("#FFFFFF", 0.1)}`,
-          boxShadow: "0 2px 12px rgba(0, 51, 102, 0.08)",
-        },
-      },
-    },
-    MuiToolbar: {
-      styleOverrides: {
-        root: {
-          minHeight: 72,
+          backgroundColor: alpha(backgroundPaper, 0.7),
+          backdropFilter: "blur(16px)",
+          borderBottom: `1px solid ${alpha(primaryMain, 0.05)}`,
+          color: primaryMain,
         },
       },
     },
     MuiButton: {
       defaultProps: {
-        disableElevation: false,
+        disableElevation: true,
       },
       styleOverrides: {
         root: {
-          textTransform: "none",
-          borderRadius: 4,
-          paddingInline: 28,
-          paddingBlock: 12,
-          fontSize: "0.95rem",
-          fontWeight: 600,
-          transition: "all 0.2s ease",
+          borderRadius: 8,
+          padding: "10px 24px",
+          transition: "all 0.2s ease-in-out",
+          ":hover": {
+            transform: "translateY(-1px)",
+          },
         },
         containedPrimary: {
-          boxShadow: "0 2px 8px rgba(0, 51, 102, 0.12)",
+          backgroundColor: primaryMain,
           ":hover": {
-            boxShadow: "0 2px 12px rgba(0, 51, 102, 0.2)",
+            backgroundColor: primaryDark,
+            boxShadow: `0 4px 12px ${alpha(primaryMain, 0.25)}`,
           },
         },
         containedSecondary: {
-          boxShadow: "0 2px 8px rgba(230, 0, 18, 0.12)",
+          color: primaryMain,
+          backgroundColor: secondaryMain,
           ":hover": {
-            boxShadow: "0 2px 12px rgba(230, 0, 18, 0.2)",
+            backgroundColor: secondaryLight,
+            boxShadow: `0 4px 12px ${alpha(secondaryMain, 0.3)}`,
           },
         },
         outlined: {
-          borderWidth: 1.5,
-          paddingInline: 27,
+          borderWidth: "1.5px !important",
           ":hover": {
-            borderWidth: 1.5,
+            backgroundColor: alpha(primaryMain, 0.04),
           },
-        },
-      },
-    },
-    MuiInputLabel: {
-      defaultProps: {
-        shrink: true,
-      },
-      styleOverrides: {
-        root: {
-          position: "relative",
-          transform: "none !important",
-          fontSize: "1rem",
-          marginBottom: 8,
-          color: "rgba(0, 0, 0, 0.6)",
-          "&.Mui-focused": {
-            color: "rgba(0, 0, 0, 0.87)",
-            transform: "none !important",
-          },
-          "&.Mui-error": {
-            color: "#d32f2f",
-          },
-        },
-        shrink: {
-          transform: "none !important",
-        },
-        asterisk: {
-          color: "#d32f2f",
-        },
-      },
-    },
-    MuiFormLabel: {
-      styleOverrides: {
-        root: {
-          position: "relative",
-          transform: "none !important",
-          fontSize: "1rem",
-          "&.Mui-focused": {
-            transform: "none !important",
-          },
-        },
-        asterisk: {
-          color: "#d32f2f",
-        },
-      },
-    },
-    MuiInputBase: {
-      styleOverrides: {
-        input: {
-          lineHeight: 1.5,
-        },
-        root: {
-          "& input::placeholder": {
-            lineHeight: 1.5,
-            opacity: 0.7,
-          },
-        },
-      },
-    },
-    MuiPaper: {
-      defaultProps: {
-        elevation: 0,
-      },
-      styleOverrides: {
-        root: {
-          borderRadius: 4,
-          border: `1px solid ${alpha(primaryMain, 0.08)}`,
-          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
         },
       },
     },
@@ -189,13 +155,41 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 4,
-          border: `1px solid ${alpha("#E1E4E8", 0.8)}`,
-          backgroundColor: "#FFFFFF",
-          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
-          transition: "box-shadow 0.2s ease",
+          borderRadius: 12,
+          border: `1px solid ${alpha(primaryMain, 0.08)}`,
+          boxShadow: `0 1px 3px ${alpha("#000", 0.05)}`,
+          transition: "all 0.3s ease",
           ":hover": {
-            boxShadow: "0 2px 8px rgba(0, 51, 102, 0.1)",
+            transform: "translateY(-2px)",
+            boxShadow: `0 12px 24px ${alpha("#000", 0.06)}`,
+            borderColor: alpha(primaryMain, 0.15),
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: "none",
+        },
+        elevation1: {
+          boxShadow: `0 1px 3px ${alpha("#000", 0.05)}, 0 1px 2px ${alpha("#000", 0.1)}`,
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        variant: "outlined",
+        size: "medium",
+      },
+      styleOverrides: {
+        root: {
+          "& .MuiOutlinedInput-root": {
+            borderRadius: 8,
+            transition: "all 0.2s ease",
+            "&.Mui-focused": {
+              boxShadow: `0 0 0 3px ${alpha(primaryMain, 0.1)}`,
+            },
           },
         },
       },
@@ -204,51 +198,10 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 600,
-          borderRadius: 4,
+          borderRadius: 6,
         },
-      },
-    },
-    MuiTextField: {
-      defaultProps: {
-        variant: "outlined",
-      },
-      styleOverrides: {
-        root: {
-          "& .MuiInputLabel-root": {
-            position: "relative",
-            transform: "none",
-            marginBottom: 8,
-          },
-        },
-      },
-    },
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(0, 0, 0, 0.87)",
-            borderWidth: 1,
-          },
-        },
-        notchedOutline: {
-          borderWidth: 1,
-          legend: {
-            display: "none",
-          },
-        },
-        input: {
-          lineHeight: 1.5,
-        },
-      },
-    },
-    MuiTableHead: {
-      styleOverrides: {
-        root: {
-          "& .MuiTableCell-root": {
-            color: primaryMain,
-            fontWeight: 700,
-            borderBottom: `1px solid ${alpha(primaryMain, 0.12)}`,
-          },
+        filled: {
+          backgroundColor: alpha(primaryMain, 0.08),
         },
       },
     },

@@ -30,7 +30,7 @@ export default async function Home() {
     <Box
       sx={{
         minHeight: { xs: "100vh", md: "calc(100vh - 64px)" },
-        background: "linear-gradient(180deg, #001a33 0%, #003366 100%)",
+        background: "linear-gradient(180deg, #020617 0%, #0F172A 100%)",
         position: "relative",
         overflow: "auto",
         display: "flex",
@@ -89,7 +89,7 @@ export default async function Home() {
                         left: 0,
                         width: "40px",
                         height: "2px",
-                        background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent)",
+                        background: "linear-gradient(90deg, #D4AF37, transparent)",
                         mx: { xs: "auto", md: 0 },
                       },
                     }}
@@ -105,7 +105,7 @@ export default async function Home() {
                     fontSize: { xs: "1.875rem", sm: "2.5rem", md: "3.5rem" },
                     letterSpacing: "-0.025em",
                     lineHeight: { xs: 1.25, md: 1.2 },
-                    color: "rgba(255, 255, 255, 0.95)",
+                    color: "#F8FAFC",
                   }}
                 >
                   Everything builds toward our next session, {firstName}.
@@ -118,7 +118,7 @@ export default async function Home() {
                     maxWidth: 600,
                     mx: { xs: "auto", md: 0 },
                     fontWeight: 400,
-                    color: "rgba(255, 255, 255, 0.75)",
+                    color: "#94A3B8",
                   }}
                 >
                   Prepare, collaborate, and stay aligned as a circle.

@@ -215,9 +215,9 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                   fontSize: "0.75rem",
                   px: 0.5,
                   height: 28,
-                  background:
-                    "linear-gradient(135deg, rgba(0, 51, 102, 0.95) 0%, rgba(0, 51, 102, 1) 100%)",
-                  boxShadow: "0 2px 8px rgba(0, 51, 102, 0.15)",
+                  // Use theme primary (Slate 900)
+                  background: (theme) => theme.palette.primary.main,
+                  boxShadow: 2,
                 }}
               />
               <IconButton

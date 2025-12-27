@@ -337,6 +337,8 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
               sx={{
                 borderRadius: 2,
                 overflow: "hidden",
+                border: "none",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
               }}
             >
               <Table sx={{ tableLayout: "fixed" }}>
@@ -346,9 +348,10 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
                       sx={{
                         fontWeight: 700,
                         width: CATEGORY_COL_WIDTH,
-                        bgcolor: "#f5f5f5",
+                        bgcolor: (theme) => theme.palette.primary.main, // Slate 900
+                        color: "#fff",
                         fontSize: "0.875rem",
-                        borderRight: "2px solid #d0d0d0",
+                        borderRight: "1px solid rgba(255, 255, 255, 0.1)",
                       }}
                     >
                       Category
@@ -357,9 +360,10 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
                       sx={{
                         fontWeight: 700,
                         width: FLEX_COL_WIDTH,
-                        bgcolor: "#f5f5f5",
+                        bgcolor: (theme) => theme.palette.primary.main,
+                        color: "#fff",
                         fontSize: "0.875rem",
-                        borderRight: "2px solid #d0d0d0",
+                        borderRight: "1px solid rgba(255, 255, 255, 0.1)",
                       }}
                     >
                       Reflect on the past 3 months
@@ -368,7 +372,8 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
                       sx={{
                         fontWeight: 700,
                         width: FLEX_COL_WIDTH,
-                        bgcolor: "#f5f5f5",
+                        bgcolor: (theme) => theme.palette.primary.main,
+                        color: "#fff",
                         fontSize: "0.875rem",
                       }}
                     >
@@ -385,10 +390,13 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
                           whiteSpace: "nowrap",
                           verticalAlign: "top",
                           fontSize: "0.9375rem",
-                          bgcolor: "#f5f5f5",
-                          borderRight: "2px solid #d0d0d0",
+                          bgcolor: "#fff",
+                          color: (theme) => theme.palette.text.primary,
+                          borderRight: "1px solid rgba(0, 0, 0, 0.06)",
                           borderBottom:
-                            index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
+                            index < CATEGORIES.length - 1
+                              ? "1px solid rgba(0, 0, 0, 0.06)"
+                              : undefined,
                         }}
                       >
                         {category.label}
@@ -397,9 +405,12 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
                         sx={{
                           verticalAlign: "top",
                           p: 2,
-                          borderRight: "2px solid #d0d0d0",
+                          bgcolor: "#fff",
+                          borderRight: "1px solid rgba(0, 0, 0, 0.06)",
                           borderBottom:
-                            index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
+                            index < CATEGORIES.length - 1
+                              ? "1px solid rgba(0, 0, 0, 0.06)"
+                              : undefined,
                         }}
                       >
                         {renderCell(groupedUpdates[category.id]?.past ?? [])}
@@ -408,8 +419,11 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
                         sx={{
                           verticalAlign: "top",
                           p: 2,
+                          bgcolor: "#fff",
                           borderBottom:
-                            index < CATEGORIES.length - 1 ? "2px solid #d0d0d0" : undefined,
+                            index < CATEGORIES.length - 1
+                              ? "1px solid rgba(0, 0, 0, 0.06)"
+                              : undefined,
                         }}
                       >
                         {renderCell(groupedUpdates[category.id]?.future ?? [])}
@@ -422,22 +436,36 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
           ) : (
             <Stack spacing={2}>
               {CATEGORIES.map((category) => (
-                <Paper key={category.id} variant="outlined" sx={{ p: 1.5 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                <Paper
+                  key={category.id}
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    border: "none",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      color: (theme) => theme.palette.primary.main,
+                    }}
+                  >
                     {category.label}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                     Reflect on the past 3 months
                   </Typography>
-                  <Box sx={{ mt: 0.5, mb: 1 }}>
+                  <Box sx={{ mt: 1, mb: 2 }}>
                     {renderCell(groupedUpdates[category.id]?.past ?? [])}
                   </Box>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                     Next 3 months
                   </Typography>
-                  <Box sx={{ mt: 0.5 }}>
-                    {renderCell(groupedUpdates[category.id]?.future ?? [])}
-                  </Box>
+                  <Box sx={{ mt: 1 }}>{renderCell(groupedUpdates[category.id]?.future ?? [])}</Box>
                 </Paper>
               ))}
             </Stack>
