@@ -20,6 +20,7 @@ type TursoConfig = {
 };
 
 let cachedClient: Client | null = null;
+let clientPromise: Promise<Client> | null = null;
 let resolvedConfig: TursoConfig | null | undefined;
 
 export class TursoUnavailableError extends Error {
@@ -108,8 +109,40 @@ export function getTursoClient(): Client {
   return cachedClient;
 }
 
+export async function getTursoClientAsync(): Promise<Client> {
+  assertServerEnvironment();
+
+  if (degradeToMemory) {
+    throw new TursoUnavailableError("In-memory fallback is enabled.");
+  }
+
+  const config = resolveConfig();
+  if (!config) {
+    throw new TursoUnavailableError();
+  }
+
+  // 並行アクセス対応: 既存のPromiseがあればそれを返す
+  if (clientPromise) {
+    return clientPromise;
+  }
+
+  if (!cachedClient) {
+    // 非同期初期化をPromiseでラップ
+    clientPromise = Promise.resolve().then(() => {
+      const client = createClient(config);
+      cachedClient = client;
+      clientPromise = null;
+      return client;
+    });
+    return clientPromise;
+  }
+
+  return cachedClient;
+}
+
 export async function execute(sql: string, args?: InArgs): Promise<ResultSet> {
-  const client = getTursoClient();
+  // 並行アクセス対応のため非同期版クライアントを使用
+  const client = await getTursoClientAsync();
   return client.execute({ sql, args });
 }
 
