@@ -1,11 +1,7 @@
 import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
 
-import { requireUserSession } from "@/lib/session";
-
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
-  await requireUserSession();
-
   return (
     <Box
       sx={{
