@@ -4,6 +4,7 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Container,
   FormControl,
   InputLabel,
@@ -23,9 +24,11 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, useTransition } from "react";
 
 import type { UpdateRecord } from "@/lib/updates";
+import { fetchUpdates } from "@/lib/updates";
 
 import { deleteAllUpdatesAction, deleteUpdateAction } from "../actions";
 import { DeleteAllUpdatesDialog, DeleteUpdateDialog } from "./delete-dialogs";
@@ -48,16 +51,26 @@ type SnackbarState = {
 } | null;
 
 type UpdatesBoardProps = {
-  initialUpdates: UpdateRecord[];
+  viewerEmail: string | null;
 };
 
-export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
+export function UpdatesBoard({ viewerEmail }: UpdatesBoardProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // We use initialUpdates directly. When server action revalidates,
-  // the page re-renders and passes new initialUpdates.
-  const updates = initialUpdates;
+  // Use React Query to fetch updates data
+  const {
+    data: updates = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["updates", viewerEmail],
+    queryFn: () => fetchUpdates(viewerEmail!, { limit: 200 }),
+    enabled: !!viewerEmail,
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds for real-time updates
+  });
 
   const [selectedUid, setSelectedUid] = useState<string>("all");
   const [detailsItem, setDetailsItem] = useState<UpdateRecord | null>(null);
@@ -128,6 +141,7 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
 
   const handleUpdateCreated = () => {
     setSnackbar({ severity: "success", message: "Update added." });
+    refetch();
   };
 
   const requestDelete = (item: UpdateRecord) => {
@@ -154,6 +168,7 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
           if (detailsItem?.id === deleteTarget.id) {
             setDetailsItem(null);
           }
+          refetch();
         } else {
           setSnackbar({ severity: "error", message: result.error || "Failed to delete update." });
         }
@@ -177,6 +192,7 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
         if (result.ok) {
           setSnackbar({ severity: "success", message: "All updates deleted." });
           setDeleteAllDialogOpen(false);
+          refetch();
         } else {
           setSnackbar({ severity: "error", message: result.error || "Failed to delete updates." });
         }
@@ -330,7 +346,32 @@ export function UpdatesBoard({ initialUpdates }: UpdatesBoardProps) {
             </Stack>
           </Stack>
 
-          {!isMobile ? (
+          {isLoading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: 8,
+              }}
+            >
+              <CircularProgress sx={{ color: "rgba(255, 255, 255, 0.8)" }} />
+            </Box>
+          ) : error ? (
+            <Alert
+              severity="error"
+              sx={{
+                mb: 2,
+                bgcolor: "rgba(211, 47, 47, 0.1)",
+                color: "#ffcdd2",
+                "& .MuiAlert-icon": {
+                  color: "#ffcdd2",
+                },
+              }}
+            >
+              Failed to load updates. Please try again later.
+            </Alert>
+          ) : !isMobile ? (
             <TableContainer
               component={Paper}
               variant="outlined"
