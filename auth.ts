@@ -1,8 +1,8 @@
-import type { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
 
-import { getConfig } from "./config";
-import { logger } from "./logger";
+import { getConfig } from "@/lib/config";
+import { logger } from "@/lib/logger";
 
 const config = getConfig();
 
@@ -13,12 +13,17 @@ const allowedEmails = new Set(
     .filter(Boolean)
 );
 
-export const authOptions: NextAuthOptions = {
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
   session: {
     strategy: "jwt",
   },
   providers: [
-    GoogleProvider({
+    Google({
       clientId: config.GOOGLE_CLIENT_ID,
       clientSecret: config.GOOGLE_CLIENT_SECRET,
     }),
@@ -48,4 +53,4 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
   },
-};
+});
