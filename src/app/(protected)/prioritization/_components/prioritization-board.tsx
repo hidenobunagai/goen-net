@@ -240,7 +240,7 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
 
   useEffect(() => {
     const storedBoard = loadBoardFromStorage();
-    setBoard(createBoardWithUpdates(storedBoard, initialUpdatesRef.current));
+    setBoard(createBoardWithUpdates(storedBoard, initialUpdatesRef.current!));
   }, []); // Run once on mount to initialize board with updates
 
   useEffect(() => {
