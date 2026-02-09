@@ -221,14 +221,14 @@ type PrioritizationBoardProps = {
 };
 
 export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps) {
-  const initialUpdateItems = useMemo(() => initialUpdates.map(toUpdateItem), [initialUpdates]);
-  const [updates, setUpdates] = useState<UpdateItem[]>(initialUpdateItems);
+  const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
   const [board, setBoard] = useState<BoardState | null>(null);
   const [newColumnName, setNewColumnName] = useState("");
   const [activeId, setActiveId] = useState<UniqueId | null>(null);
   const [selectedMember, setSelectedMember] = useState<string>("all");
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const hasInitializedBoardRef = useRef(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -236,9 +236,11 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
   );
 
   useEffect(() => {
+    if (hasInitializedBoardRef.current) return;
     const storedBoard = loadBoardFromStorage();
-    setBoard(createBoardWithUpdates(storedBoard, initialUpdateItems));
-  }, [initialUpdateItems]);
+    setBoard(createBoardWithUpdates(storedBoard, updates));
+    hasInitializedBoardRef.current = true;
+  }, [updates]);
 
   useEffect(() => {
     setUpdates(initialUpdates.map(toUpdateItem));
