@@ -222,7 +222,6 @@ type PrioritizationBoardProps = {
 
 export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps) {
   const initialUpdateItems = useMemo(() => initialUpdates.map(toUpdateItem), [initialUpdates]);
-  const initialUpdatesRef = useRef<UpdateItem[]>(initialUpdateItems);
   const [updates, setUpdates] = useState<UpdateItem[]>(initialUpdateItems);
   const [board, setBoard] = useState<BoardState | null>(null);
   const [newColumnName, setNewColumnName] = useState("");
@@ -238,8 +237,8 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
 
   useEffect(() => {
     const storedBoard = loadBoardFromStorage();
-    setBoard(createBoardWithUpdates(storedBoard, initialUpdatesRef.current));
-  }, []); // Run once on mount to initialize board with updates
+    setBoard(createBoardWithUpdates(storedBoard, initialUpdateItems));
+  }, [initialUpdateItems]);
 
   useEffect(() => {
     setUpdates(initialUpdates.map(toUpdateItem));
