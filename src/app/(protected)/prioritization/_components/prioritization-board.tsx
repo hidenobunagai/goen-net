@@ -221,8 +221,11 @@ type PrioritizationBoardProps = {
 };
 
 export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps) {
-  const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
-  const initialUpdatesRef = useRef<UpdateItem[]>(updates);
+  const initialUpdatesRef = useRef<UpdateItem[] | null>(null);
+  if (!initialUpdatesRef.current) {
+    initialUpdatesRef.current = initialUpdates.map(toUpdateItem);
+  }
+  const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdatesRef.current ?? []);
   const [board, setBoard] = useState<BoardState | null>(null);
   const [newColumnName, setNewColumnName] = useState("");
   const [activeId, setActiveId] = useState<UniqueId | null>(null);
