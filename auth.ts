@@ -22,9 +22,11 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   providers: [
+    // process.env を直接参照することでモジュール評価時の getConfig() 実行を回避する
+    // (getConfig はモジュール import 時ではなく実際の認証処理時に呼ばれる)
     Google({
-      clientId: getConfig().GOOGLE_CLIENT_ID,
-      clientSecret: getConfig().GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
   ],
   pages: {
