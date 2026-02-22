@@ -14,7 +14,6 @@
         "@libsql/client": "^0.15.15",
         "@mui/icons-material": "^5.15.20",
         "@mui/material": "^5.15.20",
-        "@mui/material-nextjs": "^7.3.3",
         "@tanstack/react-query": "^5.90.5",
         "@vercel/analytics": "^1.5.0",
         "date-fns": "^4.1.0",
@@ -325,8 +324,6 @@
     "@mui/icons-material": ["@mui/icons-material@5.18.0", "", { "dependencies": { "@babel/runtime": "7.28.4" }, "optionalDependencies": { "@types/react": "19.2.7" }, "peerDependencies": { "@mui/material": "5.18.0", "react": "19.2.3" } }, "sha512-1s0vEZj5XFXDMmz3Arl/R7IncFqJ+WQ95LDp1roHWGDE2oCO3IS4/hmiOv1/8SD9r6B7tv9GLiqVZYHo+6PkTg=="],
 
     "@mui/material": ["@mui/material@5.18.0", "", { "dependencies": { "@babel/runtime": "7.28.4", "@mui/core-downloads-tracker": "5.18.0", "@mui/system": "5.18.0", "@mui/types": "7.2.24", "@mui/utils": "5.17.1", "@popperjs/core": "2.11.8", "@types/react-transition-group": "4.4.12", "clsx": "2.1.1", "csstype": "3.2.3", "prop-types": "15.8.1", "react-is": "19.2.1", "react-transition-group": "4.4.5" }, "optionalDependencies": { "@emotion/react": "11.14.0", "@emotion/styled": "11.14.1", "@types/react": "19.2.7" }, "peerDependencies": { "react": "19.2.3", "react-dom": "19.2.3" } }, "sha512-bbH/HaJZpFtXGvWg3TsBWG4eyt3gah3E7nCNU8GLyRjVoWcA91Vm/T+sjHfUcwgJSw9iLtucfHBoq+qW/T30aA=="],
-
-    "@mui/material-nextjs": ["@mui/material-nextjs@7.3.6", "", { "dependencies": { "@babel/runtime": "7.28.4" }, "optionalDependencies": { "@emotion/cache": "11.14.0", "@types/react": "19.2.7" }, "peerDependencies": { "@emotion/react": "11.14.0", "next": "16.1.5", "react": "19.2.3" } }, "sha512-2fP1QyBRY9rT02/ykNw0yz9aAWy5ZVp+YzkLEqio9VTkIYkon/xSUQX7PfHLOWUbKlkwoKtCQOjsvrYtSOyKnQ=="],
 
     "@mui/private-theming": ["@mui/private-theming@5.17.1", "", { "dependencies": { "@babel/runtime": "7.28.4", "@mui/utils": "5.17.1", "prop-types": "15.8.1" }, "optionalDependencies": { "@types/react": "19.2.7" }, "peerDependencies": { "react": "19.2.3" } }, "sha512-XMxU0NTYcKqdsG8LRmSoxERPXwMbp16sIXPcLVgLGII/bVNagX0xaheWAwFv8+zDK7tI3ajllkuD3GZZE++ICQ=="],
 
