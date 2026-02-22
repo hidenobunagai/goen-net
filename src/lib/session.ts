@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
 
-import { auth } from "@/auth";
+import { auth } from "@/../auth";
 import { logger } from "@/lib/logger";
 
 async function resolveServerSession(): Promise<Session | null> {
