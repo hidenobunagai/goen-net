@@ -20,17 +20,15 @@ describe("authOptions", () => {
     process.env.ALLOWED_EMAILS = "";
 
     const authModule = await import("@/../auth");
-    // NextAuth v5 doesn't expose callbacks directly like this easily for testing
-    // but the logic is inside allowedEmails check. We'll skip deep testing here or just check auth exists.
-    expect(authModule.auth).toBeDefined();
-    expect(authModule.signIn).toBeDefined();
+    expect(authModule.authOptions).toBeDefined();
+    expect(authModule.authOptions.providers).toBeDefined();
   });
 
   it("allows sign-in when email is listed in ALLOWED_EMAILS", async () => {
     process.env.ALLOWED_EMAILS = "user@example.com";
 
     const authModule = await import("@/../auth");
-    expect(authModule.auth).toBeDefined();
-    expect(authModule.signIn).toBeDefined();
+    expect(authModule.authOptions).toBeDefined();
+    expect(authModule.authOptions.providers).toBeDefined();
   });
 });

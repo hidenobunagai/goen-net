@@ -1,4 +1,10 @@
-export { auth as middleware } from "@/../auth";
+import { withAuth } from "next-auth/middleware";
+
+import { authOptions } from "@/../auth";
+
+export default withAuth({
+  pages: authOptions.pages,
+});
 
 export const config = {
   matcher: [

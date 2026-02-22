@@ -1,12 +1,13 @@
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
 
-import { auth } from "@/../auth";
+import { authOptions } from "@/../auth";
 import { logger } from "@/lib/logger";
 
 async function resolveServerSession(): Promise<Session | null> {
   try {
-    return await auth();
+    return await getServerSession(authOptions);
   } catch (error) {
     const digest =
       typeof error === "object" && error && "digest" in error

@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import type { AuthOptions } from "next-auth";
 import Google from "next-auth/providers/google";
 
 import { getConfig } from "@/lib/config";
@@ -13,12 +14,7 @@ const allowedEmails = new Set(
     .filter(Boolean)
 );
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
@@ -53,4 +49,6 @@ export const {
       return true;
     },
   },
-});
+};
+
+export default NextAuth(authOptions);
