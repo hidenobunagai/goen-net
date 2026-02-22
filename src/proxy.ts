@@ -1,9 +1,12 @@
 import { withAuth } from "next-auth/middleware";
 
-import { authOptions } from "@/../auth";
-
+// auth.ts をここで import すると getConfig() がモジュール評価時に Edge Runtime で実行され
+// 環境変数が読めずクラッシュするため、静的な pages 値を直接記述する
 export default withAuth({
-  pages: authOptions.pages,
+  pages: {
+    signIn: "/signin",
+    error: "/signin",
+  },
 });
 
 export const config = {
