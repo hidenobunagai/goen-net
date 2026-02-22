@@ -71,7 +71,7 @@ const nextConfig = {
       },
     ];
   },
-  serverExternalPackages: ["@libsql/client", "@libsql/hrana-client", "next-auth", "openid-client"],
+  serverExternalPackages: ["@libsql/client", "@libsql/hrana-client", "openid-client"],
   turbopack: {
     resolveAlias: {
       "@libsql/hrana-client/LICENSE": hranaLicenseShim,
