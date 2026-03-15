@@ -1,6 +1,6 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
+import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/../auth";
 import { logger } from "@/lib/logger";
