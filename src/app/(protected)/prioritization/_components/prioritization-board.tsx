@@ -237,7 +237,6 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
   useEffect(() => {
     const storedBoard = loadBoardFromStorage();
     setBoard(createBoardWithUpdates(storedBoard, updates));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount to initialize board with updates
 
   useEffect(() => {

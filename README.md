@@ -24,8 +24,8 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 
 1. **Install dependencies**
 
-   ```powershell
-   npm install
+   ```bash
+   bun install
    ```
 
 2. **Create your environment file**
@@ -50,8 +50,8 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 
 3. **Run the application**
 
-   ```powershell
-   npm run dev
+   ```bash
+   bun run dev
    ```
 
    Unauthenticated users are redirected to `/signin` and sent back once Google sign-in succeeds.
@@ -105,9 +105,9 @@ If validation fails, the app will not start and will display detailed error mess
 
 ## 🧪 Testing and Linting
 
-- `npm run lint` – Run ESLint across the project.
-- `npm run test:updates` – Execute Vitest API suites.
-- `npm run test:playwright` – Launch Playwright end-to-end tests (requires `PLAYWRIGHT_TEST_EMAIL` and `PLAYWRIGHT_TEST_PASSWORD`).
+- `bun run lint` – Run ESLint across the project.
+- `bun run test:updates` – Execute Vitest API suites.
+- `bun run test:playwright` – Launch Playwright end-to-end tests (requires `PLAYWRIGHT_TEST_EMAIL` and `PLAYWRIGHT_TEST_PASSWORD`).
 
 ## ☁️ Deployment
 

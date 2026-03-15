@@ -1,8 +1,8 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { UpdatesBoard } from "@/app/(protected)/updates/_components";
-import { getQueryClient } from "@/lib/query-client";
 import { logger } from "@/lib/logger";
+import { getQueryClient } from "@/lib/query-client";
 import { requireUserSession } from "@/lib/session";
 import { fetchUpdates } from "@/lib/updates";
 

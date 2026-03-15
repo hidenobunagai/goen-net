@@ -28,7 +28,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, useTransition } from "react";
 
 import type { UpdateRecord } from "@/lib/updates";
-import { fetchUpdates } from "@/lib/updates";
 
 import { deleteAllUpdatesAction, deleteUpdateAction } from "../actions";
 import { DeleteAllUpdatesDialog, DeleteUpdateDialog } from "./delete-dialogs";
@@ -58,7 +57,6 @@ export function UpdatesBoard({ viewerEmail }: UpdatesBoardProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Use React Query to fetch updates data
   const {
     data: updates = [],
     isLoading,
@@ -66,10 +64,17 @@ export function UpdatesBoard({ viewerEmail }: UpdatesBoardProps) {
     refetch,
   } = useQuery({
     queryKey: ["updates", viewerEmail],
-    queryFn: () => fetchUpdates(viewerEmail!, { limit: 200 }),
+    queryFn: async (): Promise<UpdateRecord[]> => {
+      const response = await fetch("/api/updates?limit=200");
+      if (!response.ok) {
+        throw new Error("Failed to fetch updates");
+      }
+      const json = await response.json();
+      return json.updates as UpdateRecord[];
+    },
     enabled: !!viewerEmail,
-    staleTime: 60 * 1000, // 1 minute
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds for real-time updates
+    staleTime: 60 * 1000,
+    refetchInterval: 30 * 1000,
   });
 
   const [selectedUid, setSelectedUid] = useState<string>("all");
