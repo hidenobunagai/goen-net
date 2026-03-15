@@ -19,24 +19,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.12.0"
-          cache: "pnpm"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Run Vitest tests
-        run: pnpm run test:updates
+        run: bun run test:updates
         env:
-          # テスト用環境変数
           NEXTAUTH_SECRET: test-secret-at-least-32-characters-long-for-testing
           GOOGLE_CLIENT_ID: test-google-client-id
           GOOGLE_CLIENT_SECRET: test-google-client-secret
@@ -44,7 +35,6 @@ jobs:
   e2e-tests:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    # E2Eテストはオプショナル（環境変数がある場合のみ実行）
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     steps:
       - name: Checkout code
@@ -52,32 +42,21 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.12.0"
-          cache: "pnpm"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+        run: bunx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: pnpm run test:playwright
+        run: bun run test:playwright
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           PLAYWRIGHT_TEST_EMAIL: ${{ secrets.PLAYWRIGHT_TEST_EMAIL }}
           PLAYWRIGHT_TEST_PASSWORD: ${{ secrets.PLAYWRIGHT_TEST_PASSWORD }}
-          # アプリケーション環境変数
-          # アプリケーション環境変数
-          # 注: secrets の警告は Settings > Secrets に値を設定することで解消されます
           NEXTAUTH_SECRET: test-secret-at-least-32-characters-long-for-testing
           NEXTAUTH_URL: http://localhost:3000
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || 'test-google-client-id' }}
