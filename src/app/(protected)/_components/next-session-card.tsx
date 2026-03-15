@@ -16,6 +16,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 import {
@@ -67,6 +68,7 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
   }, [locationValue]);
   const locationLabel = locationValue || "To be determined";
 
+  const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<StatusState>(null);
@@ -164,7 +166,7 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
           message: "Next session updated successfully.",
         });
         setDialogOpen(false);
-        window.location.reload();
+        router.refresh();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to update next session.";
         setStatus({ type: "error", message });

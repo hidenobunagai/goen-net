@@ -1,48 +1,52 @@
 import { NextResponse } from "next/server";
 
 import { logger } from "@/lib/logger";
-import { Meeting } from "@/types/meetings";
-
-// Mock data for demonstration
-const mockMeetings: Meeting[] = [
-  {
-    id: "1",
-    title: "October Goen Net Forum",
-    date: new Date("2025-10-05T10:00:00").toISOString(),
-    duration: 180, // 3 hours in minutes
-    status: "scheduled",
-    attendees: ["alice@example.com", "bob@example.com", "charlie@example.com", "diana@example.com"],
-    description: "Monthly alumni forum discussing recent updates and strategic initiatives",
-    location: "Conference Room A",
-    agenda: [
-      "Welcome & Check-ins (15min)",
-      "Updates Review & Prioritization (60min)",
-      "Strategic Discussion (75min)",
-      "Action Items & Next Steps (30min)",
-    ],
-  },
-  {
-    id: "2",
-    title: "Q4 Planning Session",
-    date: new Date("2025-11-15T14:00:00").toISOString(),
-    duration: 120,
-    status: "scheduled",
-    attendees: ["alice@example.com", "bob@example.com", "eve@example.com"],
-    description: "Quarterly planning and goal setting",
-    location: "Online",
-  },
-];
+import { getOptionalUserSession } from "@/lib/session";
+import { getNextSession, isTursoConfigured } from "@/lib/turso";
+import type { Meeting } from "@/types/meetings";
 
 export async function GET() {
   try {
-    // Return upcoming meeting (next chronologically)
-    const upcomingMeetings = mockMeetings
-      .filter((meeting) => new Date(meeting.date) > new Date())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const session = await getOptionalUserSession();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHENTICATED", message: "Authentication required." } },
+        { status: 401 }
+      );
+    }
 
-    const nextMeeting = upcomingMeetings[0] || null;
+    if (!isTursoConfigured()) {
+      return NextResponse.json(null);
+    }
 
-    return NextResponse.json(nextMeeting);
+    const nextSession = await getNextSession();
+
+    if (!nextSession?.startAt) {
+      return NextResponse.json(null);
+    }
+
+    const sessionDate = new Date(nextSession.startAt);
+    if (Number.isNaN(sessionDate.getTime()) || sessionDate <= new Date()) {
+      return NextResponse.json(null);
+    }
+
+    const durationMs =
+      nextSession.endAt && !Number.isNaN(new Date(nextSession.endAt).getTime())
+        ? new Date(nextSession.endAt).getTime() - sessionDate.getTime()
+        : 3 * 60 * 60 * 1000;
+    const durationMinutes = Math.round(durationMs / (1000 * 60));
+
+    const meeting: Meeting = {
+      id: "next-session",
+      title: "Goen Net Session",
+      date: sessionDate.toISOString(),
+      duration: durationMinutes,
+      status: "scheduled",
+      attendees: [],
+      location: nextSession.location ?? undefined,
+    };
+
+    return NextResponse.json(meeting);
   } catch (error) {
     logger.error("Error fetching upcoming meeting", { error });
     return NextResponse.json({ error: "Failed to fetch upcoming meeting" }, { status: 500 });

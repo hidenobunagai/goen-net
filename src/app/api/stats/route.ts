@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { logger } from "@/lib/logger";
 import { getOptionalUserSession } from "@/lib/session";
+import { getNextSession, isTursoConfigured } from "@/lib/turso";
 import { fetchUpdates } from "@/lib/updates";
 
 export interface StatsData {
@@ -13,46 +14,38 @@ export interface StatsData {
 
 export async function GET() {
   try {
-    logger.info("Stats endpoint called", { endpoint: "/api/stats" });
     const session = await getOptionalUserSession();
 
     if (!session?.user?.email) {
-      logger.info("No session found, returning mock data");
-      // Return mock data for unauthenticated users (shouldn't happen in protected routes)
-      const stats: StatsData = {
-        totalUpdates: 12,
-        urgentItems: 3,
-        activeMembers: 8,
-        daysToMeeting: 5,
-      };
-
-      const response = NextResponse.json(stats);
-      response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-      response.headers.set("Pragma", "no-cache");
-      response.headers.set("Expires", "0");
-      return response;
+      return NextResponse.json(
+        { error: { code: "UNAUTHENTICATED", message: "Authentication required." } },
+        { status: 401 }
+      );
     }
 
-    logger.info("Session found, fetching real data", { email: session.user.email });
-    // Fetch real data from database
-    const updates = await fetchUpdates(session.user.email, {
-      limit: 100,
-      offset: 0,
-    });
+    const [updates, nextSession] = await Promise.all([
+      fetchUpdates(session.user.email, { limit: 100, offset: 0 }),
+      isTursoConfigured() ? getNextSession().catch(() => null) : Promise.resolve(null),
+    ]);
+
     const urgentUpdates = updates.filter((update) => update.urgent);
 
-    // Calculate days to next meeting (mock for now - should integrate with meeting system)
-    const nextMeetingDate = new Date("2025-10-05T10:00:00"); // Should be dynamic
-    const today = new Date();
-    const daysToMeeting = Math.ceil(
-      (nextMeetingDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    let daysToMeeting = 0;
+    if (nextSession?.startAt) {
+      const nextMeetingDate = new Date(nextSession.startAt);
+      if (!Number.isNaN(nextMeetingDate.getTime())) {
+        daysToMeeting = Math.max(
+          0,
+          Math.ceil((nextMeetingDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+        );
+      }
+    }
 
     const stats: StatsData = {
       totalUpdates: updates.length,
       urgentItems: urgentUpdates.length,
-      activeMembers: 8, // Fixed for the 8-person circle
-      daysToMeeting: Math.max(0, daysToMeeting),
+      activeMembers: 8,
+      daysToMeeting,
     };
 
     logger.debug("Returning stats", { stats });
