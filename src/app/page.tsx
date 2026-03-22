@@ -5,8 +5,8 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2";
 
 import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
-import { getNextSession } from "@/lib/turso";
 import { requireUserSession } from "@/lib/session";
+import { getNextSession } from "@/lib/turso";
 
 // Revalidate every 60 seconds for semi-static rendering
 export const revalidate = 60;
