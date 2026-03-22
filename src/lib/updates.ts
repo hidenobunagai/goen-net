@@ -106,7 +106,7 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
     throw new Error("[updates] users table is missing or has no columns");
   }
 
-  const idColumn = columnMap.get("uid") ?? columnMap.get("id") ?? columnMap.get("user_id");
+  const idColumn = pickColumn(columnMap, ["uid", "id", "user_id"]);
 
   if (!idColumn) {
     throw new Error("[updates] users table is missing an id or uid column");
