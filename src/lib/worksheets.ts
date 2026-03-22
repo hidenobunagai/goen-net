@@ -1,5 +1,6 @@
 import type { InArgs } from "@libsql/client";
 
+import { buildColumnMap, pickColumn, quoteIdentifier } from "@/lib/db-utils";
 import { execute, isTursoConfigured, TursoUnavailableError } from "@/lib/turso";
 
 export const WORKSHEET_ROLES = ["presenter", "coach", "observer"] as const;
@@ -70,62 +71,6 @@ function assertTursoAvailable(): void {
   }
 }
 
-function extractColumnName(row: unknown): string | null {
-  if (!row) {
-    return null;
-  }
-
-  if (Array.isArray(row)) {
-    const value = row[1];
-    if (typeof value === "string") {
-      return value;
-    }
-    if (value != null) {
-      return String(value);
-    }
-    return null;
-  }
-
-  if (typeof row === "object") {
-    const record = row as Record<string, unknown>;
-    const value = record.name;
-    if (typeof value === "string") {
-      return value;
-    }
-    if (value != null) {
-      return String(value);
-    }
-  }
-
-  return null;
-}
-
-function pickColumn(
-  columnMap: Map<string, string>,
-  candidates: string[],
-  { required = false }: { required?: boolean } = {}
-): string | undefined {
-  for (const candidate of candidates) {
-    const column = columnMap.get(candidate.toLowerCase());
-    if (column) {
-      return column;
-    }
-  }
-
-  if (required) {
-    const available = Array.from(columnMap.values()).join(", ");
-    throw new Error(
-      `[worksheets] Required column not found. Tried ${candidates.join(", ")} in table with columns: ${available}`
-    );
-  }
-
-  return undefined;
-}
-
-function quoteIdentifier(identifier: string): string {
-  return `"${identifier.replace(/"/g, '""')}"`;
-}
-
 async function getSchema(): Promise<WorksheetsTableSchema> {
   if (cachedSchema) {
     return cachedSchema;
@@ -134,14 +79,7 @@ async function getSchema(): Promise<WorksheetsTableSchema> {
   assertTursoAvailable();
   const result = await execute("PRAGMA table_info('worksheets')");
   const rows = (result?.rows ?? []) as Array<Record<string, unknown> | unknown[]>;
-  const columnMap = new Map<string, string>();
-
-  for (const row of rows) {
-    const name = extractColumnName(row);
-    if (name) {
-      columnMap.set(name.toLowerCase(), name);
-    }
-  }
+  const columnMap = buildColumnMap(rows);
 
   if (columnMap.size === 0) {
     throw new Error("[worksheets] worksheets table is missing or has no columns");

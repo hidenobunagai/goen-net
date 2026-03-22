@@ -70,6 +70,8 @@ export function UpdatesBoard({ viewerEmail }: UpdatesBoardProps) {
     enabled: !!viewerEmail,
     staleTime: 60 * 1000, // 1 minute
     refetchInterval: 30 * 1000, // Refetch every 30 seconds for real-time updates
+    refetchIntervalInBackground: false, // Don't refetch when tab is not active
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const [selectedUid, setSelectedUid] = useState<string>("all");

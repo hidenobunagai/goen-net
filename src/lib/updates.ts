@@ -1,6 +1,7 @@
 import type { InArgs } from "@libsql/client";
 import { z } from "zod";
 
+import { buildColumnMap, pickColumn, quoteIdentifier } from "@/lib/db-utils";
 import { logger } from "@/lib/logger";
 import { execute, isTursoConfigured, TursoUnavailableError } from "@/lib/turso";
 
@@ -78,14 +79,7 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
 
   const result = await execute("PRAGMA table_info('users')");
   const rows = (result?.rows ?? []) as Array<Record<string, unknown> | unknown[]>;
-  const columnMap = new Map<string, string>();
-
-  for (const row of rows) {
-    const name = extractColumnName(row);
-    if (name) {
-      columnMap.set(name.toLowerCase(), name);
-    }
-  }
+  const columnMap = buildColumnMap(rows);
 
   // If the users table is empty or missing, attempt to create a minimal default schema.
   if (columnMap.size === 0) {
@@ -97,11 +91,9 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
 
       const refreshed = await execute("PRAGMA table_info('users')");
       const refreshedRows = (refreshed?.rows ?? []) as Array<Record<string, unknown> | unknown[]>;
-      for (const row of refreshedRows) {
-        const name = extractColumnName(row);
-        if (name) {
-          columnMap.set(name.toLowerCase(), name);
-        }
+      const refreshedColumnMap = buildColumnMap(refreshedRows);
+      for (const [key, value] of refreshedColumnMap) {
+        columnMap.set(key, value);
       }
     } catch (error) {
       logger.error("[updates] Failed to auto-create users table", {
@@ -146,46 +138,6 @@ async function getUsersTableSchema(): Promise<UsersTableSchema> {
   return schema;
 }
 
-function extractColumnName(row: unknown): string | null {
-  if (!row) {
-    return null;
-  }
-
-  if (Array.isArray(row)) {
-    const value = row[1];
-    if (typeof value === "string") {
-      return value;
-    }
-    if (value != null) {
-      return String(value);
-    }
-    return null;
-  }
-
-  if (typeof row === "object") {
-    const record = row as Record<string, unknown>;
-    const value = record.name;
-    if (typeof value === "string") {
-      return value;
-    }
-    if (value != null) {
-      return String(value);
-    }
-  }
-
-  return null;
-}
-
-function pickColumn(columnMap: Map<string, string>, candidates: string[]): string | undefined {
-  for (const candidate of candidates) {
-    const column = columnMap.get(candidate.toLowerCase());
-    if (column) {
-      return column;
-    }
-  }
-  return undefined;
-}
-
 type UpdatesTableSchema = {
   idColumn: string;
   byNameColumn?: string;
@@ -203,10 +155,6 @@ type UpdatesTableSchema = {
 let cachedUpdatesTableSchema: UpdatesTableSchema | null = null;
 let attemptedPriorityToUrgentRename = false;
 
-function quoteIdentifier(identifier: string): string {
-  return `"${identifier.replace(/"/g, '""')}"`;
-}
-
 async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
   if (cachedUpdatesTableSchema) {
     return cachedUpdatesTableSchema;
@@ -214,14 +162,7 @@ async function getUpdatesTableSchema(): Promise<UpdatesTableSchema> {
 
   const result = await execute("PRAGMA table_info('updates')");
   const rows = (result?.rows ?? []) as Array<Record<string, unknown> | unknown[]>;
-  const columnMap = new Map<string, string>();
-
-  for (const row of rows) {
-    const name = extractColumnName(row);
-    if (name) {
-      columnMap.set(name.toLowerCase(), name);
-    }
-  }
+  const columnMap = buildColumnMap(rows);
 
   if (columnMap.size === 0) {
     throw new Error("[updates] updates table is missing or has no columns");
