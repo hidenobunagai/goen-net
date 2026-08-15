@@ -1,5 +1,5 @@
-const CACHE_NAME = "goen-net-v1";
-const STATIC_ASSETS = ["/favicon.ico", "/app-icon.svg", "/manifest.json"];
+const CACHE_NAME = "goen-net-v2";
+const STATIC_ASSETS = ["/favicon.ico", "/app-icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -27,6 +27,10 @@ self.addEventListener("fetch", (event) => {
 
   // API Requests: Network First, fall back to Cache
   if (url.pathname.startsWith("/api/")) {
+    // 認証クッキーをキャッシュキーに含め、オフライン時に別ユーザーのデータを返さないようにする
+    const cookie = event.request.headers.get("cookie") ?? "";
+    const cacheKey = `${event.request.url}?__user=${encodeURIComponent(cookie)}`;
+    const cacheRequest = new Request(cacheKey);
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -35,12 +39,12 @@ self.addEventListener("fetch", (event) => {
           }
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+            cache.put(cacheRequest, responseToCache);
           });
           return response;
         })
         .catch(() => {
-          return caches.match(event.request);
+          return caches.match(cacheRequest);
         })
     );
     return;
