@@ -1,44 +1,14 @@
-import { FlatCompat } from "@eslint/eslintrc";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-let patchedConfig = [];
-try {
-  patchedConfig = compat.extends("next/core-web-vitals", "next/typescript").map((config) => {
-    if (config.plugins) {
-      for (const key of Object.keys(config.plugins)) {
-        const plugin = config.plugins[key];
-        if (plugin && typeof plugin === "object" && plugin.configs) {
-          config.plugins[key] = { ...plugin };
-          delete config.plugins[key].configs;
-        }
-      }
-    }
-    return config;
-  });
-} catch (error) {
-  console.warn(
-    "Warning: Failed to load Next.js ESLint config due to FlatCompat error:",
-    error.message
-  );
-  // Fallback: Continue without Next.js specific rules to allow commit
-  patchedConfig = [];
-}
 
 const eslintConfig = [
-  ...patchedConfig,
+  // eslint-config-next v16 はネイティブの flat config を直接提供する
+  // （core-web-vitals は base + typescript 設定を含む）
+  ...nextCoreWebVitals,
   {
     ignores: [
       "node_modules/**",
@@ -48,7 +18,6 @@ const eslintConfig = [
       "next-env.d.ts",
       "legacy/**",
       "src/components/emails/**",
-      "patch.js",
     ],
   },
   {

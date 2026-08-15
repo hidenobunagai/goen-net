@@ -237,6 +237,7 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
   useEffect(() => {
     const storedBoard = loadBoardFromStorage();
     setBoard(createBoardWithUpdates(storedBoard, updates));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- マウント時に一度だけ実行する意図
   }, []); // Run once on mount to initialize board with updates
 
   useEffect(() => {
@@ -930,10 +931,13 @@ function Column({ column, items, onDelete }: ColumnProps) {
     return () => observer.disconnect();
   }, [hasMore, items.length]);
 
-  // アイテムが変更されたらリセット
-  useEffect(() => {
+  // アイテム数が変わったら表示件数をリセット
+  // （レンダー中の状態調整: 公式推奨パターン。useEffect内のsetStateを避ける）
+  const [prevItemsLength, setPrevItemsLength] = useState(items.length);
+  if (prevItemsLength !== items.length) {
+    setPrevItemsLength(items.length);
     setDisplayCount(INITIAL_LOAD);
-  }, [items.length]);
+  }
 
   return (
     <Paper

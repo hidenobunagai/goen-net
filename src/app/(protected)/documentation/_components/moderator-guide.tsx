@@ -16,7 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { PropsWithChildren } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
 
@@ -472,13 +472,6 @@ export function ModeratorGuide() {
   const maxSteps = slides.length;
   const activeSlide = slides[activeStep];
 
-  // If scenario changes or slides shrink, ensure activeStep is valid
-  useEffect(() => {
-    if (activeStep >= slides.length) {
-      setActiveStep(0);
-    }
-  }, [activeStep, slides.length]);
-
   const handleScenarioChange = (_: React.MouseEvent<HTMLElement>, value: Scenario | null) => {
     if (value) {
       setScenario(value);
@@ -486,13 +479,14 @@ export function ModeratorGuide() {
     }
   };
 
-  const handleNext = () => {
+  // シナリオ変更時に常に activeStep を 0 へ戻すため、範囲外クランプ用の useEffect は不要
+  const handleNext = useCallback(() => {
     setActiveStep((prev) => Math.min(prev + 1, maxSteps - 1));
-  };
+  }, [maxSteps]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setActiveStep((prev) => Math.max(prev - 1, 0));
-  };
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
@@ -515,7 +509,7 @@ export function ModeratorGuide() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [maxSteps]);
+  }, [handleBack, handleNext, maxSteps]);
 
   if (!activeSlide) return null;
 
