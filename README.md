@@ -12,7 +12,7 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 
 ## 🧰 Tech Stack
 
-- Next.js 15 (App Router, React Server Components, Turbopack)
+- Next.js 16 (App Router, React Server Components, Turbopack)
 - TypeScript + React 19
 - NextAuth with Google OAuth2 provider
 - Turso (LibSQL) for transactional storage
@@ -24,14 +24,14 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 
 1. **Install dependencies**
 
-   ```powershell
-   npm install
+   ```bash
+   bun install
    ```
 
 2. **Create your environment file**
 
-   ```powershell
-   Copy-Item .env.example .env.local
+   ```bash
+   cp .env.example .env.local
    ```
 
    | Variable                                     | Description                                                                                                               |
@@ -50,11 +50,11 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 
 3. **Run the application**
 
-   ```powershell
-   npm run dev
+   ```bash
+   bun run dev
    ```
 
-   Unauthenticated users are redirected to `/signin` and sent back once Google sign-in succeeds.
+   The app runs at `http://localhost:3001`. Unauthenticated users are redirected to `/signin` and sent back once Google sign-in succeeds.
 
 ## 📁 Project Structure (excerpt)
 
@@ -105,9 +105,9 @@ If validation fails, the app will not start and will display detailed error mess
 
 ## 🧪 Testing and Linting
 
-- `npm run lint` – Run ESLint across the project.
-- `npm run test:updates` – Execute Vitest API suites.
-- `npm run test:playwright` – Launch Playwright end-to-end tests (requires `PLAYWRIGHT_TEST_EMAIL` and `PLAYWRIGHT_TEST_PASSWORD`).
+- `bun run lint` – Run ESLint across the project.
+- `bun run test` – Execute the full Vitest unit suite.
+- `bun run test:playwright` – Launch Playwright end-to-end tests (requires `PLAYWRIGHT_TEST_EMAIL` and `PLAYWRIGHT_TEST_PASSWORD`).
 
 ## ☁️ Deployment
 
