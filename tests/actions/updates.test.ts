@@ -39,7 +39,6 @@ vi.mock("@/lib/updates", () => ({
   },
   insertUpdate: vi.fn(),
   deleteUpdate: vi.fn(),
-  deleteAllUpdates: vi.fn(),
 }));
 
 vi.mock("@/lib/rate-limit", () => ({
@@ -48,14 +47,10 @@ vi.mock("@/lib/rate-limit", () => ({
 
 import { revalidatePath } from "next/cache";
 
-import {
-  createUpdateAction,
-  deleteAllUpdatesAction,
-  deleteUpdateAction,
-} from "@/app/(protected)/updates/actions";
+import { createUpdateAction, deleteUpdateAction } from "@/app/(protected)/updates/actions";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireUserSession } from "@/lib/session";
-import { CreateUpdateSchema, deleteAllUpdates, deleteUpdate, insertUpdate } from "@/lib/updates";
+import { CreateUpdateSchema, deleteUpdate, insertUpdate } from "@/lib/updates";
 
 describe("Updates Server Actions", () => {
   beforeEach(() => {
@@ -163,29 +158,6 @@ describe("Updates Server Actions", () => {
 
       expect(result.ok).toBe(true);
       expect(deleteUpdate).toHaveBeenCalledWith("id", "test@example.com");
-      expect(revalidatePath).toHaveBeenCalledWith("/updates");
-    });
-  });
-
-  describe("deleteAllUpdatesAction", () => {
-    it("returns error when unauthenticated", async () => {
-      vi.mocked(requireUserSession).mockResolvedValueOnce({ user: null } as any);
-
-      const result = await deleteAllUpdatesAction();
-
-      expect(result.ok).toBe(false);
-      expect(result.error).toBe("Authentication required.");
-    });
-
-    it("deletes all updates successfully", async () => {
-      vi.mocked(requireUserSession).mockResolvedValueOnce({
-        user: { email: "test@example.com" },
-      } as any);
-
-      const result = await deleteAllUpdatesAction();
-
-      expect(result.ok).toBe(true);
-      expect(deleteAllUpdates).toHaveBeenCalled();
       expect(revalidatePath).toHaveBeenCalledWith("/updates");
     });
   });

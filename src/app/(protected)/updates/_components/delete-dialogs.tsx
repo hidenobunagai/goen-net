@@ -50,37 +50,3 @@ export function DeleteUpdateDialog({
     </Dialog>
   );
 }
-
-type DeleteAllUpdatesDialogProps = {
-  open: boolean;
-  loading: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-};
-
-export function DeleteAllUpdatesDialog({
-  open,
-  loading,
-  onClose,
-  onConfirm,
-}: DeleteAllUpdatesDialogProps) {
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Delete all updates?</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          This will permanently delete every update. The change affects the entire team and cannot
-          be undone.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
-          Cancel
-        </Button>
-        <Button onClick={onConfirm} color="error" variant="contained" disabled={loading}>
-          {loading ? <CircularProgress size={20} /> : "Delete all"}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}

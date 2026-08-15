@@ -529,10 +529,3 @@ export async function deleteUpdate(id: string, uid: string): Promise<boolean> {
   const result = await execute(sql, args as InArgs);
   return (result.rowsAffected ?? 0) > 0;
 }
-
-export async function deleteAllUpdates(): Promise<number> {
-  assertTursoAvailable();
-
-  const result = await execute(`DELETE FROM updates`);
-  return result.rowsAffected ?? 0;
-}

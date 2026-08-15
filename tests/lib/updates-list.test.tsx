@@ -20,7 +20,6 @@ vi.mock("@/lib/updates", () => ({
 }));
 
 vi.mock("@/app/(protected)/updates/actions", () => ({
-  deleteAllUpdatesAction: vi.fn(),
   deleteUpdateAction: vi.fn(),
 }));
 

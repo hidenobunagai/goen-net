@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireUserSession } from "@/lib/session";
 import { TursoUnavailableError } from "@/lib/turso";
-import { CreateUpdateSchema, deleteAllUpdates, deleteUpdate, insertUpdate } from "@/lib/updates";
+import { CreateUpdateSchema, deleteUpdate, insertUpdate } from "@/lib/updates";
 
 export type ActionState = {
   ok: boolean;
@@ -112,26 +112,5 @@ export async function deleteUpdateAction(id: string): Promise<ActionState> {
       return { ok: false, error: "Database unavailable." };
     }
     return { ok: false, error: "Failed to delete update." };
-  }
-}
-
-export async function deleteAllUpdatesAction(): Promise<ActionState> {
-  const session = await requireUserSession();
-  const uid = session.user?.email;
-
-  if (!uid) {
-    return { ok: false, error: "Authentication required." };
-  }
-
-  try {
-    await deleteAllUpdates();
-    revalidatePath("/updates");
-    return { ok: true };
-  } catch (error) {
-    logger.error("Failed to delete all updates", { error });
-    if (error instanceof TursoUnavailableError) {
-      return { ok: false, error: "Database unavailable." };
-    }
-    return { ok: false, error: "Failed to delete updates." };
   }
 }

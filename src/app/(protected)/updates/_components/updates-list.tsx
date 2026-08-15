@@ -3,7 +3,6 @@
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
   Container,
   FormControl,
@@ -30,8 +29,8 @@ import { useMemo, useState, useTransition } from "react";
 import type { UpdateRecord } from "@/lib/updates";
 import { fetchUpdatesClient } from "@/lib/updates-client";
 
-import { deleteAllUpdatesAction, deleteUpdateAction } from "../actions";
-import { DeleteAllUpdatesDialog, DeleteUpdateDialog } from "./delete-dialogs";
+import { deleteUpdateAction } from "../actions";
+import { DeleteUpdateDialog } from "./delete-dialogs";
 import { UpdateCard } from "./update-card";
 import { UpdateDetailsDialog } from "./update-details-dialog";
 import { UpdateFormDialog } from "./update-form-dialog";
@@ -80,9 +79,6 @@ export function UpdatesBoard({ viewerEmail }: UpdatesBoardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<UpdateRecord | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
-
-  const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
-  const [isDeletingAll, startDeleteAllTransition] = useTransition();
 
   const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
@@ -176,30 +172,6 @@ export function UpdatesBoard({ viewerEmail }: UpdatesBoardProps) {
         }
       } catch {
         setSnackbar({ severity: "error", message: "Failed to delete update." });
-      }
-    });
-  };
-
-  const openDeleteAll = () => setDeleteAllDialogOpen(true);
-
-  const cancelDeleteAll = () => {
-    if (isDeletingAll) return;
-    setDeleteAllDialogOpen(false);
-  };
-
-  const confirmDeleteAll = () => {
-    startDeleteAllTransition(async () => {
-      try {
-        const result = await deleteAllUpdatesAction();
-        if (result.ok) {
-          setSnackbar({ severity: "success", message: "All updates deleted." });
-          setDeleteAllDialogOpen(false);
-          refetch();
-        } else {
-          setSnackbar({ severity: "error", message: result.error || "Failed to delete updates." });
-        }
-      } catch {
-        setSnackbar({ severity: "error", message: "Failed to delete updates." });
       }
     });
   };
@@ -515,43 +487,13 @@ export function UpdatesBoard({ viewerEmail }: UpdatesBoardProps) {
           )}
         </Stack>
 
-        {/* Delete all updates button - below main content */}
-        <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            variant="text"
-            size="small"
-            onClick={openDeleteAll}
-            disabled={updates.length === 0}
-            sx={{
-              color: "rgba(255, 255, 255, 0.8)",
-              fontSize: "0.8125rem",
-              textTransform: "none",
-              "&:hover": {
-                color: "rgba(255, 255, 255, 1)",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              },
-              "&.Mui-disabled": {
-                color: "rgba(255, 255, 255, 0.3)",
-              },
-            }}
-          >
-            Delete all updates
-          </Button>
-        </Box>
-
+        {/* 全件削除ボタンはデータ喪失リスクのため意図的に実装しない（各更新の個別削除のみ） */}
         <DeleteUpdateDialog
           open={deleteDialogOpen}
           target={deleteTarget}
           loading={isDeleting}
           onClose={cancelDelete}
           onConfirm={confirmDelete}
-        />
-
-        <DeleteAllUpdatesDialog
-          open={deleteAllDialogOpen}
-          loading={isDeletingAll}
-          onClose={cancelDeleteAll}
-          onConfirm={confirmDeleteAll}
         />
 
         <UpdateDetailsDialog
