@@ -32,8 +32,6 @@ export default defineConfig({
         "**/*.config.*",
         "**/types/**",
         "src/components/emails/**",
-        "src/lib/shims/**",
-        "turbopack/**",
       ],
       thresholds: {
         lines: 80,

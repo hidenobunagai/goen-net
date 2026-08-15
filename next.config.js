@@ -1,8 +1,3 @@
-const path = require("path");
-
-const __dirname_local = process.cwd();
-const hranaLicenseShim = path.resolve(__dirname_local, "src/lib/shims/hrana-license.ts");
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -72,24 +67,6 @@ const nextConfig = {
     ];
   },
   serverExternalPackages: ["@libsql/client", "@libsql/hrana-client", "openid-client"],
-  turbopack: {
-    resolveAlias: {
-      "@libsql/hrana-client/LICENSE": hranaLicenseShim,
-    },
-  },
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@libsql/hrana-client/LICENSE": hranaLicenseShim,
-    };
-
-    config.module.rules.push({
-      test: /@libsql[\\/]+hrana-client[\\/]+LICENSE$/,
-      use: [path.resolve(__dirname_local, "turbopack/license-loader.cjs")],
-    });
-
-    return config;
-  },
 };
 
 module.exports = nextConfig;
