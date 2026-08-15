@@ -101,12 +101,3 @@ export async function checkRateLimit(key: string, options: RateLimitOptions): Pr
   }
   return checkRateLimitMemory(key, options);
 }
-
-/**
- * Synchronous version for backward compatibility
- * Only works with in-memory storage
- * @deprecated Use async checkRateLimit instead
- */
-export function checkRateLimitSync(key: string, options: RateLimitOptions): boolean {
-  return checkRateLimitMemory(key, options);
-}
