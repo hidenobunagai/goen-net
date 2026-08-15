@@ -37,10 +37,8 @@ export const viewport: Viewport = {
   themeColor: "#0f172a",
   width: "device-width",
   initialScale: 1,
-  minimumScale: 1,
-  maximumScale: 1,
   viewportFit: "cover",
-  userScalable: false,
+  // userScalable/maximumScale は指定しない（WCAG 1.4.4: ユーザーのピンチズームを妨げない）
 };
 
 const inter = Inter({
