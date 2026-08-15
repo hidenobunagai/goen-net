@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("config", () => {
   const originalEnv = process.env;
@@ -7,7 +7,7 @@ describe("config", () => {
     // 環境変数をリセット
     process.env = { ...originalEnv };
     // キャッシュをクリア（モジュールを再読み込み）
-    delete require.cache[require.resolve("@/lib/config")];
+    vi.resetModules();
   });
 
   afterEach(() => {

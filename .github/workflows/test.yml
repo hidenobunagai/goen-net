@@ -31,7 +31,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run Vitest tests
-        run: bun run test:updates
+        run: bun run test
         env:
           # テスト用環境変数
           NEXTAUTH_SECRET: test-secret-at-least-32-characters-long-for-testing

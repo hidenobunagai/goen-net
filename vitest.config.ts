@@ -10,6 +10,15 @@ export default defineConfig({
       ["tests/actions/**", "node"],
     ],
     globals: true,
+    // E2EはPlaywright専用ランナーで実行するためVitestから除外
+    exclude: [
+      "tests/e2e/**",
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/cypress/**",
+      "**/.{idea,git,cache,output,temp}/**",
+      "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*",
+    ],
     alias: {
       "@": path.resolve(__dirname, "src"),
     },

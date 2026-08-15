@@ -14,8 +14,8 @@ describe("logger", () => {
     consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
     consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    // モジュールキャッシュをクリア
-    delete require.cache[require.resolve("@/lib/logger")];
+    // モジュールキャッシュをクリア（環境変数依存の初期化を毎テスト再実行させる）
+    vi.resetModules();
   });
 
   afterEach(() => {
