@@ -16,10 +16,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
+import { useWorksheet } from "@/hooks/use-worksheet";
 
 type ConfidentialLevel = "HIGH" | "MEDIUM" | "NORMAL" | "";
 
@@ -33,74 +33,20 @@ type CoachForm = {
   confidential?: ConfidentialLevel;
 };
 
-type ChangeHandler = (
-  key: keyof CoachForm
-) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-
 export function CoachWorksheet() {
   useDocumentTitle("Coach Worksheet");
-  const [form, setForm] = useState<CoachForm>({});
-  const [saving, setSaving] = useState(false);
-  const [clearing, setClearing] = useState(false);
-  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      setLoadError(null);
-      try {
-        const response = await fetch("/api/worksheets/coach", {
-          method: "GET",
-          credentials: "include",
-        });
-        const payload = (await response.json().catch(() => null)) as
-          | { ok: true; worksheet: { data: unknown } | null }
-          | { ok: false; error?: { message?: string } }
-          | null;
-
-        if (!response.ok || payload?.ok === false) {
-          const message =
-            (payload && "error" in payload ? payload.error?.message : undefined) ??
-            "Unable to load saved worksheet data. Please try again.";
-          throw new Error(message);
-        }
-
-        if (cancelled) {
-          return;
-        }
-
-        const data = payload?.worksheet?.data;
-        if (data && typeof data === "object") {
-          setForm(data as CoachForm);
-        }
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-        const message =
-          error instanceof Error ? error.message : "Unable to load saved worksheet data.";
-        setLoadError(message);
-      }
-    };
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleChange: ChangeHandler = (key) => (event) => {
-    const target = event.target as HTMLInputElement;
-    const value = target.type === "checkbox" ? target.checked : event.target.value;
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-    setStatus(null);
-  };
+  const {
+    form,
+    setForm,
+    saving,
+    clearing,
+    status,
+    setStatus,
+    loadError,
+    handleChange,
+    save: handleSave,
+    clear: handleClear,
+  } = useWorksheet<CoachForm>("coach");
 
   const handleConfidentialChange = (level: ConfidentialLevel) => () => {
     setForm((prev) => ({
@@ -108,85 +54,6 @@ export function CoachWorksheet() {
       confidential: prev.confidential === level ? "" : level,
     }));
     setStatus(null);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setStatus(null);
-    try {
-      const response = await fetch("/api/worksheets/coach", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: form }),
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | { ok: true }
-        | { ok: false; error?: { message?: string } }
-        | null;
-
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          (payload && "error" in payload ? payload.error?.message : undefined) ??
-          "Unable to save notes right now. Please try again.";
-        throw new Error(message);
-      }
-
-      setStatus({
-        type: "success",
-        message: "Saved successfully.",
-      });
-    } catch (error) {
-      console.warn("Failed to persist coach worksheet", error);
-      const message =
-        error instanceof Error ? error.message : "Failed to save notes. Please try again.";
-      setStatus({
-        type: "error",
-        message,
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleClear = async () => {
-    if (typeof window !== "undefined") {
-      const confirmed = window.confirm("Clear all saved inputs for Coach worksheet?");
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    setClearing(true);
-    setStatus(null);
-    try {
-      const response = await fetch("/api/worksheets/coach", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | { ok: true }
-        | { ok: false; error?: { message?: string } }
-        | null;
-
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          (payload && "error" in payload ? payload.error?.message : undefined) ??
-          "Unable to clear notes right now. Please try again.";
-        throw new Error(message);
-      }
-
-      setForm({});
-      setStatus({
-        type: "success",
-        message: "Saved notes have been removed.",
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to clear notes right now.";
-      setStatus({ type: "error", message });
-    } finally {
-      setClearing(false);
-    }
   };
 
   const issueTypeChecks = useMemo(

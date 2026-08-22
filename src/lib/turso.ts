@@ -1,10 +1,6 @@
 import type { InArgs, ResultSet } from "@libsql/client";
 import { Client, createClient } from "@libsql/client";
 
-import { getConfig } from "./config";
-
-const config = getConfig();
-
 const TURSO_URL_KEYS = ["TURSO_DB_URL", "TURSO_DATABASE_URL", "DATABASE_URL"] as const;
 const TURSO_TOKEN_KEYS = [
   "TURSO_DB_AUTH_TOKEN",
@@ -12,7 +8,6 @@ const TURSO_TOKEN_KEYS = [
   "LIBSQL_AUTH_TOKEN",
   "TURSO_DB_TOKEN",
 ] as const;
-const degradeToMemory = config.DEGRADE_TO_MEMORY === "1";
 
 type TursoConfig = {
   url: string;
@@ -20,7 +15,6 @@ type TursoConfig = {
 };
 
 let cachedClient: Client | null = null;
-let clientPromise: Promise<Client> | null = null;
 let resolvedConfig: TursoConfig | null | undefined;
 
 export class TursoUnavailableError extends Error {
@@ -71,29 +65,21 @@ function resolveConfig(): TursoConfig | null {
     return resolvedConfig;
   }
 
-  const normalizedUrl = normalizeUrl(urlEntry.value);
-  if (!process.env.TURSO_DB_URL) {
-    process.env.TURSO_DB_URL = normalizedUrl;
-  }
-  if (!process.env.TURSO_DB_AUTH_TOKEN) {
-    process.env.TURSO_DB_AUTH_TOKEN = tokenEntry.value;
-  }
-
   resolvedConfig = {
-    url: normalizedUrl,
+    url: normalizeUrl(urlEntry.value),
     authToken: tokenEntry.value,
   };
   return resolvedConfig;
 }
 
 export function isTursoConfigured(): boolean {
-  return !degradeToMemory && resolveConfig() !== null;
+  return process.env.DEGRADE_TO_MEMORY !== "1" && resolveConfig() !== null;
 }
 
 export function getTursoClient(): Client {
   assertServerEnvironment();
 
-  if (degradeToMemory) {
+  if (process.env.DEGRADE_TO_MEMORY === "1") {
     throw new TursoUnavailableError("In-memory fallback is enabled.");
   }
 
@@ -110,39 +96,11 @@ export function getTursoClient(): Client {
 }
 
 export async function getTursoClientAsync(): Promise<Client> {
-  assertServerEnvironment();
-
-  if (degradeToMemory) {
-    throw new TursoUnavailableError("In-memory fallback is enabled.");
-  }
-
-  const config = resolveConfig();
-  if (!config) {
-    throw new TursoUnavailableError();
-  }
-
-  // 並行アクセス対応: 既存のPromiseがあればそれを返す
-  if (clientPromise) {
-    return clientPromise;
-  }
-
-  if (!cachedClient) {
-    // 非同期初期化をPromiseでラップ
-    clientPromise = Promise.resolve().then(() => {
-      const client = createClient(config);
-      cachedClient = client;
-      clientPromise = null;
-      return client;
-    });
-    return clientPromise;
-  }
-
-  return cachedClient;
+  return getTursoClient();
 }
 
 export async function execute(sql: string, args?: InArgs): Promise<ResultSet> {
-  // 並行アクセス対応のため非同期版クライアントを使用
-  const client = await getTursoClientAsync();
+  const client = getTursoClient();
   return client.execute({ sql, args });
 }
 

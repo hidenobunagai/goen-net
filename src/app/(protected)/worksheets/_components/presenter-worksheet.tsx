@@ -16,10 +16,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
+import { useWorksheet } from "@/hooks/use-worksheet";
 
 type PresenterForm = {
   context?: string;
@@ -50,159 +50,20 @@ function normalizeFormValue(value: unknown): PresenterForm {
   };
 }
 
-type ChangeHandler = (
-  key: keyof PresenterForm
-) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-
 export function PresenterWorksheet() {
   useDocumentTitle("Presenter Worksheet");
-  const [form, setForm] = useState<PresenterForm>({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [clearing, setClearing] = useState(false);
-  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      setLoading(true);
-      setLoadError(null);
-      try {
-        const response = await fetch("/api/worksheets/presenter", {
-          method: "GET",
-          credentials: "include",
-        });
-        const payload = (await response.json().catch(() => null)) as
-          | {
-              ok: true;
-              worksheet: { data: unknown } | null;
-              error?: undefined;
-            }
-          | {
-              ok: false;
-              error?: { message?: string };
-              worksheet?: undefined;
-            }
-          | null;
-
-        if (!response.ok || payload?.ok === false) {
-          const message =
-            (payload && "error" in payload ? payload.error?.message : undefined) ??
-            "Unable to load saved worksheet data. Please try again.";
-          throw new Error(message);
-        }
-
-        if (cancelled) {
-          return;
-        }
-
-        const data = payload?.worksheet?.data;
-        setForm(normalizeFormValue(data));
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-        const message =
-          error instanceof Error ? error.message : "Unable to load saved worksheet data.";
-        setLoadError(message);
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleChange: ChangeHandler = (key) => (event) => {
-    const target = event.target as HTMLInputElement;
-    const value = target.type === "checkbox" ? target.checked : event.target.value;
-    setStatus(null);
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setStatus(null);
-    try {
-      const response = await fetch("/api/worksheets/presenter", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: form }),
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | { ok: true }
-        | { ok: false; error?: { message?: string } }
-        | null;
-
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          (payload && "error" in payload ? payload.error?.message : undefined) ??
-          "Unable to save worksheet right now. Please try again.";
-        throw new Error(message);
-      }
-
-      setStatus({ type: "success", message: "Worksheet saved." });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to save worksheet right now.";
-      setStatus({ type: "error", message });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleClear = async () => {
-    if (typeof window !== "undefined") {
-      const confirmed = window.confirm("Clear all saved inputs for Presenter worksheet?");
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    setClearing(true);
-    setStatus(null);
-    try {
-      const response = await fetch("/api/worksheets/presenter", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | { ok: true }
-        | { ok: false; error?: { message?: string } }
-        | null;
-
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          (payload && "error" in payload ? payload.error?.message : undefined) ??
-          "Unable to clear worksheet right now. Please try again.";
-        throw new Error(message);
-      }
-
-      setForm({});
-      setStatus({
-        type: "success",
-        message: "Worksheet cleared.",
-      });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to clear worksheet right now.";
-      setStatus({ type: "error", message });
-    } finally {
-      setClearing(false);
-    }
-  };
+  const normalize = useCallback((v: unknown) => normalizeFormValue(v), []);
+  const {
+    form,
+    loading,
+    saving,
+    clearing,
+    status,
+    loadError,
+    handleChange,
+    save: handleSave,
+    clear: handleClear,
+  } = useWorksheet<PresenterForm>("presenter", { normalize });
 
   const issueTypeChecks = useMemo(
     () => [

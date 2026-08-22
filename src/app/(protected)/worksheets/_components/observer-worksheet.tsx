@@ -14,10 +14,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { useDocumentTitle } from "@/hooks/use-document-title";
+import { useWorksheet } from "@/hooks/use-worksheet";
 
 type ObserverForm = {
   good?: string;
@@ -28,10 +28,6 @@ type ObserverForm = {
   protocolSupport?: string;
 };
 
-type ChangeHandler = (
-  key: keyof ObserverForm
-) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-
 type ProtocolPrompt = { type: "checkbox" | "bullet"; text: string };
 
 type ProtocolSection = {
@@ -40,148 +36,19 @@ type ProtocolSection = {
   prompts: ProtocolPrompt[];
 };
 
-function normalizeFormValue(value: unknown): ObserverForm {
-  if (!value || typeof value !== "object") {
-    return {};
-  }
-  return value as ObserverForm;
-}
-
 export function ObserverWorksheet() {
   useDocumentTitle("Observer Worksheet");
-  const [form, setForm] = useState<ObserverForm>({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [clearing, setClearing] = useState(false);
-  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      setLoading(true);
-      setLoadError(null);
-      try {
-        const response = await fetch("/api/worksheets/observer", {
-          method: "GET",
-          credentials: "include",
-        });
-        const payload = (await response.json().catch(() => null)) as
-          | { ok: true; worksheet: { data: unknown } | null }
-          | { ok: false; error?: { message?: string } }
-          | null;
-
-        if (!response.ok || payload?.ok === false) {
-          const message =
-            (payload && "error" in payload ? payload.error?.message : undefined) ??
-            "Unable to load saved worksheet data. Please try again.";
-          throw new Error(message);
-        }
-
-        if (cancelled) {
-          return;
-        }
-
-        setForm(normalizeFormValue(payload?.worksheet?.data ?? {}));
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-        const message =
-          error instanceof Error ? error.message : "Unable to load saved worksheet data.";
-        setLoadError(message);
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleChange: ChangeHandler = (key) => (event) => {
-    setStatus(null);
-    setForm((prev) => ({
-      ...prev,
-      [key]: event.target.value,
-    }));
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setStatus(null);
-    try {
-      const response = await fetch("/api/worksheets/observer", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: form }),
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | { ok: true }
-        | { ok: false; error?: { message?: string } }
-        | null;
-
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          (payload && "error" in payload ? payload.error?.message : undefined) ??
-          "Unable to save worksheet right now. Please try again.";
-        throw new Error(message);
-      }
-
-      setStatus({ type: "success", message: "Worksheet saved." });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to save worksheet right now.";
-      setStatus({ type: "error", message });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleClear = async () => {
-    if (typeof window !== "undefined") {
-      const confirmed = window.confirm("Clear all saved inputs for Observer worksheet?");
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    setClearing(true);
-    setStatus(null);
-    try {
-      const response = await fetch("/api/worksheets/observer", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | { ok: true }
-        | { ok: false; error?: { message?: string } }
-        | null;
-
-      if (!response.ok || payload?.ok === false) {
-        const message =
-          (payload && "error" in payload ? payload.error?.message : undefined) ??
-          "Unable to clear worksheet right now. Please try again.";
-        throw new Error(message);
-      }
-
-      setForm({});
-      setStatus({ type: "success", message: "Worksheet cleared." });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to clear worksheet right now.";
-      setStatus({ type: "error", message });
-    } finally {
-      setClearing(false);
-    }
-  };
+  const {
+    form,
+    loading,
+    saving,
+    clearing,
+    status,
+    loadError,
+    handleChange,
+    save: handleSave,
+    clear: handleClear,
+  } = useWorksheet<ObserverForm>("observer");
 
   const protocolSections = useMemo<ProtocolSection[]>(
     () => [
