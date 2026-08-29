@@ -15,7 +15,6 @@ import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Unstable_Grid2";
 import { useMemo, useState, useTransition } from "react";
 
 import {
@@ -307,11 +306,12 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                 InputLabelProps={{ shrink: true, sx: { lineHeight: 1 } }}
                 required
               />
-              <Grid container spacing={2} columns={{ xs: 1, sm: 2 }}>
-                <Grid xs={1}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <Box sx={{ flex: 1 }}>
                   <TextField
                     label="Start time"
                     type="time"
+                    fullWidth
                     value={form.startTime}
                     onChange={(event) =>
                       setForm((prev) => ({
@@ -323,11 +323,12 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                     inputProps={{ step: 1800 }}
                     required
                   />
-                </Grid>
-                <Grid xs={1}>
+                </Box>
+                <Box sx={{ flex: 1 }}>
                   <TextField
                     label="End time (optional)"
                     type="time"
+                    fullWidth
                     value={form.endTime}
                     onChange={(event) =>
                       setForm((prev) => ({
@@ -338,8 +339,8 @@ export function NextSessionCard({ initial }: { initial: InitialSession | null })
                     InputLabelProps={{ shrink: true, sx: { lineHeight: 1 } }}
                     inputProps={{ step: 1800 }}
                   />
-                </Grid>
-              </Grid>
+                </Box>
+              </Stack>
               <TextField
                 label="Location (URL or venue)"
                 value={form.location}

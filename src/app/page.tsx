@@ -1,8 +1,8 @@
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Unstable_Grid2";
 
 import { NextSessionCard } from "@/app/(protected)/_components/next-session-card";
 import { requireUserSession } from "@/lib/session";
@@ -38,14 +38,8 @@ export default async function Home() {
         }}
       >
         <Stack spacing={{ xs: 6, md: 10 }}>
-          <Grid
-            container
-            columns={{ xs: 1, md: 12 }}
-            alignItems="center"
-            columnSpacing={{ xs: 0, md: 8 }}
-            rowSpacing={{ xs: 4, md: 0 }}
-          >
-            <Grid xs={1} md={7}>
+          <Grid container alignItems="center" spacing={{ xs: 4, md: 8 }}>
+            <Grid item xs={12} md={7}>
               <Stack
                 spacing={{ xs: 2.5, md: 3.5 }}
                 sx={{
@@ -118,7 +112,8 @@ export default async function Home() {
               </Stack>
             </Grid>
             <Grid
-              xs={1}
+              item
+              xs={12}
               md={5}
               sx={{
                 animation: "fadeInUp 0.8s ease-out 0.2s backwards",
