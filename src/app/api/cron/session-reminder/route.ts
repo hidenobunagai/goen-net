@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,21 +9,19 @@ import { getNextSession, isTursoConfigured } from "@/lib/turso";
 
 // Vercel Cronからのリクエストを検証
 function isValidCronRequest(request: NextRequest): boolean {
-  // Vercel Cronの場合、Authorization headerに "Bearer [CRON_SECRET]" が設定される
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (!cronSecret) {
-    // CRON_SECRETが設定されていない場合は、開発環境として扱う
-    logger.warn("CRON_SECRET is not set. Allowing request for development.");
+  if (process.env.NODE_ENV === "development" && !cronSecret) {
+    logger.warn("CRON_SECRET is not set. Allowing request in development mode only.");
     return true;
   }
 
-  if (!authHeader) {
+  if (!cronSecret || !authHeader) {
     return false;
   }
 
-  const token = authHeader.replace("Bearer ", "");
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
   return token === cronSecret;
 }
 
@@ -54,10 +52,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // セッションの日時を解析
+    // セッションの日時を解析（カレンダー日数で判定）
     const sessionDate = parseISO(nextSession.startAt);
     const now = new Date();
-    const daysUntil = Math.floor((sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntil = differenceInCalendarDays(sessionDate, now);
 
     // 3日前でない場合はスキップ
     if (daysUntil !== 3) {
