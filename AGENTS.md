@@ -41,7 +41,7 @@ Goen Net is a private alumni dashboard for peer forum mentoring, updates sharing
 ## 🔒 Security & Code Standards
 
 1. **Authentication Guardrails**:
-   - Route protection middleware is in `src/middleware.ts`.
+   - Route protection proxy is in `src/proxy.ts` (Next.js 16 proxy convention).
    - `src/app/(protected)/layout.tsx` enforces `await requireUserSession()`.
    - API routes must verify session before performing data operations.
 2. **Database Operations**:

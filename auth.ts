@@ -6,7 +6,7 @@ import { getConfig } from "@/lib/config";
 import { logger } from "@/lib/logger";
 
 // モジュール評価時ではなく実行時に getConfig() を呼ぶことで
-// Edge Runtime (middleware) での import 時のクラッシュを防ぐ
+// Edge Runtime (proxy) での import 時のクラッシュを防ぐ
 function getAllowedEmails(): Set<string> {
   const config = getConfig();
   return new Set(
