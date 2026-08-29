@@ -101,10 +101,6 @@ async function ensureUserProfile(uid: string, name: string): Promise<void> {
   assertTursoAvailable();
   const safeName = name?.trim() || uid;
   try {
-    // Ensure users table exists (idempotent)
-    await execute(
-      "CREATE TABLE IF NOT EXISTS users (uid TEXT PRIMARY KEY, email TEXT, name TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))"
-    );
     await execute(
       `INSERT INTO users (uid, email, name, created_at, updated_at)
        VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))
