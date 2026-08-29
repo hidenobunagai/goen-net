@@ -21,6 +21,8 @@ import { useCallback, useMemo } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useWorksheet } from "@/hooks/use-worksheet";
 
+import { ClearWorksheetDialog } from "./clear-dialog";
+
 type PresenterForm = {
   context?: string;
   situation?: string;
@@ -63,6 +65,9 @@ export function PresenterWorksheet() {
     handleChange,
     save: handleSave,
     clear: handleClear,
+    clearDialogOpen,
+    setClearDialogOpen,
+    confirmClear,
   } = useWorksheet<PresenterForm>("presenter", { normalize });
 
   const issueTypeChecks = useMemo(
@@ -512,6 +517,13 @@ export function PresenterWorksheet() {
           </Paper>
         </Stack>
       </Container>
+      <ClearWorksheetDialog
+        open={clearDialogOpen}
+        onClose={() => setClearDialogOpen(false)}
+        onConfirm={confirmClear}
+        role="presenter"
+        isClearing={clearing}
+      />
     </Box>
   );
 }

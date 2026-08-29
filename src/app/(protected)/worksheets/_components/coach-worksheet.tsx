@@ -21,6 +21,8 @@ import { useMemo } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useWorksheet } from "@/hooks/use-worksheet";
 
+import { ClearWorksheetDialog } from "./clear-dialog";
+
 type ConfidentialLevel = "HIGH" | "MEDIUM" | "NORMAL" | "";
 
 type CoachForm = {
@@ -46,6 +48,9 @@ export function CoachWorksheet() {
     handleChange,
     save: handleSave,
     clear: handleClear,
+    clearDialogOpen,
+    setClearDialogOpen,
+    confirmClear,
   } = useWorksheet<CoachForm>("coach");
 
   const handleConfidentialChange = (level: ConfidentialLevel) => () => {
@@ -551,6 +556,13 @@ export function CoachWorksheet() {
           </Paper>
         </Stack>
       </Container>
+      <ClearWorksheetDialog
+        open={clearDialogOpen}
+        onClose={() => setClearDialogOpen(false)}
+        onConfirm={confirmClear}
+        role="coach"
+        isClearing={clearing}
+      />
     </Box>
   );
 }

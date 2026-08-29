@@ -110,12 +110,14 @@ export function useWorksheet<T extends Record<string, unknown>>(
     }
   }, [role, form]);
 
-  const clear = useCallback(async () => {
-    if (typeof window !== "undefined") {
-      const label = role.charAt(0).toUpperCase() + role.slice(1);
-      const confirmed = window.confirm(`Clear all saved inputs for ${label} worksheet?`);
-      if (!confirmed) return;
-    }
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+
+  const requestClear = useCallback(() => {
+    setClearDialogOpen(true);
+  }, []);
+
+  const confirmClear = useCallback(async () => {
+    setClearDialogOpen(false);
     setClearing(true);
     setStatus(null);
     try {
@@ -155,6 +157,10 @@ export function useWorksheet<T extends Record<string, unknown>>(
     loadError,
     handleChange,
     save,
-    clear,
+    clear: requestClear,
+    clearDialogOpen,
+    setClearDialogOpen,
+    requestClear,
+    confirmClear,
   };
 }

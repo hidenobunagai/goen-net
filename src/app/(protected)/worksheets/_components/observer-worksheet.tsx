@@ -19,6 +19,8 @@ import { useMemo } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useWorksheet } from "@/hooks/use-worksheet";
 
+import { ClearWorksheetDialog } from "./clear-dialog";
+
 type ObserverForm = {
   good?: string;
   improve?: string;
@@ -48,6 +50,9 @@ export function ObserverWorksheet() {
     handleChange,
     save: handleSave,
     clear: handleClear,
+    clearDialogOpen,
+    setClearDialogOpen,
+    confirmClear,
   } = useWorksheet<ObserverForm>("observer");
 
   const protocolSections = useMemo<ProtocolSection[]>(
@@ -483,6 +488,13 @@ export function ObserverWorksheet() {
           </Paper>
         </Stack>
       </Container>
+      <ClearWorksheetDialog
+        open={clearDialogOpen}
+        onClose={() => setClearDialogOpen(false)}
+        onConfirm={confirmClear}
+        role="observer"
+        isClearing={clearing}
+      />
     </Box>
   );
 }
