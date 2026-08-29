@@ -1,17 +1,21 @@
 "use client";
 
+import Logout from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import ListSubheader from "@mui/material/ListSubheader";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { alpha, useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -50,13 +54,18 @@ function useActiveChecker() {
 export function Navbar() {
   const router = useRouter();
   const isActive = useActiveChecker();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const theme = useTheme();
+
+  const userName = session?.user?.name ?? "Member";
+  const userEmail = session?.user?.email ?? "";
+  const userImage = session?.user?.image ?? undefined;
 
   const [anchorNav, setAnchorNav] = useState<HTMLElement | null>(null);
   const [anchorWorksheet, setAnchorWorksheet] = useState<HTMLElement | null>(null);
   const [anchorDocs, setAnchorDocs] = useState<HTMLElement | null>(null);
+  const [anchorUser, setAnchorUser] = useState<HTMLElement | null>(null);
 
   const handleOpenNav = (event: MouseEvent<HTMLElement>) => {
     setAnchorNav(event.currentTarget);
@@ -72,6 +81,11 @@ export function Navbar() {
     setAnchorDocs(event.currentTarget);
   };
   const handleCloseDocs = () => setAnchorDocs(null);
+
+  const handleOpenUser = (event: MouseEvent<HTMLElement>) => {
+    setAnchorUser(event.currentTarget);
+  };
+  const handleCloseUser = () => setAnchorUser(null);
 
   const navigateAndClose = (path: string, closer: () => void) => {
     closer();
@@ -112,9 +126,20 @@ export function Navbar() {
     );
   };
 
-  // モバイル用：すべてのリンクを含む
+  // モバイル用：ユーザー情報 + すべてのリンクを含む
   const mobileMenuContent: ReactNode = isAuthenticated
     ? [
+        <Box key="mobile-user-header" sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle2" noWrap sx={{ fontWeight: 700 }}>
+            {userName}
+          </Typography>
+          {userEmail ? (
+            <Typography variant="caption" color="text.secondary" noWrap display="block">
+              {userEmail}
+            </Typography>
+          ) : null}
+        </Box>,
+        <Divider key="mobile-divider-user" sx={{ my: 0.5 }} />,
         ...primaryLinks.map(({ path, label }) => (
           <MenuItem
             key={`mobile-nav-${path}`}
@@ -151,15 +176,14 @@ export function Navbar() {
         )),
         <Divider key="mobile-divider-signout" sx={{ my: 0.5 }} />,
         <MenuItem key="mobile-sign-out" onClick={handleSignOut}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
           Sign Out
         </MenuItem>,
       ]
     : null;
 
-  // デスクトップ用：Sign Outのみ
-  const desktopMenuContent: ReactNode = isAuthenticated ? (
-    <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
-  ) : null;
   return (
     <AppBar
       position="sticky"
@@ -314,21 +338,44 @@ export function Navbar() {
             </>
           )}
 
-          {/* デスクトップ用ハンバーガーメニュー（Sign Outのみ、認証時のみ） */}
+          {/* デスクトップ用ユーザーアバターメニュー（認証時のみ） */}
           {isAuthenticated && (
-            <>
-              <IconButton
-                color="inherit"
-                sx={{ display: { xs: "none", md: "inline-flex" } }}
-                onClick={handleOpenNav}
-                aria-label="Open menu"
-              >
-                <MenuIcon />
-              </IconButton>
+            <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", ml: 1 }}>
+              <Tooltip title={userName}>
+                <IconButton
+                  onClick={handleOpenUser}
+                  size="small"
+                  sx={{
+                    p: 0.5,
+                    border: "1.5px solid rgba(255, 255, 255, 0.3)",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      borderColor: "rgba(255, 255, 255, 0.8)",
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                  aria-label="User account menu"
+                >
+                  <Avatar
+                    alt={userName}
+                    src={userImage}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      bgcolor: "secondary.main",
+                      color: "primary.main",
+                      fontSize: "0.875rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {userName.charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
               <Menu
-                anchorEl={anchorNav}
-                open={Boolean(anchorNav)}
-                onClose={handleCloseNav}
+                anchorEl={anchorUser}
+                open={Boolean(anchorUser)}
+                onClose={handleCloseUser}
                 keepMounted
                 disableScrollLock={true}
                 anchorOrigin={{
@@ -339,11 +386,34 @@ export function Navbar() {
                   vertical: "top",
                   horizontal: "right",
                 }}
-                sx={{ display: { xs: "none", md: "block" } }}
+                PaperProps={{
+                  sx: {
+                    mt: 1.5,
+                    minWidth: 200,
+                    boxShadow:
+                      "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)",
+                  },
+                }}
               >
-                {desktopMenuContent}
+                <Box sx={{ px: 2, py: 1.5 }}>
+                  <Typography variant="subtitle2" noWrap sx={{ fontWeight: 700 }}>
+                    {userName}
+                  </Typography>
+                  {userEmail ? (
+                    <Typography variant="caption" color="text.secondary" noWrap display="block">
+                      {userEmail}
+                    </Typography>
+                  ) : null}
+                </Box>
+                <Divider />
+                <MenuItem onClick={handleSignOut} sx={{ py: 1 }}>
+                  <ListItemIcon>
+                    <Logout fontSize="small" />
+                  </ListItemIcon>
+                  Sign Out
+                </MenuItem>
               </Menu>
-            </>
+            </Box>
           )}
         </Toolbar>
       </Container>
