@@ -218,16 +218,29 @@ function findColumnIdByItem(board: BoardState, itemId: UniqueId): UniqueId | nul
 
 type PrioritizationBoardProps = {
   initialUpdates: UpdateRecord[];
+  initialBoard?: unknown;
 };
 
-export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps) {
+export function PrioritizationBoard({ initialUpdates, initialBoard }: PrioritizationBoardProps) {
   const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
-  const [board, setBoard] = useState<BoardState | null>(null);
+  const [board, setBoard] = useState<BoardState | null>(() => {
+    const rawBoard = (
+      initialBoard && typeof initialBoard === "object" ? initialBoard : null
+    ) as BoardState | null;
+    if (rawBoard && rawBoard.columns && rawBoard.columnOrder) {
+      return createBoardWithUpdates(rawBoard, initialUpdates.map(toUpdateItem));
+    }
+    return null;
+  });
+  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [newColumnName, setNewColumnName] = useState("");
   const [activeId, setActiveId] = useState<UniqueId | null>(null);
   const [selectedMember, setSelectedMember] = useState<string>("all");
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  const isFirstMount = useRef(true);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -235,8 +248,10 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
   );
 
   useEffect(() => {
-    const storedBoard = loadBoardFromStorage();
-    setBoard(createBoardWithUpdates(storedBoard, updates));
+    if (!board) {
+      const storedBoard = loadBoardFromStorage();
+      setBoard(createBoardWithUpdates(storedBoard, updates));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- マウント時に一度だけ実行する意図
   }, []); // Run once on mount to initialize board with updates
 
@@ -247,6 +262,40 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
   useEffect(() => {
     if (!board) return;
     saveBoardToStorage(board);
+
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    setSyncStatus("saving");
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch("/api/prioritization", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ board }),
+        });
+        if (response.ok) {
+          setSyncStatus("saved");
+          setTimeout(() => setSyncStatus("idle"), 2000);
+        } else {
+          setSyncStatus("error");
+        }
+      } catch {
+        setSyncStatus("error");
+      }
+    }, 800);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [board]);
 
   useEffect(() => {
@@ -548,18 +597,38 @@ export function PrioritizationBoard({ initialUpdates }: PrioritizationBoardProps
                 Session Planning
               </Typography>
             </Box>
-            <Typography
-              variant="h3"
-              component="h1"
-              sx={{
-                fontWeight: 800,
-                letterSpacing: "-0.025em",
-                lineHeight: 1.2,
-                color: "rgba(255, 255, 255, 0.95)",
-              }}
-            >
-              Prioritization
-            </Typography>
+            <Stack direction="row" alignItems="center" spacing={2} sx={{ flexWrap: "wrap" }}>
+              <Typography
+                variant="h3"
+                component="h1"
+                sx={{
+                  fontWeight: 800,
+                  letterSpacing: "-0.025em",
+                  lineHeight: 1.2,
+                  color: "rgba(255, 255, 255, 0.95)",
+                }}
+              >
+                Prioritization
+              </Typography>
+              {syncStatus === "saving" && (
+                <Typography
+                  variant="caption"
+                  sx={{ color: "rgba(255, 255, 255, 0.6)", fontWeight: 500 }}
+                >
+                  Saving...
+                </Typography>
+              )}
+              {syncStatus === "saved" && (
+                <Typography variant="caption" sx={{ color: "#4ade80", fontWeight: 500 }}>
+                  ✓ Saved
+                </Typography>
+              )}
+              {syncStatus === "error" && (
+                <Typography variant="caption" sx={{ color: "#f87171", fontWeight: 500 }}>
+                  Save failed (saved locally)
+                </Typography>
+              )}
+            </Stack>
             <Typography
               variant="body1"
               sx={{

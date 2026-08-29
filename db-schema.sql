@@ -57,3 +57,12 @@ CREATE TABLE IF NOT EXISTS worksheets (
 );
 
 CREATE INDEX IF NOT EXISTS idx_worksheets_uid_role ON worksheets(uid, role);
+
+-- Prioritization board state (shared forum planning)
+CREATE TABLE IF NOT EXISTS prioritization (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  data TEXT,
+  updated_at TEXT DEFAULT (datetime('now')),
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
