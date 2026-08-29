@@ -33,28 +33,42 @@ async function checkRateLimitPersistent(
   const nowUnix = Math.floor(now / 1000);
 
   try {
-    // Clean up expired entries first
-    await execute("DELETE FROM rate_limit WHERE expires_at <= ?", [nowUnix]);
+    // 確率的（5%の確率）に期限切れレコードを非同期クリーンアップ
+    if (Math.random() < 0.05) {
+      void execute("DELETE FROM rate_limit WHERE expires_at <= ?", [nowUnix]).catch((err) => {
+        logger.warn("Rate limit background cleanup failed", { error: err });
+      });
+    }
 
-    // Try to get existing entry
+    // 現在のエントリを取得
     const result = await execute("SELECT count, expires_at FROM rate_limit WHERE key = ?", [key]);
 
     if (result.rows.length === 0) {
-      // No existing entry, create new one
-      await execute("INSERT INTO rate_limit (key, count, expires_at) VALUES (?, 1, ?)", [
-        key,
-        expiresAtUnix,
-      ]);
+      // 新規エントリ作成
+      await execute(
+        "INSERT INTO rate_limit (key, count, expires_at, created_at, updated_at) VALUES (?, 1, ?, unixepoch(), unixepoch())",
+        [key, expiresAtUnix]
+      );
       return true;
     }
 
     const row = result.rows[0] as unknown as { count: number; expires_at: number };
 
+    // 既存エントリが期限切れの場合はリセット
+    if (row.expires_at <= nowUnix) {
+      await execute(
+        "UPDATE rate_limit SET count = 1, expires_at = ?, updated_at = unixepoch() WHERE key = ?",
+        [expiresAtUnix, key]
+      );
+      return true;
+    }
+
+    // 制限値に達している場合
     if (row.count >= limit) {
       return false;
     }
 
-    // Increment counter
+    // カウンターを加算
     await execute(
       "UPDATE rate_limit SET count = count + 1, updated_at = unixepoch() WHERE key = ?",
       [key]
@@ -66,7 +80,7 @@ async function checkRateLimitPersistent(
       key,
       error,
     });
-    // Fall back to memory on error
+    // エラー時はインメモリにフォールバック
     return checkRateLimitMemory(key, { limit, windowMs });
   }
 }
