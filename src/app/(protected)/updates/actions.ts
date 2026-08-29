@@ -103,7 +103,13 @@ export async function deleteUpdateAction(id: string): Promise<ActionState> {
   }
 
   try {
-    await deleteUpdate(id, uid);
+    const deleted = await deleteUpdate(id, uid);
+    if (!deleted) {
+      return {
+        ok: false,
+        error: "You do not have permission to delete this update or it does not exist.",
+      };
+    }
     revalidatePath("/updates");
     return { ok: true };
   } catch (error) {

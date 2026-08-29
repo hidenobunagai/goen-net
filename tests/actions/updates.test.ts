@@ -153,12 +153,26 @@ describe("Updates Server Actions", () => {
         user: { email: "test@example.com" },
       } as any);
       vi.mocked(checkRateLimit).mockResolvedValueOnce(true);
+      vi.mocked(deleteUpdate).mockResolvedValueOnce(true);
 
       const result = await deleteUpdateAction("id");
 
       expect(result.ok).toBe(true);
       expect(deleteUpdate).toHaveBeenCalledWith("id", "test@example.com");
       expect(revalidatePath).toHaveBeenCalledWith("/updates");
+    });
+
+    it("returns error when deleteUpdate returns false (not found or forbidden)", async () => {
+      vi.mocked(requireUserSession).mockResolvedValueOnce({
+        user: { email: "test@example.com" },
+      } as any);
+      vi.mocked(checkRateLimit).mockResolvedValueOnce(true);
+      vi.mocked(deleteUpdate).mockResolvedValueOnce(false);
+
+      const result = await deleteUpdateAction("id");
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toContain("You do not have permission");
     });
   });
 });
