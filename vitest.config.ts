@@ -10,6 +10,7 @@ export default defineConfig({
       ["tests/actions/**", "node"],
     ],
     globals: true,
+    pool: "forks",
     // E2EはPlaywright専用ランナーで実行するためVitestから除外
     exclude: [
       "tests/e2e/**",
