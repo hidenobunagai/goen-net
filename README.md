@@ -20,6 +20,12 @@ Goen Net is a supportive mentoring network for visionary leaders who are committ
 - Vitest + Playwright for automated testing
 - ESLint 9 for linting
 
+## 🏛️ Architecture
+
+[![Goen Net Architecture Diagram](./docs/architecture.png)](./docs/architecture.html)
+
+> 💡 **インタラクティブ図**: [docs/architecture.html](./docs/architecture.html) を開くと、テーマ切り替え (Light / Dark)・ズーム操作・フロー別フォーカス表示に対応した対話型アーキテクチャ図が利用可能です。
+
 ## 🚀 Getting Started
 
 1. **Install dependencies**

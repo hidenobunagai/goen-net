@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Goen Net システムアーキテクチャ",
+    "output": "architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "auth-flow",
+        "label": "認証・アクセス制御",
+        "focus": ["users", "google-auth", "next-auth", "api-routes"],
+        "note": "Google OAuth 2.0 と ALLOWED_EMAILS ホワイトリストによる厳格なアクセス制御。"
+      },
+      {
+        "id": "app-flow",
+        "label": "UI・アプリケーション連携",
+        "focus": ["users", "next-client", "app-router", "api-routes"],
+        "note": "React 19 / MUI 5 UI と Server Components / API Handler による高速なデータ連携。"
+      },
+      {
+        "id": "data-flow",
+        "label": "データ永続化とフォールバック",
+        "focus": ["app-router", "turso-db", "core-services", "memory-store"],
+        "note": "Turso LibSQL クラウドとローカル開発用メモリフォールバック構成。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "users",
+      "type": "external",
+      "label": "ユーザー (Alumni)",
+      "sublabel": "ブラウザ / モバイル",
+      "pos": [40, 270],
+      "size": [140, 60]
+    },
+    {
+      "id": "google-auth",
+      "type": "security",
+      "label": "Google OAuth 2.0",
+      "sublabel": "ID プロバイダー",
+      "brand": "google-cloud",
+      "pos": [40, 120],
+      "size": [140, 60],
+      "tag": "OAuth 2.0"
+    },
+    {
+      "id": "next-auth",
+      "type": "security",
+      "label": "NextAuth 認証層",
+      "sublabel": "セッション & ホワイトリスト",
+      "pos": [270, 120],
+      "size": [150, 60],
+      "tag": "ALLOWED_EMAILS"
+    },
+    {
+      "id": "next-client",
+      "type": "frontend",
+      "label": "React クライアント UI",
+      "sublabel": "MUI 5 / TanStack Query",
+      "brand": "react",
+      "pos": [270, 270],
+      "size": [150, 60]
+    },
+    {
+      "id": "app-router",
+      "type": "backend",
+      "label": "Next.js 16 App Router",
+      "sublabel": "RSC / Server Actions",
+      "brand": "next-js",
+      "pos": [520, 270],
+      "size": [160, 60]
+    },
+    {
+      "id": "api-routes",
+      "type": "backend",
+      "label": "API Route Handlers",
+      "sublabel": "Updates / Worksheets / Cron",
+      "pos": [520, 120],
+      "size": [160, 60]
+    },
+    {
+      "id": "core-services",
+      "type": "backend",
+      "label": "Core ユーティリティ",
+      "sublabel": "Zod Config / Logger / Rate Limit",
+      "pos": [520, 420],
+      "size": [160, 60]
+    },
+    {
+      "id": "turso-db",
+      "type": "database",
+      "label": "Turso (LibSQL)",
+      "sublabel": "Primary SQLite Cloud",
+      "brand": "sqlite",
+      "pos": [820, 270],
+      "size": [150, 60]
+    },
+    {
+      "id": "memory-store",
+      "type": "database",
+      "label": "In-Memory Store",
+      "sublabel": "ローカル開発 / テスト",
+      "pos": [820, 420],
+      "size": [150, 60],
+      "tag": "DEGRADE_TO_MEMORY"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Goen Net Application (Next.js 16 / Vercel)",
+      "wraps": ["next-auth", "next-client", "app-router", "api-routes", "core-services"]
+    },
+    {
+      "kind": "region",
+      "label": "データ永続化層",
+      "wraps": ["turso-db", "memory-store"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "users-to-client",
+      "from": "users",
+      "to": "next-client",
+      "label": "HTTPS / UI操作",
+      "variant": "emphasis"
+    },
+    {
+      "id": "users-to-google",
+      "from": "users",
+      "to": "google-auth",
+      "label": "OAuth サインイン",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "google-to-auth",
+      "from": "google-auth",
+      "to": "next-auth",
+      "label": "IDトークン検証",
+      "variant": "security"
+    },
+    {
+      "id": "auth-to-api",
+      "from": "next-auth",
+      "to": "api-routes",
+      "label": "セッション検証",
+      "variant": "security"
+    },
+    {
+      "id": "client-to-app",
+      "from": "next-client",
+      "to": "app-router",
+      "label": "RSC / Actions"
+    },
+    {
+      "id": "app-to-api",
+      "from": "app-router",
+      "to": "api-routes",
+      "label": "API ルート呼出",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [600, 195]
+    },
+    {
+      "id": "app-to-turso",
+      "from": "app-router",
+      "to": "turso-db",
+      "label": "LibSQL クエリ"
+    },
+    {
+      "id": "app-to-core",
+      "from": "app-router",
+      "to": "core-services",
+      "label": "設定 & ログ出力",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [600, 345]
+    },
+    {
+      "id": "core-to-memory",
+      "from": "core-services",
+      "to": "memory-store",
+      "label": "メモリフォールバック",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "フロントエンド",
+      "items": [
+        "React 19 / MUI 5 による UI と @dnd-kit 操作",
+        "TanStack Query による高速キャッシュと同期"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "バックエンド & 認証",
+      "items": [
+        "Next.js 16 App Router (RSC & Server Actions)",
+        "Google OAuth と ALLOWED_EMAILS ホワイトリスト"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "データ永続化",
+      "items": [
+        "Turso (LibSQL) クラウド SQLite データベース",
+        "DEGRADE_TO_MEMORY によるメモリフォールバック"
+      ]
+    }
+  ]
+}
