@@ -8,7 +8,7 @@ Goen Net is a private alumni dashboard for peer forum mentoring, updates sharing
 - **Framework**: Next.js 16 (App Router, React Server Components, Turbopack).
 - **Language**: TypeScript (strict mode, no placeholder comments like `// ... existing code ...`).
 - **Authentication**: NextAuth with Google OAuth2 (`ALLOWED_EMAILS` whitelist check).
-- **Database**: Turso (LibSQL client) with in-memory fallback support (`DEGRADE_TO_MEMORY=1`).
+- **Database**: Turso (LibSQL client). `DEGRADE_TO_MEMORY=1` enables a volatile in-memory store for **local development and E2E tests only** — never enable it in production (saved data disappears on restart). When the DB is unconfigured in production, worksheets/prioritization fail loud with 503 instead of silently using memory.
 - **UI & Styling**: MUI 5 (`@mui/material`, `@emotion/react`, `@emotion/styled`), `@dnd-kit` for drag-and-drop.
 - **State & Data Fetching**: TanStack React Query v5.
 - **Environment Variables**: Managed via `dotenvx`. Do not commit plaintext `.env` files.

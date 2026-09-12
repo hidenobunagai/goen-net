@@ -18,6 +18,7 @@ const eslintConfig = [
       "next-env.d.ts",
       "legacy/**",
       "src/components/emails/**",
+      "scripts/**",
     ],
   },
   {

@@ -32,6 +32,11 @@ jobs:
           GOOGLE_CLIENT_ID: test-google-client-id
           GOOGLE_CLIENT_SECRET: test-google-client-secret
 
+      - name: Validate migrations (dry-run against local sqlite)
+        run: |
+          rm -f /tmp/goen-ci-migrate.db
+          TURSO_DB_URL="file:/tmp/goen-ci-migrate.db" bun run scripts/migrate.ts --dry-run
+
   e2e-tests:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest

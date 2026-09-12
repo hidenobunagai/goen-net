@@ -20,61 +20,40 @@ export type RateLimitOptions = {
 };
 
 /**
- * Check rate limit using persistent database storage
- * Falls back to in-memory if database is unavailable
+ * Check rate limit using persistent database storage.
+ * Single-query UPSERT with RETURNING makes the read-modify-write atomic,
+ * so concurrent requests cannot slip through the limit.
+ * Expired-entry cleanup is intentionally NOT done inline here —
+ * run DELETE FROM rate_limit WHERE expires_at <= unixepoch() via a scheduled job instead.
+ * Falls back to in-memory if the database query itself fails.
  */
 async function checkRateLimitPersistent(
   key: string,
   { limit, windowMs }: RateLimitOptions
 ): Promise<boolean> {
-  const now = Date.now();
-  const expiresAt = now + windowMs;
-  const expiresAtUnix = Math.floor(expiresAt / 1000);
-  const nowUnix = Math.floor(now / 1000);
+  const nowUnix = Math.floor(Date.now() / 1000);
+  const expiresAtUnix = nowUnix + Math.max(1, Math.ceil(windowMs / 1000));
 
   try {
-    // 確率的（5%の確率）に期限切れレコードを非同期クリーンアップ
-    if (Math.random() < 0.05) {
-      void execute("DELETE FROM rate_limit WHERE expires_at <= ?", [nowUnix]).catch((err) => {
-        logger.warn("Rate limit background cleanup failed", { error: err });
-      });
-    }
-
-    // 現在のエントリを取得
-    const result = await execute("SELECT count, expires_at FROM rate_limit WHERE key = ?", [key]);
-
-    if (result.rows.length === 0) {
-      // 新規エントリ作成
-      await execute(
-        "INSERT INTO rate_limit (key, count, expires_at, created_at, updated_at) VALUES (?, 1, ?, unixepoch(), unixepoch())",
-        [key, expiresAtUnix]
-      );
-      return true;
-    }
-
-    const row = result.rows[0] as unknown as { count: number; expires_at: number };
-
-    // 既存エントリが期限切れの場合はリセット
-    if (row.expires_at <= nowUnix) {
-      await execute(
-        "UPDATE rate_limit SET count = 1, expires_at = ?, updated_at = unixepoch() WHERE key = ?",
-        [expiresAtUnix, key]
-      );
-      return true;
-    }
-
-    // 制限値に達している場合
-    if (row.count >= limit) {
-      return false;
-    }
-
-    // カウンターを加算
-    await execute(
-      "UPDATE rate_limit SET count = count + 1, updated_at = unixepoch() WHERE key = ?",
-      [key]
+    const result = await execute(
+      `INSERT INTO rate_limit (key, count, expires_at, created_at, updated_at)
+       VALUES (?, 1, ?, unixepoch(), unixepoch())
+       ON CONFLICT(key) DO UPDATE SET
+         count = CASE WHEN rate_limit.expires_at <= unixepoch() THEN 1 ELSE rate_limit.count + 1 END,
+         expires_at = CASE WHEN rate_limit.expires_at <= unixepoch() THEN excluded.expires_at ELSE rate_limit.expires_at END,
+         updated_at = unixepoch()
+       RETURNING count`,
+      [key, expiresAtUnix]
     );
 
-    return true;
+    const row = result.rows?.[0] as unknown as { count?: unknown } | undefined;
+    const count = typeof row?.count === "number" ? row.count : Number(row?.count ?? Number.NaN);
+    if (Number.isNaN(count)) {
+      logger.error("Rate limit check returned unexpected shape, falling back to memory", { key });
+      return checkRateLimitMemory(key, { limit, windowMs });
+    }
+
+    return count <= limit;
   } catch (error) {
     logger.error("Rate limit check failed, falling back to memory", {
       key,

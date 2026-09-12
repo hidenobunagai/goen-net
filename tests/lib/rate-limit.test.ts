@@ -47,29 +47,42 @@ describe("Rate Limiting", () => {
   });
 
   describe("Persistent rate limiter (Turso)", () => {
-    it("handles new rate limit entry in database", async () => {
+    it("issues a single atomic UPSERT and allows the first request", async () => {
       vi.mocked(isTursoConfigured).mockReturnValue(true);
-      vi.mocked(execute)
-        .mockResolvedValueOnce({ rows: [] } as never) // select -> empty
-        .mockResolvedValueOnce({ rows: [] } as never); // insert
+      vi.mocked(execute).mockResolvedValueOnce({ rows: [{ count: 1 }] } as never);
 
       const res = await checkRateLimit("test:db:1", { limit: 5, windowMs: 60000 });
       expect(res).toBe(true);
-      expect(execute).toHaveBeenCalledWith(
-        "SELECT count, expires_at FROM rate_limit WHERE key = ?",
-        ["test:db:1"]
-      );
+      expect(execute).toHaveBeenCalledTimes(1);
+      const [sql, args] = vi.mocked(execute).mock.calls[0] as [string, unknown[]];
+      expect(sql).toContain("ON CONFLICT(key) DO UPDATE");
+      expect(sql).toContain("RETURNING count");
+      expect(args[0]).toBe("test:db:1");
     });
 
-    it("blocks when database count meets or exceeds limit", async () => {
+    it("blocks when the returned count exceeds the limit", async () => {
       vi.mocked(isTursoConfigured).mockReturnValue(true);
-      const futureUnix = Math.floor(Date.now() / 1000) + 100;
-      vi.mocked(execute).mockResolvedValueOnce({
-        rows: [{ count: 5, expires_at: futureUnix }],
-      } as never);
+      vi.mocked(execute).mockResolvedValueOnce({ rows: [{ count: 6 }] } as never);
 
       const res = await checkRateLimit("test:db:2", { limit: 5, windowMs: 60000 });
       expect(res).toBe(false);
+    });
+
+    it("allows exactly up to the limit", async () => {
+      vi.mocked(isTursoConfigured).mockReturnValue(true);
+      vi.mocked(execute).mockResolvedValueOnce({ rows: [{ count: 5 }] } as never);
+
+      const res = await checkRateLimit("test:db:3", { limit: 5, windowMs: 60000 });
+      expect(res).toBe(true);
+    });
+
+    it("falls back to memory when the UPSERT fails", async () => {
+      vi.mocked(isTursoConfigured).mockReturnValue(true);
+      vi.mocked(execute).mockRejectedValueOnce(new Error("db down"));
+
+      const key = `test:db:fallback:${Date.now()}`;
+      const res = await checkRateLimit(key, { limit: 1, windowMs: 60000 });
+      expect(res).toBe(true);
     });
   });
 });

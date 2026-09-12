@@ -1,4 +1,7 @@
 -- Migrate legacy updates table to the new application schema.
+-- requires-legacy-table: updates
+-- WARNING: destructive for legacy DBs (DROP TABLE updates). Back up first.
+-- Fresh databases without the legacy table are skipped by scripts/migrate.ts.
 BEGIN TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS updates_new (

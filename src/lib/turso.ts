@@ -76,6 +76,15 @@ export function isTursoConfigured(): boolean {
   return process.env.DEGRADE_TO_MEMORY !== "1" && resolveConfig() !== null;
 }
 
+/**
+ * Explicit opt-in for volatile in-memory storage.
+ * Development and E2E testing only — never enable in production,
+ * otherwise saved data silently disappears on restart/redeploy.
+ */
+export function isMemoryFallbackEnabled(): boolean {
+  return process.env.DEGRADE_TO_MEMORY === "1";
+}
+
 export function getTursoClient(): Client {
   assertServerEnvironment();
 
