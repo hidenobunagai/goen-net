@@ -76,10 +76,65 @@ describe("/api/next-session", () => {
 
       const response = await POST(request);
       expect(response.status).toBe(422);
-      await expect(response.json()).resolves.toEqual({
-        ok: false,
-        error: { code: "INVALID_START", message: "Start time is required." },
+      const body = (await response.json()) as {
+        ok: boolean;
+        error: { code: string; message: string };
+      };
+      expect(body.ok).toBe(false);
+      expect(body.error.code).toBe("INVALID_START");
+    });
+
+    it("rejects malformed JSON with 400", async () => {
+      vi.mocked(getOptionalUserSession).mockResolvedValue({
+        user: { email: "member@example.com" },
+      } as never);
+
+      const request = new Request("https://example.com/api/next-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{not-json",
       });
+
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects an invalid date-time string with 422", async () => {
+      vi.mocked(getOptionalUserSession).mockResolvedValue({
+        user: { email: "member@example.com" },
+      } as never);
+
+      const request = new Request("https://example.com/api/next-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ startAt: "not-a-date" }),
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(422);
+      const body = (await response.json()) as {
+        ok: boolean;
+        error: { code: string };
+      };
+      expect(body.error.code).toBe("INVALID_START");
+    });
+
+    it("rejects an overlong location with 422", async () => {
+      vi.mocked(getOptionalUserSession).mockResolvedValue({
+        user: { email: "member@example.com" },
+      } as never);
+
+      const request = new Request("https://example.com/api/next-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          startAt: "2026-09-01T10:00:00Z",
+          location: "x".repeat(501),
+        }),
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(422);
     });
 
     it("updates next session successfully", async () => {

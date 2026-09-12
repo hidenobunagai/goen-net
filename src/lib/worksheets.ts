@@ -1,8 +1,16 @@
 import type { InArgs } from "@libsql/client";
 
-import { execute, isTursoConfigured } from "@/lib/turso";
+import {
+  execute,
+  isMemoryFallbackEnabled,
+  isTursoConfigured,
+  TursoUnavailableError,
+} from "@/lib/turso";
+import { jsonByteLength, PayloadTooLargeError } from "@/lib/utils";
 
 export const WORKSHEET_ROLES = ["presenter", "coach", "observer"] as const;
+
+export const MAX_WORKSHEET_BYTES = 100 * 1024;
 
 export type WorksheetRole = (typeof WORKSHEET_ROLES)[number];
 
@@ -67,6 +75,9 @@ export async function getWorksheet<T = unknown>(
   role: WorksheetRole
 ): Promise<WorksheetRecord<T> | null> {
   if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
     return getMemoryWorksheet<T>(uid, role);
   }
 
@@ -99,7 +110,17 @@ export async function upsertWorksheet<T = unknown>(
   role: WorksheetRole,
   data: T
 ): Promise<void> {
+  const size = jsonByteLength(data);
+  if (size > MAX_WORKSHEET_BYTES) {
+    throw new PayloadTooLargeError(
+      `Worksheet data is too large (${size} bytes). Maximum is ${MAX_WORKSHEET_BYTES} bytes.`
+    );
+  }
+
   if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
     upsertMemoryWorksheet(uid, role, data);
     return;
   }
@@ -114,6 +135,9 @@ export async function upsertWorksheet<T = unknown>(
 
 export async function deleteWorksheet(uid: string, role: WorksheetRole): Promise<void> {
   if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
     deleteMemoryWorksheet(uid, role);
     return;
   }

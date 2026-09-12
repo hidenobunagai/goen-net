@@ -31,8 +31,8 @@ const envSchema = z.object({
   // オプション設定
   DEGRADE_TO_MEMORY: z.enum(["0", "1"]).optional(),
 
-  // Cron設定
-  CRON_SECRET: z.string().optional(),
+  // Cron設定（本番環境では16文字以上を必須とし、短い値は起動時検証で拒否する）
+  CRON_SECRET: z.string().min(16, "CRON_SECRET must be at least 16 characters when set").optional(),
 
   // メール送信（Resend）
   RESEND_API_KEY: z.string().optional(),

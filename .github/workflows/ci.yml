@@ -44,7 +44,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run TypeScript compiler
-        run: bunx tsc --noEmit
+        run: bun run typecheck
 
   build:
     name: Build

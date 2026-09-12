@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { getOptionalUserSession } from "@/lib/session";
 import { TursoUnavailableError } from "@/lib/turso";
-import { JsonBodyError, requireJson } from "@/lib/utils";
+import { JsonBodyError, PayloadTooLargeError, requireJson } from "@/lib/utils";
 import {
   deleteWorksheet,
   getWorksheet,
@@ -163,6 +163,15 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     await upsertWorksheet(auth.email, role, payload.data ?? null);
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (error instanceof PayloadTooLargeError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: { code: "PAYLOAD_TOO_LARGE", message: error.message },
+        },
+        { status: error.status }
+      );
+    }
     logger.error("Failed to save worksheet", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(

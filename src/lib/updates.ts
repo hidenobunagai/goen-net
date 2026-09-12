@@ -20,8 +20,12 @@ export type UpdateRecord = {
   viewerIsOwner: boolean;
 };
 
+export const MAX_UPDATE_BY_LENGTH = 100;
+export const MAX_UPDATE_TITLE_LENGTH = 200;
+export const MAX_UPDATE_BODY_LENGTH = 10000;
+
 export const CreateUpdateSchema = z.object({
-  by: z.string().optional(),
+  by: z.string().max(MAX_UPDATE_BY_LENGTH, "Name must be 100 characters or fewer.").optional(),
   category: z
     .number()
     .refine((value): value is 0 | 1 | 2 => value === 0 || value === 1 || value === 2, {
@@ -30,9 +34,19 @@ export const CreateUpdateSchema = z.object({
     .optional(),
   urgent: z.boolean().optional(),
   priority: z.boolean().optional(), // Legacy support
-  title: z.string().nullable().optional(),
-  update: z.string().optional(), // Legacy support
-  body: z.string().optional(),
+  title: z
+    .string()
+    .max(MAX_UPDATE_TITLE_LENGTH, "Title must be 200 characters or fewer.")
+    .nullable()
+    .optional(),
+  update: z
+    .string()
+    .max(MAX_UPDATE_BODY_LENGTH, "Update must be 10000 characters or fewer.")
+    .optional(), // Legacy support
+  body: z
+    .string()
+    .max(MAX_UPDATE_BODY_LENGTH, "Body must be 10000 characters or fewer.")
+    .optional(),
   when: z
     .number()
     .refine((value): value is -1 | 1 => value === -1 || value === 1, {

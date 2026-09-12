@@ -6,7 +6,7 @@ import { getPrioritizationBoard, savePrioritizationBoard } from "@/lib/prioritiz
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getOptionalUserSession } from "@/lib/session";
 import { TursoUnavailableError } from "@/lib/turso";
-import { JsonBodyError, requireJson } from "@/lib/utils";
+import { JsonBodyError, PayloadTooLargeError, requireJson } from "@/lib/utils";
 
 export async function GET() {
   const session = await getOptionalUserSession();
@@ -84,6 +84,15 @@ export async function PUT(request: NextRequest) {
     await savePrioritizationBoard(payload.board ?? null);
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (error instanceof PayloadTooLargeError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: { code: "PAYLOAD_TOO_LARGE", message: error.message },
+        },
+        { status: error.status }
+      );
+    }
     logger.error("Failed to save prioritization board", { error });
     const unavailable = error instanceof TursoUnavailableError;
     return NextResponse.json(

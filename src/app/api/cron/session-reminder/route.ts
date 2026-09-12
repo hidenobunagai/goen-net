@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,22 +9,35 @@ import { logger } from "@/lib/logger";
 import { getAllowedEmails, sendEmail } from "@/lib/resend";
 import { getNextSession, isTursoConfigured } from "@/lib/turso";
 
-// Vercel Cronからのリクエストを検証
+function safeEqual(a: string, b: string): boolean {
+  const aBuffer = Buffer.from(a, "utf8");
+  const bBuffer = Buffer.from(b, "utf8");
+  if (aBuffer.length !== bBuffer.length) {
+    return false;
+  }
+  return timingSafeEqual(aBuffer, bBuffer);
+}
+
+// Vercel Cronからのリクエストを検証（開発環境の無認証バイパスなし）
 function isValidCronRequest(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (process.env.NODE_ENV === "development" && !cronSecret) {
-    logger.warn("CRON_SECRET is not set. Allowing request in development mode only.");
-    return true;
+  if (!cronSecret) {
+    logger.error("CRON_SECRET is not set. Rejecting cron request.");
+    return false;
   }
 
-  if (!cronSecret || !authHeader) {
+  if (!authHeader) {
     return false;
   }
 
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-  return token === cronSecret;
+  if (!token) {
+    return false;
+  }
+
+  return safeEqual(token, cronSecret);
 }
 
 export async function GET(request: NextRequest) {

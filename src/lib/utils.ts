@@ -24,3 +24,20 @@ export class JsonBodyError extends Error {
     this.status = status;
   }
 }
+
+export class PayloadTooLargeError extends Error {
+  status = 413;
+
+  constructor(message = "Request payload is too large.") {
+    super(message);
+    this.name = "PayloadTooLargeError";
+  }
+}
+
+/** UTF-8 byte length of a value when serialized as JSON. */
+export function jsonByteLength(value: unknown): number {
+  const serialized = JSON.stringify(value ?? null);
+  return typeof TextEncoder === "undefined"
+    ? serialized.length
+    : new TextEncoder().encode(serialized).length;
+}

@@ -1,6 +1,14 @@
 import type { InArgs } from "@libsql/client";
 
-import { execute, isTursoConfigured } from "@/lib/turso";
+import {
+  execute,
+  isMemoryFallbackEnabled,
+  isTursoConfigured,
+  TursoUnavailableError,
+} from "@/lib/turso";
+import { jsonByteLength, PayloadTooLargeError } from "@/lib/utils";
+
+export const MAX_PRIORITIZATION_BOARD_BYTES = 100 * 1024;
 
 let memoryPrioritizationStore: { data: unknown; updatedAt: string } | null = null;
 
@@ -18,6 +26,9 @@ function parseStoredData(raw: unknown): unknown {
 
 export async function getPrioritizationBoard<T = unknown>(): Promise<T | null> {
   if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
     return (memoryPrioritizationStore?.data as T) ?? null;
   }
 
@@ -30,7 +41,17 @@ export async function getPrioritizationBoard<T = unknown>(): Promise<T | null> {
 }
 
 export async function savePrioritizationBoard<T = unknown>(data: T): Promise<void> {
+  const size = jsonByteLength(data);
+  if (size > MAX_PRIORITIZATION_BOARD_BYTES) {
+    throw new PayloadTooLargeError(
+      `Prioritization board is too large (${size} bytes). Maximum is ${MAX_PRIORITIZATION_BOARD_BYTES} bytes.`
+    );
+  }
+
   if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
     memoryPrioritizationStore = {
       data: data ?? null,
       updatedAt: new Date().toISOString(),

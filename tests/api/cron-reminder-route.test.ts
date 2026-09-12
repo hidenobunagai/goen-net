@@ -1,5 +1,5 @@
 import { addDays } from "date-fns";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/logger", () => ({
   logger: {
@@ -29,13 +29,35 @@ describe("GET /api/cron/session-reminder", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env = { ...originalEnv, CRON_SECRET: "secret-key" };
+    process.env = { ...originalEnv, CRON_SECRET: "secret-key-16-chars-long" };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
   });
 
   it("returns 401 when authorization token does not match CRON_SECRET", async () => {
     const request = new Request("https://example.com/api/cron/session-reminder", {
-      headers: { authorization: "Bearer wrong-secret" },
+      headers: { authorization: "Bearer wrong-secret-16-chars-long" },
     });
+
+    const response = await GET(request as never);
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 401 when CRON_SECRET is not configured", async () => {
+    delete process.env.CRON_SECRET;
+    const request = new Request("https://example.com/api/cron/session-reminder", {
+      headers: { authorization: "Bearer anything-at-all" },
+    });
+
+    const response = await GET(request as never);
+    expect(response.status).toBe(401);
+    expect(sendEmail).not.toHaveBeenCalled();
+  });
+
+  it("returns 401 when the authorization header is missing", async () => {
+    const request = new Request("https://example.com/api/cron/session-reminder");
 
     const response = await GET(request as never);
     expect(response.status).toBe(401);
@@ -51,7 +73,7 @@ describe("GET /api/cron/session-reminder", () => {
     });
 
     const request = new Request("https://example.com/api/cron/session-reminder", {
-      headers: { authorization: "Bearer secret-key" },
+      headers: { authorization: "Bearer secret-key-16-chars-long" },
     });
 
     const response = await GET(request as never);
@@ -72,7 +94,7 @@ describe("GET /api/cron/session-reminder", () => {
     });
 
     const request = new Request("https://example.com/api/cron/session-reminder", {
-      headers: { authorization: "Bearer secret-key" },
+      headers: { authorization: "Bearer secret-key-16-chars-long" },
     });
 
     const response = await GET(request as never);
