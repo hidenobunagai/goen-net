@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { logger } from "@/lib/logger";
-import { getOptionalUserSession } from "@/lib/session";
-import { getNextSession, TursoUnavailableError, upsertNextSession } from "@/lib/turso";
+import { apiError, apiServiceError, resolveApiSession, resolveApiUser } from "@/lib/api";
+import { getNextSession, upsertNextSession } from "@/lib/turso";
 import { JsonBodyError, requireJson } from "@/lib/utils";
 
 export const MAX_NEXT_SESSION_LOCATION_LENGTH = 500;
@@ -34,16 +33,11 @@ export const NextSessionSchema = z.object({
 export type NextSessionInput = z.infer<typeof NextSessionSchema>;
 
 export async function GET() {
-  const session = await getOptionalUserSession();
-  if (!session) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "UNAUTHENTICATED", message: "Authentication required." },
-      },
-      { status: 401 }
-    );
+  const auth = await resolveApiSession();
+  if (!auth.ok) {
+    return auth.response;
   }
+
   try {
     const record = await getNextSession();
     return NextResponse.json({
@@ -51,46 +45,20 @@ export async function GET() {
       session: record,
     });
   } catch (error) {
-    logger.error("Failed to load next session", { error });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "FETCH_FAILED",
-          message: unavailable
-            ? "The next session cannot be loaded because the database is unavailable right now."
-            : "Unable to load the next session. Please try again later.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to load next session",
+      code: "FETCH_FAILED",
+      message: "Unable to load the next session. Please try again later.",
+      unavailableMessage:
+        "The next session cannot be loaded because the database is unavailable right now.",
+    });
   }
 }
 
 export async function POST(request: Request) {
-  const session = await getOptionalUserSession();
-  if (!session) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "UNAUTHENTICATED", message: "Authentication required." },
-      },
-      { status: 401 }
-    );
-  }
-
-  if (session.user?.email == null) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: "NO_EMAIL",
-          message: "Unable to determine user email for this session.",
-        },
-      },
-      { status: 400 }
-    );
+  const auth = await resolveApiUser();
+  if (!auth.ok) {
+    return auth.response;
   }
 
   let payload: NextSessionInput;
@@ -98,13 +66,7 @@ export async function POST(request: Request) {
     payload = await requireJson<NextSessionInput>(request);
   } catch (error) {
     if (error instanceof JsonBodyError) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: { code: "INVALID_JSON", message: error.message },
-        },
-        { status: error.status }
-      );
+      return apiError("INVALID_JSON", error.message, error.status);
     }
     throw error;
   }
@@ -122,13 +84,7 @@ export async function POST(request: Request) {
     const code = parsed.error.issues.some((issue) => issue.path.includes("startAt"))
       ? "INVALID_START"
       : "INVALID_INPUT";
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code, message },
-      },
-      { status: 422 }
-    );
+    return apiError(code, message, 422);
   }
 
   const { startAt, endAt, location } = parsed.data;
@@ -137,19 +93,12 @@ export async function POST(request: Request) {
     await upsertNextSession({ startAt, endAt: endAt ?? null, location: location || null });
     return NextResponse.json({ ok: true });
   } catch (error) {
-    logger.error("Failed to update next session", { error });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "UPDATE_FAILED",
-          message: unavailable
-            ? "The next session cannot be updated because the database is unavailable. Please try again once connectivity is restored."
-            : "Unable to update the next session right now.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to update next session",
+      code: "UPDATE_FAILED",
+      message: "Unable to update the next session right now.",
+      unavailableMessage:
+        "The next session cannot be updated because the database is unavailable. Please try again once connectivity is restored.",
+    });
   }
 }

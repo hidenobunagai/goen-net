@@ -1,69 +1,42 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { logger } from "@/lib/logger";
+import { apiError, apiServiceError, resolveApiSession } from "@/lib/api";
 import { getPrioritizationBoard, savePrioritizationBoard } from "@/lib/prioritization";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { getOptionalUserSession } from "@/lib/session";
-import { TursoUnavailableError } from "@/lib/turso";
 import { JsonBodyError, PayloadTooLargeError, requireJson } from "@/lib/utils";
 
 export async function GET() {
-  const session = await getOptionalUserSession();
-  if (!session) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "UNAUTHENTICATED", message: "Authentication required." },
-      },
-      { status: 401 }
-    );
+  const auth = await resolveApiSession();
+  if (!auth.ok) {
+    return auth.response;
   }
 
   try {
     const board = await getPrioritizationBoard();
     return NextResponse.json({ ok: true, board });
   } catch (error) {
-    logger.error("Failed to load prioritization board", { error });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "FETCH_FAILED",
-          message: unavailable
-            ? "Prioritization board cannot be loaded because the database is unavailable."
-            : "Unable to load prioritization board.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to load prioritization board",
+      code: "FETCH_FAILED",
+      message: "Unable to load prioritization board.",
+      unavailableMessage:
+        "Prioritization board cannot be loaded because the database is unavailable.",
+    });
   }
 }
 
 export async function PUT(request: NextRequest) {
-  const session = await getOptionalUserSession();
-  if (!session) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "UNAUTHENTICATED", message: "Authentication required." },
-      },
-      { status: 401 }
-    );
+  const auth = await resolveApiSession();
+  if (!auth.ok) {
+    return auth.response;
   }
 
-  const uid = session.user?.email;
+  const uid = auth.session.user?.email;
   if (uid) {
     const rateKey = `prioritization:put:${uid}`;
     if (!(await checkRateLimit(rateKey, { limit: 30, windowMs: 60_000 }))) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: { code: "RATE_LIMITED", message: "Too many save requests. Please slow down." },
-        },
-        { status: 429 }
-      );
+      return apiError("RATE_LIMITED", "Too many save requests. Please slow down.", 429);
     }
   }
 
@@ -72,10 +45,7 @@ export async function PUT(request: NextRequest) {
     payload = await requireJson<{ board?: unknown }>(request);
   } catch (error) {
     if (error instanceof JsonBodyError) {
-      return NextResponse.json(
-        { ok: false, error: { code: "INVALID_JSON", message: error.message } },
-        { status: error.status }
-      );
+      return apiError("INVALID_JSON", error.message, error.status);
     }
     throw error;
   }
@@ -85,27 +55,14 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof PayloadTooLargeError) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: { code: "PAYLOAD_TOO_LARGE", message: error.message },
-        },
-        { status: error.status }
-      );
+      return apiError("PAYLOAD_TOO_LARGE", error.message, error.status);
     }
-    logger.error("Failed to save prioritization board", { error });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "SAVE_FAILED",
-          message: unavailable
-            ? "Prioritization board cannot be saved because the database is unavailable."
-            : "Unable to save prioritization board.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to save prioritization board",
+      code: "SAVE_FAILED",
+      message: "Unable to save prioritization board.",
+      unavailableMessage:
+        "Prioritization board cannot be saved because the database is unavailable.",
+    });
   }
 }

@@ -1,9 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { apiError, apiServiceError, resolveApiUser } from "@/lib/api";
 import { logger } from "@/lib/logger";
-import { getOptionalUserSession } from "@/lib/session";
-import { TursoUnavailableError } from "@/lib/turso";
 import { JsonBodyError, PayloadTooLargeError, requireJson } from "@/lib/utils";
 import {
   deleteWorksheet,
@@ -41,65 +40,14 @@ async function resolveRole(context: RouteContext): Promise<WorksheetRole | null>
   }
 }
 
-type AuthResolution =
-  | {
-      status: "authenticated";
-      email: string;
-    }
-  | {
-      status: "unauthenticated";
-      response: NextResponse;
-    };
-
-async function resolveAuthenticatedEmail(): Promise<AuthResolution> {
-  const session = await getOptionalUserSession();
-  if (!session) {
-    return {
-      status: "unauthenticated",
-      response: NextResponse.json(
-        {
-          ok: false,
-          error: { code: "UNAUTHENTICATED", message: "Authentication required." },
-        },
-        { status: 401 }
-      ),
-    };
-  }
-
-  const email = session.user?.email?.trim();
-  if (!email) {
-    return {
-      status: "unauthenticated",
-      response: NextResponse.json(
-        {
-          ok: false,
-          error: {
-            code: "NO_EMAIL",
-            message: "Unable to determine user email for this session.",
-          },
-        },
-        { status: 400 }
-      ),
-    };
-  }
-
-  return { status: "authenticated", email };
-}
-
 export async function GET(_request: NextRequest, context: RouteContext) {
   const role = await resolveRole(context);
   if (!role) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "INVALID_ROLE", message: "Unknown worksheet role." },
-      },
-      { status: 400 }
-    );
+    return apiError("INVALID_ROLE", "Unknown worksheet role.", 400);
   }
 
-  const auth = await resolveAuthenticatedEmail();
-  if (auth.status === "unauthenticated") {
+  const auth = await resolveApiUser();
+  if (!auth.ok) {
     return auth.response;
   }
 
@@ -112,37 +60,24 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         : null,
     });
   } catch (error) {
-    logger.error("Failed to load worksheet", { error });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "FETCH_FAILED",
-          message: unavailable
-            ? "Worksheets cannot be loaded because the database is currently unavailable."
-            : "Unable to load worksheet data right now. Please try again soon.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to load worksheet",
+      code: "FETCH_FAILED",
+      message: "Unable to load worksheet data right now. Please try again soon.",
+      unavailableMessage:
+        "Worksheets cannot be loaded because the database is currently unavailable.",
+    });
   }
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   const role = await resolveRole(context);
   if (!role) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "INVALID_ROLE", message: "Unknown worksheet role." },
-      },
-      { status: 400 }
-    );
+    return apiError("INVALID_ROLE", "Unknown worksheet role.", 400);
   }
 
-  const auth = await resolveAuthenticatedEmail();
-  if (auth.status === "unauthenticated") {
+  const auth = await resolveApiUser();
+  if (!auth.ok) {
     return auth.response;
   }
 
@@ -151,10 +86,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     payload = await requireJson<SaveWorksheetPayload>(request);
   } catch (error) {
     if (error instanceof JsonBodyError) {
-      return NextResponse.json(
-        { ok: false, error: { code: "INVALID_JSON", message: error.message } },
-        { status: error.status }
-      );
+      return apiError("INVALID_JSON", error.message, error.status);
     }
     throw error;
   }
@@ -164,45 +96,26 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof PayloadTooLargeError) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: { code: "PAYLOAD_TOO_LARGE", message: error.message },
-        },
-        { status: error.status }
-      );
+      return apiError("PAYLOAD_TOO_LARGE", error.message, error.status);
     }
-    logger.error("Failed to save worksheet", { error });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "SAVE_FAILED",
-          message: unavailable
-            ? "Worksheets cannot be saved because the database is currently unavailable."
-            : "Unable to save worksheet right now. Please try again later.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to save worksheet",
+      code: "SAVE_FAILED",
+      message: "Unable to save worksheet right now. Please try again later.",
+      unavailableMessage:
+        "Worksheets cannot be saved because the database is currently unavailable.",
+    });
   }
 }
 
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   const role = await resolveRole(context);
   if (!role) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "INVALID_ROLE", message: "Unknown worksheet role." },
-      },
-      { status: 400 }
-    );
+    return apiError("INVALID_ROLE", "Unknown worksheet role.", 400);
   }
 
-  const auth = await resolveAuthenticatedEmail();
-  if (auth.status === "unauthenticated") {
+  const auth = await resolveApiUser();
+  if (!auth.ok) {
     return auth.response;
   }
 
@@ -210,19 +123,12 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     await deleteWorksheet(auth.email, role);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    logger.error("Failed to clear worksheet", { error });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "DELETE_FAILED",
-          message: unavailable
-            ? "Worksheets cannot be cleared because the database is currently unavailable."
-            : "Unable to clear worksheet right now. Please try again later.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to clear worksheet",
+      code: "DELETE_FAILED",
+      message: "Unable to clear worksheet right now. Please try again later.",
+      unavailableMessage:
+        "Worksheets cannot be cleared because the database is currently unavailable.",
+    });
   }
 }

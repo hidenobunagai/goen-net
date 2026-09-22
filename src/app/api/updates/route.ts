@@ -1,9 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { logger } from "@/lib/logger";
-import { getOptionalUserSession } from "@/lib/session";
-import { TursoUnavailableError } from "@/lib/turso";
+import { apiServiceError, resolveApiUser } from "@/lib/api";
 import { fetchUpdates } from "@/lib/updates";
 
 function parseLimit(value: string | null): number {
@@ -17,50 +15,24 @@ function parseLimit(value: string | null): number {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await getOptionalUserSession();
-  if (!session) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: { code: "UNAUTHENTICATED", message: "Authentication required." },
-      },
-      { status: 401 }
-    );
-  }
-
-  const viewerId = session.user?.email;
-  if (!viewerId) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: "NO_EMAIL",
-          message: "Unable to determine user email for this session.",
-        },
-      },
-      { status: 400 }
-    );
+  const auth = await resolveApiUser();
+  if (!auth.ok) {
+    return auth.response;
   }
 
   const limit = parseLimit(new URL(request.url).searchParams.get("limit"));
 
   try {
-    const updates = await fetchUpdates(viewerId, { limit });
+    const updates = await fetchUpdates(auth.email, { limit });
     return NextResponse.json({ ok: true, updates });
   } catch (error) {
-    logger.error("Failed to load updates", { error, viewerId, limit });
-    const unavailable = error instanceof TursoUnavailableError;
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: unavailable ? "DATABASE_UNAVAILABLE" : "FETCH_FAILED",
-          message: unavailable
-            ? "The updates cannot be loaded because the database is unavailable right now."
-            : "Unable to load updates right now.",
-        },
-      },
-      { status: 503 }
-    );
+    return apiServiceError(error, {
+      logMessage: "Failed to load updates",
+      context: { viewerId: auth.email, limit },
+      code: "FETCH_FAILED",
+      message: "Unable to load updates right now.",
+      unavailableMessage:
+        "The updates cannot be loaded because the database is unavailable right now.",
+    });
   }
 }
