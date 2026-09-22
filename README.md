@@ -113,7 +113,7 @@ If validation fails, the app will not start and will display detailed error mess
 
 - `bun run lint` – Run ESLint across the project.
 - `bun run test` – Execute the full Vitest unit suite.
-- `bun run test:playwright` – Launch Playwright end-to-end tests (requires `PLAYWRIGHT_TEST_EMAIL` and `PLAYWRIGHT_TEST_PASSWORD`).
+- `bun run test:playwright` – Launch Playwright end-to-end tests (starts the dev server on port 3001 via `webServer`; run `bunx playwright install chromium` once beforehand).
 
 ## ☁️ Deployment
 

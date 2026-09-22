@@ -59,11 +59,9 @@ jobs:
       - name: Run Playwright tests
         run: bun run test:playwright
         env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          PLAYWRIGHT_TEST_EMAIL: ${{ secrets.PLAYWRIGHT_TEST_EMAIL }}
-          PLAYWRIGHT_TEST_PASSWORD: ${{ secrets.PLAYWRIGHT_TEST_PASSWORD }}
+          PLAYWRIGHT_BASE_URL: http://localhost:3001
           NEXTAUTH_SECRET: test-secret-at-least-32-characters-long-for-testing
-          NEXTAUTH_URL: http://localhost:3000
+          NEXTAUTH_URL: http://localhost:3001
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || 'test-google-client-id' }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET || 'test-google-client-secret' }}
           DEGRADE_TO_MEMORY: "1"
