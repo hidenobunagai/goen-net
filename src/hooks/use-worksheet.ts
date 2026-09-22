@@ -24,6 +24,7 @@ export function useWorksheet<T extends Record<string, unknown>>(
   const [clearing, setClearing] = useState(false);
   const [status, setStatus] = useState<WorksheetStatus>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,7 +69,14 @@ export function useWorksheet<T extends Record<string, unknown>>(
     return () => {
       cancelled = true;
     };
-  }, [role, normalize, initialRef]);
+  }, [role, normalize, initialRef, reloadKey]);
+
+  const reload = useCallback(() => {
+    setReloadKey((key) => key + 1);
+  }, []);
+
+  // 読み込み完了前・読み込み失敗中は form が空のままなので、保存可否はここで一元判定する
+  const canSave = !loading && !loadError && !saving && !clearing;
 
   const handleChange = useCallback(
     (key: keyof T) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -81,6 +89,7 @@ export function useWorksheet<T extends Record<string, unknown>>(
   );
 
   const save = useCallback(async () => {
+    if (!canSave) return;
     setSaving(true);
     setStatus(null);
     try {
@@ -108,7 +117,7 @@ export function useWorksheet<T extends Record<string, unknown>>(
     } finally {
       setSaving(false);
     }
-  }, [role, form]);
+  }, [role, form, canSave]);
 
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
@@ -155,6 +164,8 @@ export function useWorksheet<T extends Record<string, unknown>>(
     status,
     setStatus,
     loadError,
+    canSave,
+    reload,
     handleChange,
     save,
     clear: requestClear,

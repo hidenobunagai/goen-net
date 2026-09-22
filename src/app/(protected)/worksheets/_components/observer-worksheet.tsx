@@ -42,11 +42,12 @@ export function ObserverWorksheet() {
   useDocumentTitle("Observer Worksheet");
   const {
     form,
-    loading,
     saving,
     clearing,
     status,
     loadError,
+    canSave,
+    reload,
     handleChange,
     save: handleSave,
     clear: handleClear,
@@ -150,7 +151,15 @@ export function ObserverWorksheet() {
       <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 }, pb: 8 }}>
         <Stack spacing={4}>
           {loadError && (
-            <Alert severity="error" variant="outlined">
+            <Alert
+              severity="error"
+              variant="outlined"
+              action={
+                <Button color="inherit" size="small" onClick={reload}>
+                  Reload
+                </Button>
+              }
+            >
               {loadError}
             </Alert>
           )}
@@ -466,14 +475,11 @@ export function ObserverWorksheet() {
                 </Alert>
               )}
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1} justifyContent="flex-end">
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleSave}
-                  disabled={loading || saving || clearing}
-                >
-                  Save
-                </Button>
+                {!loadError && (
+                  <Button variant="contained" size="small" onClick={handleSave} disabled={!canSave}>
+                    Save
+                  </Button>
+                )}
                 <Button
                   variant="outlined"
                   color="warning"

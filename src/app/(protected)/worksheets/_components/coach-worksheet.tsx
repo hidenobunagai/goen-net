@@ -45,6 +45,8 @@ export function CoachWorksheet() {
     status,
     setStatus,
     loadError,
+    canSave,
+    reload,
     handleChange,
     save: handleSave,
     clear: handleClear,
@@ -117,7 +119,15 @@ export function CoachWorksheet() {
       <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 }, pb: 8 }}>
         <Stack spacing={4}>
           {loadError && (
-            <Alert severity="error" variant="outlined">
+            <Alert
+              severity="error"
+              variant="outlined"
+              action={
+                <Button color="inherit" size="small" onClick={reload}>
+                  Reload
+                </Button>
+              }
+            >
               {loadError}
             </Alert>
           )}
@@ -521,16 +531,18 @@ export function CoachWorksheet() {
           >
             <Stack spacing={2.5}>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1} justifyContent="flex-end">
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => {
-                    void handleSave();
-                  }}
-                  disabled={saving}
-                >
-                  {saving ? "Saving…" : "Save"}
-                </Button>
+                {!loadError && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => {
+                      void handleSave();
+                    }}
+                    disabled={!canSave}
+                  >
+                    {saving ? "Saving…" : "Save"}
+                  </Button>
+                )}
                 <Button
                   variant="outlined"
                   color="warning"
