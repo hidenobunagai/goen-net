@@ -18,6 +18,15 @@ vi.mock("@/lib/worksheets", () => ({
   upsertWorksheet: vi.fn(),
   deleteWorksheet: vi.fn(),
   isValidWorksheetRole: (role: string) => ["presenter", "coach", "observer"].includes(role),
+  WorksheetConflictError: class WorksheetConflictError extends Error {
+    status = 409;
+    constructor(
+      message = "This worksheet was changed in another session. Reload to see the latest version."
+    ) {
+      super(message);
+      this.name = "WorksheetConflictError";
+    }
+  },
 }));
 
 vi.mock("@/lib/turso", () => ({
@@ -26,7 +35,12 @@ vi.mock("@/lib/turso", () => ({
 
 import { DELETE, GET, PUT } from "@/app/api/worksheets/[role]/route";
 import { getOptionalUserSession } from "@/lib/session";
-import { deleteWorksheet, getWorksheet, upsertWorksheet } from "@/lib/worksheets";
+import {
+  deleteWorksheet,
+  getWorksheet,
+  upsertWorksheet,
+  WorksheetConflictError,
+} from "@/lib/worksheets";
 
 describe("/api/worksheets/[role]", () => {
   beforeEach(() => {
@@ -92,7 +106,7 @@ describe("/api/worksheets/[role]", () => {
       vi.mocked(getOptionalUserSession).mockResolvedValue({
         user: { email: "presenter@example.com" },
       } as never);
-      vi.mocked(upsertWorksheet).mockResolvedValue(undefined);
+      vi.mocked(upsertWorksheet).mockResolvedValue("saved-revision");
 
       const request = new Request("https://example.com/api/worksheets/presenter", {
         method: "PUT",
@@ -105,10 +119,92 @@ describe("/api/worksheets/[role]", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(upsertWorksheet).toHaveBeenCalledWith("presenter@example.com", "presenter", {
-        issue: "Scaling challenges",
+      expect(upsertWorksheet).toHaveBeenCalledWith(
+        "presenter@example.com",
+        "presenter",
+        { issue: "Scaling challenges" },
+        null
+      );
+      await expect(response.json()).resolves.toEqual({ ok: true, updatedAt: "saved-revision" });
+    });
+
+    it("forwards the client revision and returns the revision it wrote", async () => {
+      vi.mocked(getOptionalUserSession).mockResolvedValue({
+        user: { email: "coach@example.com" },
+      } as never);
+      vi.mocked(upsertWorksheet).mockResolvedValue("2026-09-30T10:00:00.000Z");
+
+      const request = new Request("https://example.com/api/worksheets/coach", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: { note: "edited" },
+          baseUpdatedAt: "2026-09-29T10:00:00.000Z",
+        }),
       });
-      await expect(response.json()).resolves.toEqual({ ok: true });
+
+      const response = await PUT(request as never, {
+        params: Promise.resolve({ role: "coach" }),
+      });
+
+      expect(response.status).toBe(200);
+      expect(upsertWorksheet).toHaveBeenCalledWith(
+        "coach@example.com",
+        "coach",
+        { note: "edited" },
+        "2026-09-29T10:00:00.000Z"
+      );
+      await expect(response.json()).resolves.toEqual({
+        ok: true,
+        updatedAt: "2026-09-30T10:00:00.000Z",
+      });
+    });
+
+    it("ignores a non-string baseUpdatedAt instead of letting it block the save", async () => {
+      vi.mocked(getOptionalUserSession).mockResolvedValue({
+        user: { email: "coach@example.com" },
+      } as never);
+      vi.mocked(upsertWorksheet).mockResolvedValue("revision");
+
+      const request = new Request("https://example.com/api/worksheets/coach", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: {}, baseUpdatedAt: 42 }),
+      });
+
+      await PUT(request as never, { params: Promise.resolve({ role: "coach" }) });
+
+      expect(upsertWorksheet).toHaveBeenCalledWith("coach@example.com", "coach", {}, null);
+    });
+
+    it("returns 409 when the stored revision moved on", async () => {
+      vi.mocked(getOptionalUserSession).mockResolvedValue({
+        user: { email: "presenter@example.com" },
+      } as never);
+      vi.mocked(upsertWorksheet).mockRejectedValue(new WorksheetConflictError());
+
+      const request = new Request("https://example.com/api/worksheets/presenter", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: { issue: "stale" },
+          baseUpdatedAt: "2026-09-29T10:00:00.000Z",
+        }),
+      });
+
+      const response = await PUT(request as never, {
+        params: Promise.resolve({ role: "presenter" }),
+      });
+
+      expect(response.status).toBe(409);
+      await expect(response.json()).resolves.toEqual({
+        ok: false,
+        error: {
+          code: "SAVE_CONFLICT",
+          message:
+            "This worksheet was changed in another session. Reload to see the latest version.",
+        },
+      });
     });
   });
 

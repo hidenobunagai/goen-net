@@ -9,6 +9,7 @@ import {
   getWorksheet,
   isValidWorksheetRole,
   upsertWorksheet,
+  WorksheetConflictError,
   type WorksheetRole,
 } from "@/lib/worksheets";
 
@@ -20,6 +21,8 @@ type RouteContext = {
 
 type SaveWorksheetPayload = {
   data?: unknown;
+  /** Revision the client loaded; absent means "no worksheet existed yet". */
+  baseUpdatedAt?: unknown;
 };
 
 function normalizeRole(value: string | undefined): WorksheetRole | null {
@@ -91,10 +94,15 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     throw error;
   }
 
+  const baseUpdatedAt = typeof payload.baseUpdatedAt === "string" ? payload.baseUpdatedAt : null;
+
   try {
-    await upsertWorksheet(auth.email, role, payload.data ?? null);
-    return NextResponse.json({ ok: true });
+    const updatedAt = await upsertWorksheet(auth.email, role, payload.data ?? null, baseUpdatedAt);
+    return NextResponse.json({ ok: true, updatedAt });
   } catch (error) {
+    if (error instanceof WorksheetConflictError) {
+      return apiError("SAVE_CONFLICT", error.message, error.status);
+    }
     if (error instanceof PayloadTooLargeError) {
       return apiError("PAYLOAD_TOO_LARGE", error.message, error.status);
     }

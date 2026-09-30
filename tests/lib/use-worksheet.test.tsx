@@ -95,6 +95,7 @@ describe("useWorksheet save guard", () => {
     expect(putCalls(fetchMock)).toHaveLength(1);
     expect(JSON.parse(String(putCalls(fetchMock)[0][1]?.body))).toEqual({
       data: { note: "loaded" },
+      baseUpdatedAt: null,
     });
   });
 
@@ -142,5 +143,205 @@ describe("useWorksheet save guard", () => {
     expect(hook.result.current.loadError).toBeNull();
     expect(hook.result.current.canSave).toBe(true);
     expect(hook.result.current.form).toEqual({ note: "recovered" });
+  });
+});
+
+describe("useWorksheet optimistic locking", () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+  let unmount: (() => void) | undefined;
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    unmount?.();
+    unmount = undefined;
+    fetchMock.mockReset();
+  });
+
+  it("sends the revision it loaded and keeps the one returned by the save", async () => {
+    let putBody: unknown;
+    fetchMock.mockImplementation((_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        putBody = JSON.parse(String(init.body));
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ ok: true, updatedAt: "rev-2" }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          worksheet: { data: { note: "loaded" }, updatedAt: "rev-1" },
+        }),
+      });
+    });
+
+    const hook = renderHook(() => useWorksheet<Record<string, unknown>>("coach"));
+    unmount = hook.unmount;
+
+    await act(async () => {
+      await flush();
+    });
+    expect(hook.result.current.canSave).toBe(true);
+
+    await act(async () => {
+      await hook.result.current.save();
+    });
+    expect(putBody).toEqual({ data: { note: "loaded" }, baseUpdatedAt: "rev-1" });
+
+    await act(async () => {
+      await hook.result.current.save();
+    });
+    expect((putBody as { baseUpdatedAt: string }).baseUpdatedAt).toBe("rev-2");
+  });
+
+  it("sends baseUpdatedAt null when nothing was stored yet", async () => {
+    let putBody: unknown;
+    fetchMock.mockImplementation((_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        putBody = JSON.parse(String(init.body));
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ ok: true, updatedAt: "rev-1" }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ ok: true, worksheet: null }),
+      });
+    });
+
+    const hook = renderHook(() => useWorksheet<Record<string, unknown>>("coach"));
+    unmount = hook.unmount;
+
+    await act(async () => {
+      await flush();
+    });
+    await act(async () => {
+      await hook.result.current.save();
+    });
+
+    expect(putBody).toEqual({ data: {}, baseUpdatedAt: null });
+  });
+
+  it("blocks saving on 409 and recovers through reload()", async () => {
+    const conflictMessage =
+      "This worksheet was changed in another session. Reload to see the latest version.";
+    fetchMock.mockImplementation((_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        return Promise.resolve({
+          ok: false,
+          status: 409,
+          json: async () => ({
+            ok: false,
+            error: { code: "SAVE_CONFLICT", message: conflictMessage },
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          worksheet: { data: { note: "loaded" }, updatedAt: "rev-1" },
+        }),
+      });
+    });
+
+    const hook = renderHook(() => useWorksheet<Record<string, unknown>>("coach"));
+    unmount = hook.unmount;
+
+    await act(async () => {
+      await flush();
+    });
+
+    await act(async () => {
+      await hook.result.current.save();
+    });
+
+    expect(hook.result.current.loadError).toBe(conflictMessage);
+    expect(hook.result.current.canSave).toBe(false);
+    expect(hook.result.current.status).toBeNull();
+
+    fetchMock.mockImplementation((_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        return Promise.resolve({ ok: true, json: async () => ({ ok: true, updatedAt: "rev-2" }) });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          worksheet: { data: { note: "theirs" }, updatedAt: "rev-2" },
+        }),
+      });
+    });
+
+    await act(async () => {
+      hook.result.current.reload();
+      await flush();
+    });
+
+    expect(hook.result.current.loadError).toBeNull();
+    expect(hook.result.current.canSave).toBe(true);
+    expect(hook.result.current.form).toEqual({ note: "theirs" });
+
+    let putBody: unknown;
+    fetchMock.mockImplementation((_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        putBody = JSON.parse(String(init.body));
+        return Promise.resolve({ ok: true, json: async () => ({ ok: true, updatedAt: "rev-3" }) });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          worksheet: { data: { note: "theirs" }, updatedAt: "rev-2" },
+        }),
+      });
+    });
+
+    await act(async () => {
+      await hook.result.current.save();
+    });
+
+    expect((putBody as { baseUpdatedAt: string }).baseUpdatedAt).toBe("rev-2");
+  });
+
+  it("treats saves after a clear as a fresh insert", async () => {
+    const bodies: unknown[] = [];
+    fetchMock.mockImplementation((_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        bodies.push(JSON.parse(String(init.body)));
+        return Promise.resolve({ ok: true, json: async () => ({ ok: true, updatedAt: "rev-2" }) });
+      }
+      if (init?.method === "DELETE") {
+        return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          worksheet: { data: { note: "loaded" }, updatedAt: "rev-1" },
+        }),
+      });
+    });
+
+    const hook = renderHook(() => useWorksheet<Record<string, unknown>>("coach"));
+    unmount = hook.unmount;
+
+    await act(async () => {
+      await flush();
+    });
+    await act(async () => {
+      await hook.result.current.confirmClear();
+    });
+    await act(async () => {
+      await hook.result.current.save();
+    });
+
+    expect(bodies).toEqual([{ data: {}, baseUpdatedAt: null }]);
   });
 });

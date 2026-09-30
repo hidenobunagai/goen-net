@@ -26,7 +26,31 @@ type MemoryWorksheetRecord = {
   updatedAt: string;
 };
 
+/** Raised when a save is based on a revision that is no longer the stored one. */
+export class WorksheetConflictError extends Error {
+  status = 409;
+
+  constructor(
+    message = "This worksheet was changed in another session. Reload to see the latest version."
+  ) {
+    super(message);
+    this.name = "WorksheetConflictError";
+  }
+}
+
 const memoryWorksheetStore = new Map<string, MemoryWorksheetRecord>();
+
+/**
+ * The revision to store for this write. Kept strictly greater than the base it
+ * replaces: millisecond timestamps repeat within the same millisecond, and two
+ * revisions that compare equal would let a stale save through the guard.
+ */
+function nextWorksheetRevision(baseUpdatedAt: string | null): string {
+  const now = Date.now();
+  const base = baseUpdatedAt ? Date.parse(baseUpdatedAt) : Number.NaN;
+  const next = Number.isNaN(base) ? now : Math.max(now, base + 1);
+  return new Date(next).toISOString();
+}
 
 function getMemoryKey(uid: string, role: WorksheetRole): string {
   return `${uid}::${role}`;
@@ -46,12 +70,20 @@ function getMemoryWorksheet<T = unknown>(
   };
 }
 
-function upsertMemoryWorksheet<T = unknown>(uid: string, role: WorksheetRole, data: T): void {
-  const updatedAt = new Date().toISOString();
-  memoryWorksheetStore.set(getMemoryKey(uid, role), {
-    data: (data ?? null) as T | null,
-    updatedAt,
-  });
+function upsertMemoryWorksheet<T = unknown>(
+  uid: string,
+  role: WorksheetRole,
+  data: T,
+  baseUpdatedAt: string | null
+): string {
+  const key = getMemoryKey(uid, role);
+  const existing = memoryWorksheetStore.get(key);
+  if (existing ? existing.updatedAt !== baseUpdatedAt : baseUpdatedAt !== null) {
+    throw new WorksheetConflictError();
+  }
+  const updatedAt = nextWorksheetRevision(baseUpdatedAt);
+  memoryWorksheetStore.set(key, { data: (data ?? null) as T | null, updatedAt });
+  return updatedAt;
 }
 
 function deleteMemoryWorksheet(uid: string, role: WorksheetRole): void {
@@ -105,11 +137,17 @@ export async function getWorksheet<T = unknown>(
   };
 }
 
+/**
+ * Writes the worksheet, refusing to clobber a revision the caller did not read.
+ * `baseUpdatedAt` is the `updatedAt` returned by the GET the form was based on;
+ * `null` means "no worksheet existed yet". Returns the revision written.
+ */
 export async function upsertWorksheet<T = unknown>(
   uid: string,
   role: WorksheetRole,
-  data: T
-): Promise<void> {
+  data: T,
+  baseUpdatedAt: string | null = null
+): Promise<string> {
   const size = jsonByteLength(data);
   if (size > MAX_WORKSHEET_BYTES) {
     throw new PayloadTooLargeError(
@@ -121,16 +159,27 @@ export async function upsertWorksheet<T = unknown>(
     if (!isMemoryFallbackEnabled()) {
       throw new TursoUnavailableError();
     }
-    upsertMemoryWorksheet(uid, role, data);
-    return;
+    return upsertMemoryWorksheet(uid, role, data, baseUpdatedAt);
   }
 
-  await execute(
+  // Two guards, both meaning "the caller read the latest revision": the row may
+  // only be inserted while none exists (?5 IS NULL), and the DO UPDATE only
+  // matches the revision the caller actually read.
+  const updatedAt = nextWorksheetRevision(baseUpdatedAt);
+  const result = await execute(
     `INSERT INTO worksheets (uid, role, data, created_at, updated_at)
-     VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))
-     ON CONFLICT(uid, role) DO UPDATE SET data=excluded.data, updated_at=datetime('now')`,
-    [uid, role, JSON.stringify(data ?? null)] as InArgs
+     SELECT ?1, ?2, ?3, ?4, ?4
+     WHERE ?5 IS NULL OR EXISTS (SELECT 1 FROM worksheets WHERE uid = ?1 AND role = ?2)
+     ON CONFLICT(uid, role) DO UPDATE SET data=excluded.data, updated_at=excluded.updated_at
+     WHERE worksheets.updated_at = ?5`,
+    [uid, role, JSON.stringify(data ?? null), updatedAt, baseUpdatedAt] as InArgs
   );
+
+  if (result.rowsAffected !== 1) {
+    throw new WorksheetConflictError();
+  }
+
+  return updatedAt;
 }
 
 export async function deleteWorksheet(uid: string, role: WorksheetRole): Promise<void> {

@@ -24,6 +24,8 @@ export function useWorksheet<T extends Record<string, unknown>>(
   const [clearing, setClearing] = useState(false);
   const [status, setStatus] = useState<WorksheetStatus>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  // 保存時の楽観ロックに使う、読み込み済みリビジョン（未保存なら null）
+  const [baseUpdatedAt, setBaseUpdatedAt] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export function useWorksheet<T extends Record<string, unknown>>(
           credentials: "include",
         });
         const payload = (await response.json().catch(() => null)) as
-          | { ok: true; worksheet: { data: unknown } | null }
+          | { ok: true; worksheet: { data: unknown; updatedAt?: unknown } | null }
           | { ok: false; error?: { message?: string } }
           | null;
 
@@ -49,6 +51,9 @@ export function useWorksheet<T extends Record<string, unknown>>(
         }
         if (cancelled) return;
         const data = payload?.worksheet?.data;
+        setBaseUpdatedAt(
+          typeof payload?.worksheet?.updatedAt === "string" ? payload.worksheet.updatedAt : null
+        );
         if (normalize) {
           setForm(normalize(data));
         } else if (data && typeof data === "object") {
@@ -97,17 +102,29 @@ export function useWorksheet<T extends Record<string, unknown>>(
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: form }),
+        body: JSON.stringify({ data: form, baseUpdatedAt }),
       });
       const payload = (await response.json().catch(() => null)) as
-        | { ok: true }
+        | { ok: true; updatedAt?: unknown }
         | { ok: false; error?: { message?: string } }
         | null;
+      // 409 = 他セッションが先に保存した。保存を封じ、既存の Reload 導線に載せる
+      // （メッセージは loadError の Alert が受け持つので status には出さない）
+      if (response.status === 409) {
+        setLoadError(
+          (payload && "error" in payload ? payload.error?.message : undefined) ??
+            "This worksheet was changed in another session. Reload to see the latest version."
+        );
+        return;
+      }
       if (!response.ok || payload?.ok === false) {
         const message =
           (payload && "error" in payload ? payload.error?.message : undefined) ??
           "Unable to save worksheet right now. Please try again.";
         throw new Error(message);
+      }
+      if (typeof payload?.updatedAt === "string") {
+        setBaseUpdatedAt(payload.updatedAt);
       }
       setStatus({ type: "success", message: "Worksheet saved." });
     } catch (error) {
@@ -117,7 +134,7 @@ export function useWorksheet<T extends Record<string, unknown>>(
     } finally {
       setSaving(false);
     }
-  }, [role, form, canSave]);
+  }, [role, form, canSave, baseUpdatedAt]);
 
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
@@ -145,6 +162,8 @@ export function useWorksheet<T extends Record<string, unknown>>(
         throw new Error(message);
       }
       setForm(initialRef);
+      // 消した直後の状態が新しい基準（再保存は「新規作成」として通す）
+      setBaseUpdatedAt(null);
       setStatus({ type: "success", message: "Worksheet cleared." });
     } catch (error) {
       const message =
