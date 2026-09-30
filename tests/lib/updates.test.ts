@@ -12,6 +12,7 @@ vi.mock("@/lib/logger", () => ({
 
 vi.mock("@/lib/turso", () => ({
   isTursoConfigured: vi.fn(),
+  isMemoryFallbackEnabled: vi.fn(() => false),
   execute: vi.fn(),
   TursoUnavailableError: class TursoUnavailableError extends Error {
     constructor(message = "Turso database configuration is not available.") {

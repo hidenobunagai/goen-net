@@ -2,7 +2,12 @@ import type { InArgs } from "@libsql/client";
 import { z } from "zod";
 
 import { logger } from "@/lib/logger";
-import { execute, isTursoConfigured, TursoUnavailableError } from "@/lib/turso";
+import {
+  execute,
+  isMemoryFallbackEnabled,
+  isTursoConfigured,
+  TursoUnavailableError,
+} from "@/lib/turso";
 
 export type UpdateCategory = 0 | 1 | 2;
 export type UpdateWhen = -1 | 1;
@@ -69,10 +74,32 @@ type FetchOptions = {
   offset?: number;
 };
 
-function assertTursoAvailable(): void {
-  if (!isTursoConfigured()) {
-    throw new TursoUnavailableError();
-  }
+type MemoryUpdateRow = {
+  id: string;
+  by_name: string;
+  category: UpdateCategory;
+  urgent: number;
+  uid: string;
+  title: string | null;
+  body: string;
+  when_value: UpdateWhen;
+  created_at: string;
+  updated_at: string;
+  [key: string]: unknown;
+};
+
+const globalUpdatesStore = globalThis as unknown as {
+  __updatesMemoryStore?: Map<string, MemoryUpdateRow>;
+};
+
+if (!globalUpdatesStore.__updatesMemoryStore) {
+  globalUpdatesStore.__updatesMemoryStore = new Map();
+}
+
+const memoryUpdatesStore = globalUpdatesStore.__updatesMemoryStore;
+
+export function resetUpdatesCache(): void {
+  memoryUpdatesStore.clear();
 }
 
 function toRecord(row: unknown): Record<string, unknown> | null {
@@ -112,7 +139,6 @@ function toUpdateRecord(row: Record<string, unknown>, viewerId: string): UpdateR
 }
 
 async function ensureUserProfile(uid: string, name: string): Promise<void> {
-  assertTursoAvailable();
   const safeName = name?.trim() || uid;
   try {
     await execute(
@@ -133,7 +159,21 @@ export async function fetchUpdates(
   viewerId: string,
   { limit = 50, offset = 0 }: FetchOptions = {}
 ): Promise<UpdateRecord[]> {
-  assertTursoAvailable();
+  if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
+    const all = Array.from(memoryUpdatesStore.values());
+    all.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    const paged = all.slice(offset, offset + limit);
+    const updates: UpdateRecord[] = [];
+    for (const row of paged) {
+      const update = toUpdateRecord(row, viewerId);
+      if (update) updates.push(update);
+    }
+    return updates;
+  }
+
   const result = await execute(
     "SELECT * FROM updates ORDER BY created_at DESC LIMIT ?1 OFFSET ?2",
     [limit, offset] as InArgs
@@ -149,7 +189,15 @@ export async function fetchUpdates(
 }
 
 export async function getUpdateById(id: string, viewerId: string): Promise<UpdateRecord | null> {
-  assertTursoAvailable();
+  if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
+    const record = memoryUpdatesStore.get(id);
+    if (!record) return null;
+    return toUpdateRecord(record, viewerId);
+  }
+
   const result = await execute("SELECT * FROM updates WHERE id = ?1 LIMIT 1", [id] as InArgs);
   const record = toRecord(result.rows?.[0]);
   if (!record) return null;
@@ -166,7 +214,26 @@ export async function insertUpdate(params: {
   body: string;
   when: UpdateWhen;
 }): Promise<void> {
-  assertTursoAvailable();
+  if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
+    const now = new Date().toISOString();
+    memoryUpdatesStore.set(params.id, {
+      id: params.id,
+      by_name: params.by,
+      category: params.category,
+      urgent: params.urgent ? 1 : 0,
+      uid: params.uid,
+      title: params.title,
+      body: params.body,
+      when_value: params.when,
+      created_at: now,
+      updated_at: now,
+    });
+    return;
+  }
+
   await ensureUserProfile(params.uid, params.by);
   await execute(
     `INSERT INTO updates (id, by_name, category, urgent, uid, title, body, when_value, created_at, updated_at)
@@ -185,7 +252,18 @@ export async function insertUpdate(params: {
 }
 
 export async function deleteUpdate(id: string, uid: string): Promise<boolean> {
-  assertTursoAvailable();
+  if (!isTursoConfigured()) {
+    if (!isMemoryFallbackEnabled()) {
+      throw new TursoUnavailableError();
+    }
+    const record = memoryUpdatesStore.get(id);
+    if (!record || record.uid !== uid) {
+      return false;
+    }
+    memoryUpdatesStore.delete(id);
+    return true;
+  }
+
   const result = await execute("DELETE FROM updates WHERE id = ?1 AND uid = ?2", [
     id,
     uid,
