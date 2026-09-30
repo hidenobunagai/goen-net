@@ -49,3 +49,41 @@ test("injected session can open /updates", async ({ page }) => {
   await expect(page).toHaveURL((url) => url.pathname === UPDATES_PATH);
   await expect(page.getByRole("heading", { level: 1, name: "Updates" })).toBeVisible();
 });
+
+// 作成（server action）→ 一覧（GET /api/updates）→ 削除（server action）。
+// DEGRADE_TO_MEMORY=1 では server action と route handler が別バンドルなので、
+// インメモリストアが globalThis 経由で共有されていることも同時に検証する。
+test("injected session can create, list, and delete an update", async ({ page }) => {
+  // next dev はオンデマンドでコンパイルするため、
+  // 作成後の一覧反映（refetch）まで数十秒かかることがある。
+  test.slow();
+
+  await injectSession(page);
+  await page.goto(UPDATES_PATH);
+  await expect(page.getByRole("heading", { level: 1, name: "Updates" })).toBeVisible();
+
+  const title = `E2E update ${Date.now()}`;
+
+  await page.getByRole("button", { name: "Add Update" }).click();
+  await page.getByLabel("Title").fill(title);
+  await page.getByLabel("Update text").fill("Created by the E2E suite.");
+  await page.getByRole("button", { name: "Save" }).click();
+
+  await expect(page.getByText("Update added.")).toBeVisible();
+  const cardTitle = page.getByText(title, { exact: true });
+  await expect(cardTitle).toHaveCount(1, { timeout: 20_000 });
+
+  await cardTitle.click();
+  const detailsDialog = page
+    .getByRole("dialog")
+    .filter({ has: page.getByRole("heading", { level: 2, name: title }) });
+  await expect(detailsDialog).toBeVisible();
+  await detailsDialog.getByRole("button", { name: "Delete" }).click();
+
+  const confirmDialog = page.getByRole("dialog").filter({ hasText: "Delete update?" });
+  await expect(confirmDialog).toBeVisible();
+  await confirmDialog.getByRole("button", { name: "Delete" }).click();
+
+  await expect(page.getByText("Update deleted.")).toBeVisible();
+  await expect(cardTitle).toHaveCount(0, { timeout: 20_000 });
+});
