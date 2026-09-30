@@ -24,13 +24,7 @@ vi.mock("@/lib/turso", () => ({
 
 import { logger } from "@/lib/logger";
 import { execute, isTursoConfigured, TursoUnavailableError } from "@/lib/turso";
-import {
-  CreateUpdateSchema,
-  deleteUpdate,
-  fetchUpdates,
-  getUpdateById,
-  insertUpdate,
-} from "@/lib/updates";
+import { CreateUpdateSchema, deleteUpdate, fetchUpdates, insertUpdate } from "@/lib/updates";
 
 describe("updates", () => {
   describe("CreateUpdateSchema", () => {
@@ -89,10 +83,6 @@ describe("updates", () => {
 
     it("fetchUpdates throws TursoUnavailableError", async () => {
       await expect(fetchUpdates("viewer-1")).rejects.toThrow(TursoUnavailableError);
-    });
-
-    it("getUpdateById throws TursoUnavailableError", async () => {
-      await expect(getUpdateById("id-1", "viewer-1")).rejects.toThrow(TursoUnavailableError);
     });
 
     it("insertUpdate throws TursoUnavailableError", async () => {
@@ -204,52 +194,6 @@ describe("updates", () => {
         expect(updates[2]?.when).toBe(-1);
         expect(updates[2]?.title).toBe("Untitled");
         expect(updates[2]?.by).toBe("Unknown");
-      });
-    });
-
-    describe("getUpdateById", () => {
-      it("returns null on empty", async () => {
-        vi.mocked(execute).mockResolvedValueOnce({ rows: [] } as any);
-
-        const result = await getUpdateById("nonexistent-id", "viewer-id");
-
-        expect(result).toBeNull();
-        expect(execute).toHaveBeenCalledWith("SELECT * FROM updates WHERE id = ?1 LIMIT 1", [
-          "nonexistent-id",
-        ]);
-      });
-
-      it("returns UpdateRecord when found", async () => {
-        vi.mocked(execute).mockResolvedValueOnce({
-          rows: [
-            {
-              id: "update-123",
-              by_name: "Alice",
-              category: 2,
-              urgent: 1,
-              uid: "viewer-id",
-              title: "My Update",
-              body: "Update details",
-              when_value: 1,
-              created_at: "2026-03-01T00:00:00Z",
-            },
-          ],
-        } as any);
-
-        const result = await getUpdateById("update-123", "viewer-id");
-
-        expect(result).toEqual({
-          id: "update-123",
-          by: "Alice",
-          category: 2,
-          urgent: true,
-          uid: "viewer-id",
-          title: "My Update",
-          body: "Update details",
-          when: 1,
-          createdAt: "2026-03-01T00:00:00Z",
-          viewerIsOwner: true,
-        });
       });
     });
 

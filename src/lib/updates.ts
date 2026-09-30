@@ -188,22 +188,6 @@ export async function fetchUpdates(
   return updates;
 }
 
-export async function getUpdateById(id: string, viewerId: string): Promise<UpdateRecord | null> {
-  if (!isTursoConfigured()) {
-    if (!isMemoryFallbackEnabled()) {
-      throw new TursoUnavailableError();
-    }
-    const record = memoryUpdatesStore.get(id);
-    if (!record) return null;
-    return toUpdateRecord(record, viewerId);
-  }
-
-  const result = await execute("SELECT * FROM updates WHERE id = ?1 LIMIT 1", [id] as InArgs);
-  const record = toRecord(result.rows?.[0]);
-  if (!record) return null;
-  return toUpdateRecord(record, viewerId);
-}
-
 export async function insertUpdate(params: {
   id: string;
   by: string;

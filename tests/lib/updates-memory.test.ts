@@ -27,13 +27,7 @@ import {
   isTursoConfigured,
   TursoUnavailableError,
 } from "@/lib/turso";
-import {
-  deleteUpdate,
-  fetchUpdates,
-  getUpdateById,
-  insertUpdate,
-  resetUpdatesCache,
-} from "@/lib/updates";
+import { deleteUpdate, fetchUpdates, insertUpdate, resetUpdatesCache } from "@/lib/updates";
 
 describe("updates (in-memory fallback)", () => {
   beforeEach(() => {
@@ -132,28 +126,6 @@ describe("updates (in-memory fallback)", () => {
     }
   });
 
-  it("getUpdateById returns the record, and null for an unknown id", async () => {
-    await insertUpdate({
-      id: "up-target",
-      by: "Charlie",
-      category: 2,
-      urgent: false,
-      uid: "uid-charlie",
-      title: "Charlie's Update",
-      body: "Details of Charlie's update",
-      when: 1,
-    });
-
-    const found = await getUpdateById("up-target", "uid-charlie");
-    expect(found).not.toBeNull();
-    expect(found?.id).toBe("up-target");
-    expect(found?.title).toBe("Charlie's Update");
-    expect(found?.viewerIsOwner).toBe(true);
-
-    const notFound = await getUpdateById("unknown-id", "uid-charlie");
-    expect(notFound).toBeNull();
-  });
-
   it("deleteUpdate: own uid deletes and returns true; a different uid returns false and leaves the record; a second delete of the same id returns false", async () => {
     await insertUpdate({
       id: "up-del",
@@ -169,14 +141,14 @@ describe("updates (in-memory fallback)", () => {
     // A different uid returns false and leaves the record
     const wrongUidResult = await deleteUpdate("up-del", "different-uid");
     expect(wrongUidResult).toBe(false);
-    const stillThere = await getUpdateById("up-del", "owner-uid");
-    expect(stillThere).not.toBeNull();
+    const stillThere = await fetchUpdates("owner-uid");
+    expect(stillThere.map((update) => update.id)).toEqual(["up-del"]);
 
     // Own uid deletes and returns true
     const ownUidResult = await deleteUpdate("up-del", "owner-uid");
     expect(ownUidResult).toBe(true);
-    const gone = await getUpdateById("up-del", "owner-uid");
-    expect(gone).toBeNull();
+    const gone = await fetchUpdates("owner-uid");
+    expect(gone).toHaveLength(0);
 
     // A second delete of the same id returns false
     const secondDeleteResult = await deleteUpdate("up-del", "owner-uid");
@@ -196,7 +168,6 @@ describe("updates (in-memory fallback)", () => {
     });
 
     await fetchUpdates("uid-eve");
-    await getUpdateById("up-mem", "uid-eve");
     await deleteUpdate("up-mem", "uid-eve");
 
     expect(execute).not.toHaveBeenCalled();
