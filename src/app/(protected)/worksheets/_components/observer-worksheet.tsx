@@ -9,6 +9,7 @@ import {
   Chip,
   Container,
   Divider,
+  FormControlLabel,
   Paper,
   Stack,
   TextField,
@@ -28,6 +29,7 @@ type ObserverForm = {
   protocolAccept?: string;
   protocolQuestion?: string;
   protocolSupport?: string;
+  checklist?: Record<string, boolean>;
 };
 
 type ProtocolPrompt = { type: "checkbox" | "bullet"; text: string };
@@ -42,6 +44,7 @@ export function ObserverWorksheet() {
   useDocumentTitle("Observer Worksheet");
   const {
     form,
+    setForm,
     saving,
     clearing,
     status,
@@ -387,24 +390,38 @@ export function ObserverWorksheet() {
                     <Stack spacing={0.75}>
                       {prompts.map((prompt) =>
                         prompt.type === "checkbox" ? (
-                          <Stack
+                          <FormControlLabel
                             key={prompt.text}
-                            direction="row"
-                            spacing={1}
-                            alignItems="flex-start"
-                          >
-                            <Checkbox
-                              size="small"
-                              sx={{
-                                p: 0,
-                                mt: 0.25,
-                                "& .MuiSvgIcon-root": { fontSize: 20 },
-                              }}
-                            />
-                            <Typography variant="body2" sx={{ pt: 0.25 }}>
-                              {prompt.text}
-                            </Typography>
-                          </Stack>
+                            control={
+                              <Checkbox
+                                size="small"
+                                checked={Boolean(form.checklist?.[prompt.text])}
+                                onChange={(event) =>
+                                  setForm((prev) => ({
+                                    ...prev,
+                                    checklist: {
+                                      ...prev.checklist,
+                                      [prompt.text]: event.target.checked,
+                                    },
+                                  }))
+                                }
+                                sx={{
+                                  p: 0,
+                                  mt: 0.25,
+                                  "& .MuiSvgIcon-root": { fontSize: 20 },
+                                }}
+                              />
+                            }
+                            label={prompt.text}
+                            slotProps={{
+                              typography: { variant: "body2", sx: { pt: 0.25 } },
+                            }}
+                            sx={{
+                              alignItems: "flex-start",
+                              m: 0,
+                              gap: 1,
+                            }}
+                          />
                         ) : (
                           <Stack
                             key={prompt.text}
