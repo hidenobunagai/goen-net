@@ -2,27 +2,28 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Goen Net システムアーキテクチャ",
+    "title": "Goen Net System Architecture",
+    "locale": "en",
     "output": "architecture.html",
     "quality_profile": "showcase",
     "views": [
       {
         "id": "auth-flow",
-        "label": "認証・アクセス制御",
+        "label": "Authentication & Access Control",
         "focus": ["users", "google-auth", "next-auth", "api-routes"],
-        "note": "Google OAuth 2.0 と ALLOWED_EMAILS ホワイトリストによる厳格なアクセス制御。"
+        "note": "Strict access control via Google OAuth 2.0 and the ALLOWED_EMAILS whitelist."
       },
       {
         "id": "app-flow",
-        "label": "UI・アプリケーション連携",
+        "label": "UI & Application Flow",
         "focus": ["users", "next-client", "app-router", "api-routes"],
-        "note": "React 19 / MUI 5 UI と Server Components / API Handler による高速なデータ連携。"
+        "note": "Fast data flow via React 19 / MUI 5 UI, Server Components and API handlers."
       },
       {
         "id": "data-flow",
-        "label": "データ永続化とフォールバック",
+        "label": "Data Persistence & Fallback",
         "focus": ["app-router", "turso-db", "core-services", "memory-store"],
-        "note": "Turso LibSQL クラウドとローカル開発用メモリフォールバック構成。"
+        "note": "Turso LibSQL cloud with an in-memory fallback for local development."
       }
     ]
   },
@@ -30,8 +31,8 @@
     {
       "id": "users",
       "type": "external",
-      "label": "ユーザー (Alumni)",
-      "sublabel": "ブラウザ / モバイル",
+      "label": "Users (Alumni)",
+      "sublabel": "Browser / Mobile",
       "pos": [40, 270],
       "size": [140, 60]
     },
@@ -39,7 +40,7 @@
       "id": "google-auth",
       "type": "security",
       "label": "Google OAuth 2.0",
-      "sublabel": "ID プロバイダー",
+      "sublabel": "Identity Provider",
       "brand": "google-cloud",
       "pos": [40, 120],
       "size": [140, 60],
@@ -48,8 +49,8 @@
     {
       "id": "next-auth",
       "type": "security",
-      "label": "NextAuth 認証層",
-      "sublabel": "セッション & ホワイトリスト",
+      "label": "NextAuth Auth Layer",
+      "sublabel": "Session & whitelist",
       "pos": [270, 120],
       "size": [150, 60],
       "tag": "ALLOWED_EMAILS"
@@ -57,7 +58,7 @@
     {
       "id": "next-client",
       "type": "frontend",
-      "label": "React クライアント UI",
+      "label": "React Client UI",
       "sublabel": "MUI 5 / TanStack Query",
       "brand": "react",
       "pos": [270, 270],
@@ -83,7 +84,7 @@
     {
       "id": "core-services",
       "type": "backend",
-      "label": "Core ユーティリティ",
+      "label": "Core Utilities",
       "sublabel": "Zod Config / Logger / Rate Limit",
       "pos": [520, 420],
       "size": [160, 60]
@@ -101,7 +102,7 @@
       "id": "memory-store",
       "type": "database",
       "label": "In-Memory Store",
-      "sublabel": "ローカル開発 / テスト",
+      "sublabel": "Local dev / tests",
       "pos": [820, 420],
       "size": [150, 60],
       "tag": "DEGRADE_TO_MEMORY"
@@ -115,7 +116,7 @@
     },
     {
       "kind": "region",
-      "label": "データ永続化層",
+      "label": "Data Persistence Layer",
       "wraps": ["turso-db", "memory-store"]
     }
   ],
@@ -124,14 +125,14 @@
       "id": "users-to-client",
       "from": "users",
       "to": "next-client",
-      "label": "HTTPS / UI操作",
+      "label": "HTTPS / UI",
       "variant": "emphasis"
     },
     {
       "id": "users-to-google",
       "from": "users",
       "to": "google-auth",
-      "label": "OAuth サインイン",
+      "label": "OAuth sign-in",
       "variant": "security",
       "fromSide": "top",
       "toSide": "bottom"
@@ -140,14 +141,14 @@
       "id": "google-to-auth",
       "from": "google-auth",
       "to": "next-auth",
-      "label": "IDトークン検証",
+      "label": "ID token check",
       "variant": "security"
     },
     {
       "id": "auth-to-api",
       "from": "next-auth",
       "to": "api-routes",
-      "label": "セッション検証",
+      "label": "Session check",
       "variant": "security"
     },
     {
@@ -160,7 +161,7 @@
       "id": "app-to-api",
       "from": "app-router",
       "to": "api-routes",
-      "label": "API ルート呼出",
+      "label": "API route calls",
       "fromSide": "top",
       "toSide": "bottom",
       "labelAt": [600, 195]
@@ -169,13 +170,13 @@
       "id": "app-to-turso",
       "from": "app-router",
       "to": "turso-db",
-      "label": "LibSQL クエリ"
+      "label": "LibSQL queries"
     },
     {
       "id": "app-to-core",
       "from": "app-router",
       "to": "core-services",
-      "label": "設定 & ログ出力",
+      "label": "Config & logging",
       "fromSide": "bottom",
       "toSide": "top",
       "labelAt": [600, 345]
@@ -184,33 +185,33 @@
       "id": "core-to-memory",
       "from": "core-services",
       "to": "memory-store",
-      "label": "メモリフォールバック",
+      "label": "Memory fallback",
       "variant": "dashed"
     }
   ],
   "cards": [
     {
       "dot": "cyan",
-      "title": "フロントエンド",
+      "title": "Frontend",
       "items": [
-        "React 19 / MUI 5 による UI と @dnd-kit 操作",
-        "TanStack Query による高速キャッシュと同期"
+        "UI and drag-and-drop via React 19 / MUI 5 and @dnd-kit",
+        "Fast cache and sync via TanStack Query"
       ]
     },
     {
       "dot": "emerald",
-      "title": "バックエンド & 認証",
+      "title": "Backend & Auth",
       "items": [
         "Next.js 16 App Router (RSC & Server Actions)",
-        "Google OAuth と ALLOWED_EMAILS ホワイトリスト"
+        "Google OAuth with the ALLOWED_EMAILS whitelist"
       ]
     },
     {
       "dot": "amber",
-      "title": "データ永続化",
+      "title": "Data Persistence",
       "items": [
-        "Turso (LibSQL) クラウド SQLite データベース",
-        "DEGRADE_TO_MEMORY によるメモリフォールバック"
+        "Turso (LibSQL) cloud SQLite database",
+        "In-memory fallback via DEGRADE_TO_MEMORY"
       ]
     }
   ]
