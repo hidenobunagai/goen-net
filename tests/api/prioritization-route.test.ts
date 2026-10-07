@@ -136,10 +136,7 @@ describe("/api/prioritization", () => {
 
       const response = await PUT(request as never);
       expect(response.status).toBe(200);
-      expect(savePrioritizationBoard).toHaveBeenCalledWith(
-        mockBoard,
-        "2026-10-07T12:00:00.000Z"
-      );
+      expect(savePrioritizationBoard).toHaveBeenCalledWith(mockBoard, "2026-10-07T12:00:00.000Z");
       await expect(response.json()).resolves.toEqual({
         ok: true,
         updatedAt: "2026-10-07T12:00:00.001Z",

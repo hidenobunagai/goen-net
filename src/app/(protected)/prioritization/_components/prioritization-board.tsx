@@ -239,9 +239,9 @@ export function PrioritizationBoard({
     }
     return null;
   });
-  const [syncStatus, setSyncStatus] = useState<
-    "idle" | "saving" | "saved" | "error" | "conflict"
-  >("idle");
+  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error" | "conflict">(
+    "idle"
+  );
   const [newColumnName, setNewColumnName] = useState("");
   const [activeId, setActiveId] = useState<UniqueId | null>(null);
   const [selectedMember, setSelectedMember] = useState<string>("all");
