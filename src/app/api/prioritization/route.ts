@@ -2,9 +2,18 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { apiError, apiServiceError, resolveApiSession } from "@/lib/api";
-import { getPrioritizationBoard, savePrioritizationBoard } from "@/lib/prioritization";
+import {
+  getPrioritizationBoard,
+  PrioritizationConflictError,
+  savePrioritizationBoard,
+} from "@/lib/prioritization";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { JsonBodyError, PayloadTooLargeError, requireJson } from "@/lib/utils";
+
+type SavePrioritizationPayload = {
+  board?: unknown;
+  baseUpdatedAt?: unknown;
+};
 
 export async function GET() {
   const auth = await resolveApiSession();
@@ -13,8 +22,8 @@ export async function GET() {
   }
 
   try {
-    const board = await getPrioritizationBoard();
-    return NextResponse.json({ ok: true, board });
+    const record = await getPrioritizationBoard();
+    return NextResponse.json({ ok: true, board: record.data, updatedAt: record.updatedAt });
   } catch (error) {
     return apiServiceError(error, {
       logMessage: "Failed to load prioritization board",
@@ -40,9 +49,9 @@ export async function PUT(request: NextRequest) {
     }
   }
 
-  let payload: { board?: unknown };
+  let payload: SavePrioritizationPayload;
   try {
-    payload = await requireJson<{ board?: unknown }>(request);
+    payload = await requireJson<SavePrioritizationPayload>(request);
   } catch (error) {
     if (error instanceof JsonBodyError) {
       return apiError("INVALID_JSON", error.message, error.status);
@@ -50,10 +59,23 @@ export async function PUT(request: NextRequest) {
     throw error;
   }
 
+  if (
+    payload.baseUpdatedAt !== undefined &&
+    payload.baseUpdatedAt !== null &&
+    typeof payload.baseUpdatedAt !== "string"
+  ) {
+    return apiError("INVALID_BODY", "baseUpdatedAt must be a string or null.", 400);
+  }
+
+  const baseUpdatedAt = typeof payload.baseUpdatedAt === "string" ? payload.baseUpdatedAt : null;
+
   try {
-    await savePrioritizationBoard(payload.board ?? null);
-    return NextResponse.json({ ok: true });
+    const updatedAt = await savePrioritizationBoard(payload.board ?? null, baseUpdatedAt);
+    return NextResponse.json({ ok: true, updatedAt });
   } catch (error) {
+    if (error instanceof PrioritizationConflictError) {
+      return apiError("SAVE_CONFLICT", error.message, error.status);
+    }
     if (error instanceof PayloadTooLargeError) {
       return apiError("PAYLOAD_TOO_LARGE", error.message, error.status);
     }
