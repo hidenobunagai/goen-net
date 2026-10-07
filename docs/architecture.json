@@ -209,10 +209,7 @@
     {
       "dot": "amber",
       "title": "Data Persistence",
-      "items": [
-        "Turso (LibSQL) cloud SQLite database",
-        "In-memory fallback via DEGRADE_TO_MEMORY"
-      ]
+      "items": ["Turso (LibSQL) cloud SQLite database", "In-memory fallback via DEGRADE_TO_MEMORY"]
     }
   ]
 }
