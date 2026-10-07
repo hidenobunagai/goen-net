@@ -41,3 +41,15 @@ export function jsonByteLength(value: unknown): number {
     ? serialized.length
     : new TextEncoder().encode(serialized).length;
 }
+
+/**
+ * The revision to store for this write. Kept strictly greater than the base it
+ * replaces: millisecond timestamps repeat within the same millisecond, and two
+ * revisions that compare equal would let a stale save through the guard.
+ */
+export function nextRevision(baseUpdatedAt: string | null): string {
+  const now = Date.now();
+  const base = baseUpdatedAt ? Date.parse(baseUpdatedAt) : Number.NaN;
+  const next = Number.isNaN(base) ? now : Math.max(now, base + 1);
+  return new Date(next).toISOString();
+}

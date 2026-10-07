@@ -6,7 +6,7 @@ import {
   isTursoConfigured,
   TursoUnavailableError,
 } from "@/lib/turso";
-import { jsonByteLength, PayloadTooLargeError } from "@/lib/utils";
+import { jsonByteLength, nextRevision, PayloadTooLargeError } from "@/lib/utils";
 
 export const WORKSHEET_ROLES = ["presenter", "coach", "observer"] as const;
 
@@ -40,18 +40,6 @@ export class WorksheetConflictError extends Error {
 
 const memoryWorksheetStore = new Map<string, MemoryWorksheetRecord>();
 
-/**
- * The revision to store for this write. Kept strictly greater than the base it
- * replaces: millisecond timestamps repeat within the same millisecond, and two
- * revisions that compare equal would let a stale save through the guard.
- */
-function nextWorksheetRevision(baseUpdatedAt: string | null): string {
-  const now = Date.now();
-  const base = baseUpdatedAt ? Date.parse(baseUpdatedAt) : Number.NaN;
-  const next = Number.isNaN(base) ? now : Math.max(now, base + 1);
-  return new Date(next).toISOString();
-}
-
 function getMemoryKey(uid: string, role: WorksheetRole): string {
   return `${uid}::${role}`;
 }
@@ -81,7 +69,7 @@ function upsertMemoryWorksheet<T = unknown>(
   if (existing ? existing.updatedAt !== baseUpdatedAt : baseUpdatedAt !== null) {
     throw new WorksheetConflictError();
   }
-  const updatedAt = nextWorksheetRevision(baseUpdatedAt);
+  const updatedAt = nextRevision(baseUpdatedAt);
   memoryWorksheetStore.set(key, { data: (data ?? null) as T | null, updatedAt });
   return updatedAt;
 }
@@ -165,7 +153,7 @@ export async function upsertWorksheet<T = unknown>(
   // Two guards, both meaning "the caller read the latest revision": the row may
   // only be inserted while none exists (?5 IS NULL), and the DO UPDATE only
   // matches the revision the caller actually read.
-  const updatedAt = nextWorksheetRevision(baseUpdatedAt);
+  const updatedAt = nextRevision(baseUpdatedAt);
   const result = await execute(
     `INSERT INTO worksheets (uid, role, data, created_at, updated_at)
      SELECT ?1, ?2, ?3, ?4, ?4
