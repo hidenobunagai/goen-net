@@ -136,6 +136,19 @@ function saveBoardToStorage(board: BoardState) {
   }
 }
 
+// Canonical signature of the board content. Column key insertion order is not
+// meaningful, so columns are sorted before serializing; two boards with equal
+// signatures never need to be saved twice.
+function serializeBoard(board: BoardState): string {
+  const columns = Object.keys(board.columns)
+    .sort()
+    .map((id) => {
+      const column = board.columns[id];
+      return { id, title: column.title, removable: column.removable, itemIds: column.itemIds };
+    });
+  return JSON.stringify({ columnOrder: board.columnOrder, columns });
+}
+
 function ensureBacklogColumn(board: BoardState): BoardState {
   if (board.columns[BACKLOG_COLUMN_ID]) return board;
   const backlog: ColumnState = {
@@ -254,6 +267,7 @@ export function PrioritizationBoard({
   const hasConflictRef = useRef(false);
   const isFirstMount = useRef(true);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSyncedBoardRef = useRef<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -272,13 +286,16 @@ export function PrioritizationBoard({
     setUpdates(initialUpdates.map(toUpdateItem));
   }, [initialUpdates]);
 
-  // Sync state if initialBoard or initialUpdatedAt changes from props (e.g. after conflict reload)
+  // Sync state if initialBoard or initialUpdatedAt changes from props (e.g. after conflict reload).
+  // Adopted server state is recorded as already synced so it is never written straight back.
   useEffect(() => {
     const rawBoard = (
       initialBoard && typeof initialBoard === "object" ? initialBoard : null
     ) as BoardState | null;
     if (rawBoard && rawBoard.columns && rawBoard.columnOrder) {
-      setBoard(createBoardWithUpdates(rawBoard, updates));
+      const nextBoard = createBoardWithUpdates(rawBoard, updates);
+      lastSyncedBoardRef.current = serializeBoard(nextBoard);
+      setBoard(nextBoard);
     }
     baseUpdatedAtRef.current = initialUpdatedAt ?? null;
     hasConflictRef.current = false;
@@ -371,16 +388,30 @@ export function PrioritizationBoard({
     router.refresh();
   }, [router]);
 
+  // Schedule a save only when the board content actually changed.
+  // syncStatus is deliberately not a dependency: status transitions
+  // (saving -> saved -> idle) used to re-run this effect and keep saving forever
+  // while nobody edited the board. Content-identical board updates (prop sync,
+  // updates reconciliation) are filtered out by the last-synced signature, and a
+  // pending debounced save is superseded inline instead of in a cleanup so such
+  // an update cannot cancel an edit that still needs to reach the server.
   useEffect(() => {
     if (!board) return;
-    if (hasConflictRef.current || syncStatus === "conflict") return;
+    if (hasConflictRef.current) return;
 
-    saveBoardToStorage(board);
+    const signature = serializeBoard(board);
 
     if (isFirstMount.current) {
       isFirstMount.current = false;
+      lastSyncedBoardRef.current = signature;
+      saveBoardToStorage(board);
       return;
     }
+
+    if (signature === lastSyncedBoardRef.current) return;
+
+    lastSyncedBoardRef.current = signature;
+    saveBoardToStorage(board);
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -390,13 +421,7 @@ export function PrioritizationBoard({
     saveTimeoutRef.current = setTimeout(() => {
       void sendSaveRequest(board);
     }, 800);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [board, sendSaveRequest, syncStatus]);
+  }, [board, sendSaveRequest]);
 
   useEffect(() => {
     setBoard((prev) => createBoardWithUpdates(prev, updates));
