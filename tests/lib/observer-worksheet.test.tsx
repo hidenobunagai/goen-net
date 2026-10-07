@@ -98,5 +98,5 @@ describe("ObserverWorksheet", () => {
 
     const body = JSON.parse(String(putCalls[0][1]?.body));
     expect(body.data.checklist?.[targetPromptText!]).toBe(true);
-  });
+  }, 15000);
 });

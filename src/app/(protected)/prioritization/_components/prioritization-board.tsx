@@ -43,6 +43,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { UpdateRecord } from "@/lib/updates";
@@ -135,6 +136,19 @@ function saveBoardToStorage(board: BoardState) {
   }
 }
 
+// Canonical signature of the board content. Column key insertion order is not
+// meaningful, so columns are sorted before serializing; two boards with equal
+// signatures never need to be saved twice.
+function serializeBoard(board: BoardState): string {
+  const columns = Object.keys(board.columns)
+    .sort()
+    .map((id) => {
+      const column = board.columns[id];
+      return { id, title: column.title, removable: column.removable, itemIds: column.itemIds };
+    });
+  return JSON.stringify({ columnOrder: board.columnOrder, columns });
+}
+
 function ensureBacklogColumn(board: BoardState): BoardState {
   if (board.columns[BACKLOG_COLUMN_ID]) return board;
   const backlog: ColumnState = {
@@ -219,9 +233,15 @@ function findColumnIdByItem(board: BoardState, itemId: UniqueId): UniqueId | nul
 type PrioritizationBoardProps = {
   initialUpdates: UpdateRecord[];
   initialBoard?: unknown;
+  initialUpdatedAt?: string | null;
 };
 
-export function PrioritizationBoard({ initialUpdates, initialBoard }: PrioritizationBoardProps) {
+export function PrioritizationBoard({
+  initialUpdates,
+  initialBoard,
+  initialUpdatedAt = null,
+}: PrioritizationBoardProps) {
+  const router = useRouter();
   const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
   const [board, setBoard] = useState<BoardState | null>(() => {
     const rawBoard = (
@@ -232,15 +252,22 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
     }
     return null;
   });
-  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error" | "conflict">(
+    "idle"
+  );
   const [newColumnName, setNewColumnName] = useState("");
   const [activeId, setActiveId] = useState<UniqueId | null>(null);
   const [selectedMember, setSelectedMember] = useState<string>("all");
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
+  const baseUpdatedAtRef = useRef<string | null>(initialUpdatedAt ?? null);
+  const isSavingRef = useRef(false);
+  const pendingBoardRef = useRef<BoardState | null>(null);
+  const hasConflictRef = useRef(false);
   const isFirstMount = useRef(true);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSyncedBoardRef = useRef<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -259,44 +286,142 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
     setUpdates(initialUpdates.map(toUpdateItem));
   }, [initialUpdates]);
 
+  // Sync state if initialBoard or initialUpdatedAt changes from props (e.g. after conflict reload).
+  // Adopted server state is recorded as already synced so it is never written straight back.
+  useEffect(() => {
+    const rawBoard = (
+      initialBoard && typeof initialBoard === "object" ? initialBoard : null
+    ) as BoardState | null;
+    if (rawBoard && rawBoard.columns && rawBoard.columnOrder) {
+      const nextBoard = createBoardWithUpdates(rawBoard, updates);
+      lastSyncedBoardRef.current = serializeBoard(nextBoard);
+      setBoard(nextBoard);
+    }
+    baseUpdatedAtRef.current = initialUpdatedAt ?? null;
+    hasConflictRef.current = false;
+    setSyncStatus("idle");
+  }, [initialBoard, initialUpdatedAt, updates]);
+
+  const sendSaveRequest = useCallback(async (boardToSave: BoardState) => {
+    if (hasConflictRef.current) return;
+
+    if (isSavingRef.current) {
+      pendingBoardRef.current = boardToSave;
+      return;
+    }
+
+    isSavingRef.current = true;
+    setSyncStatus("saving");
+
+    try {
+      const response = await fetch("/api/prioritization", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          board: boardToSave,
+          baseUpdatedAt: baseUpdatedAtRef.current,
+        }),
+      });
+
+      if (response.status === 409) {
+        hasConflictRef.current = true;
+        pendingBoardRef.current = null;
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+          saveTimeoutRef.current = null;
+        }
+        setSyncStatus("conflict");
+        isSavingRef.current = false;
+        return;
+      }
+
+      if (response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          ok?: boolean;
+          updatedAt?: string | null;
+        } | null;
+        if (typeof payload?.updatedAt === "string") {
+          baseUpdatedAtRef.current = payload.updatedAt;
+        }
+        isSavingRef.current = false;
+
+        if (pendingBoardRef.current && !hasConflictRef.current) {
+          const nextBoard = pendingBoardRef.current;
+          pendingBoardRef.current = null;
+          void sendSaveRequest(nextBoard);
+        } else {
+          setSyncStatus("saved");
+          setTimeout(() => {
+            setSyncStatus((current) => (current === "saved" ? "idle" : current));
+          }, 2000);
+        }
+      } else {
+        isSavingRef.current = false;
+        setSyncStatus("error");
+        if (pendingBoardRef.current && !hasConflictRef.current) {
+          const nextBoard = pendingBoardRef.current;
+          pendingBoardRef.current = null;
+          void sendSaveRequest(nextBoard);
+        }
+      }
+    } catch {
+      isSavingRef.current = false;
+      setSyncStatus("error");
+      if (pendingBoardRef.current && !hasConflictRef.current) {
+        const nextBoard = pendingBoardRef.current;
+        pendingBoardRef.current = null;
+        void sendSaveRequest(nextBoard);
+      }
+    }
+  }, []);
+
+  const handleReload = useCallback(() => {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore storage errors
+    }
+    hasConflictRef.current = false;
+    pendingBoardRef.current = null;
+    isSavingRef.current = false;
+    isFirstMount.current = true;
+    router.refresh();
+  }, [router]);
+
+  // Schedule a save only when the board content actually changed.
+  // syncStatus is deliberately not a dependency: status transitions
+  // (saving -> saved -> idle) used to re-run this effect and keep saving forever
+  // while nobody edited the board. Content-identical board updates (prop sync,
+  // updates reconciliation) are filtered out by the last-synced signature, and a
+  // pending debounced save is superseded inline instead of in a cleanup so such
+  // an update cannot cancel an edit that still needs to reach the server.
   useEffect(() => {
     if (!board) return;
-    saveBoardToStorage(board);
+    if (hasConflictRef.current) return;
+
+    const signature = serializeBoard(board);
 
     if (isFirstMount.current) {
       isFirstMount.current = false;
+      lastSyncedBoardRef.current = signature;
+      saveBoardToStorage(board);
       return;
     }
+
+    if (signature === lastSyncedBoardRef.current) return;
+
+    lastSyncedBoardRef.current = signature;
+    saveBoardToStorage(board);
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
 
     setSyncStatus("saving");
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const response = await fetch("/api/prioritization", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ board }),
-        });
-        if (response.ok) {
-          setSyncStatus("saved");
-          setTimeout(() => setSyncStatus("idle"), 2000);
-        } else {
-          setSyncStatus("error");
-        }
-      } catch {
-        setSyncStatus("error");
-      }
+    saveTimeoutRef.current = setTimeout(() => {
+      void sendSaveRequest(board);
     }, 800);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [board]);
+  }, [board, sendSaveRequest]);
 
   useEffect(() => {
     setBoard((prev) => createBoardWithUpdates(prev, updates));
@@ -628,7 +753,24 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
                   Save failed (saved locally)
                 </Typography>
               )}
+              {syncStatus === "conflict" && (
+                <Typography variant="caption" sx={{ color: "#f87171", fontWeight: 600 }}>
+                  Another member changed the board.
+                </Typography>
+              )}
             </Stack>
+            {syncStatus === "conflict" && (
+              <Alert
+                severity="error"
+                action={
+                  <Button color="inherit" size="small" onClick={handleReload}>
+                    Reload
+                  </Button>
+                }
+              >
+                Another member changed the board.
+              </Alert>
+            )}
             <Typography
               variant="body1"
               sx={{
