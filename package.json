@@ -64,7 +64,8 @@
   },
   "overrides": {
     "esbuild": "0.25.0",
-    "next": "$next"
+    "next": "$next",
+    "tinypool": "^2.2.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
