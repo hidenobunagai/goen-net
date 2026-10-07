@@ -43,6 +43,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { UpdateRecord } from "@/lib/updates";
@@ -219,9 +220,15 @@ function findColumnIdByItem(board: BoardState, itemId: UniqueId): UniqueId | nul
 type PrioritizationBoardProps = {
   initialUpdates: UpdateRecord[];
   initialBoard?: unknown;
+  initialUpdatedAt?: string | null;
 };
 
-export function PrioritizationBoard({ initialUpdates, initialBoard }: PrioritizationBoardProps) {
+export function PrioritizationBoard({
+  initialUpdates,
+  initialBoard,
+  initialUpdatedAt = null,
+}: PrioritizationBoardProps) {
+  const router = useRouter();
   const [updates, setUpdates] = useState<UpdateItem[]>(() => initialUpdates.map(toUpdateItem));
   const [board, setBoard] = useState<BoardState | null>(() => {
     const rawBoard = (
@@ -232,13 +239,19 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
     }
     return null;
   });
-  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [syncStatus, setSyncStatus] = useState<
+    "idle" | "saving" | "saved" | "error" | "conflict"
+  >("idle");
   const [newColumnName, setNewColumnName] = useState("");
   const [activeId, setActiveId] = useState<UniqueId | null>(null);
   const [selectedMember, setSelectedMember] = useState<string>("all");
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
+  const baseUpdatedAtRef = useRef<string | null>(initialUpdatedAt ?? null);
+  const isSavingRef = useRef(false);
+  const pendingBoardRef = useRef<BoardState | null>(null);
+  const hasConflictRef = useRef(false);
   const isFirstMount = useRef(true);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -259,8 +272,109 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
     setUpdates(initialUpdates.map(toUpdateItem));
   }, [initialUpdates]);
 
+  // Sync state if initialBoard or initialUpdatedAt changes from props (e.g. after conflict reload)
+  useEffect(() => {
+    const rawBoard = (
+      initialBoard && typeof initialBoard === "object" ? initialBoard : null
+    ) as BoardState | null;
+    if (rawBoard && rawBoard.columns && rawBoard.columnOrder) {
+      setBoard(createBoardWithUpdates(rawBoard, updates));
+    }
+    baseUpdatedAtRef.current = initialUpdatedAt ?? null;
+    hasConflictRef.current = false;
+    setSyncStatus("idle");
+  }, [initialBoard, initialUpdatedAt, updates]);
+
+  const sendSaveRequest = useCallback(async (boardToSave: BoardState) => {
+    if (hasConflictRef.current) return;
+
+    if (isSavingRef.current) {
+      pendingBoardRef.current = boardToSave;
+      return;
+    }
+
+    isSavingRef.current = true;
+    setSyncStatus("saving");
+
+    try {
+      const response = await fetch("/api/prioritization", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          board: boardToSave,
+          baseUpdatedAt: baseUpdatedAtRef.current,
+        }),
+      });
+
+      if (response.status === 409) {
+        hasConflictRef.current = true;
+        pendingBoardRef.current = null;
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+          saveTimeoutRef.current = null;
+        }
+        setSyncStatus("conflict");
+        isSavingRef.current = false;
+        return;
+      }
+
+      if (response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          ok?: boolean;
+          updatedAt?: string | null;
+        } | null;
+        if (typeof payload?.updatedAt === "string") {
+          baseUpdatedAtRef.current = payload.updatedAt;
+        }
+        isSavingRef.current = false;
+
+        if (pendingBoardRef.current && !hasConflictRef.current) {
+          const nextBoard = pendingBoardRef.current;
+          pendingBoardRef.current = null;
+          void sendSaveRequest(nextBoard);
+        } else {
+          setSyncStatus("saved");
+          setTimeout(() => {
+            setSyncStatus((current) => (current === "saved" ? "idle" : current));
+          }, 2000);
+        }
+      } else {
+        isSavingRef.current = false;
+        setSyncStatus("error");
+        if (pendingBoardRef.current && !hasConflictRef.current) {
+          const nextBoard = pendingBoardRef.current;
+          pendingBoardRef.current = null;
+          void sendSaveRequest(nextBoard);
+        }
+      }
+    } catch {
+      isSavingRef.current = false;
+      setSyncStatus("error");
+      if (pendingBoardRef.current && !hasConflictRef.current) {
+        const nextBoard = pendingBoardRef.current;
+        pendingBoardRef.current = null;
+        void sendSaveRequest(nextBoard);
+      }
+    }
+  }, []);
+
+  const handleReload = useCallback(() => {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore storage errors
+    }
+    hasConflictRef.current = false;
+    pendingBoardRef.current = null;
+    isSavingRef.current = false;
+    isFirstMount.current = true;
+    router.refresh();
+  }, [router]);
+
   useEffect(() => {
     if (!board) return;
+    if (hasConflictRef.current || syncStatus === "conflict") return;
+
     saveBoardToStorage(board);
 
     if (isFirstMount.current) {
@@ -273,22 +387,8 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
     }
 
     setSyncStatus("saving");
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const response = await fetch("/api/prioritization", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ board }),
-        });
-        if (response.ok) {
-          setSyncStatus("saved");
-          setTimeout(() => setSyncStatus("idle"), 2000);
-        } else {
-          setSyncStatus("error");
-        }
-      } catch {
-        setSyncStatus("error");
-      }
+    saveTimeoutRef.current = setTimeout(() => {
+      void sendSaveRequest(board);
     }, 800);
 
     return () => {
@@ -296,7 +396,7 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [board]);
+  }, [board, sendSaveRequest, syncStatus]);
 
   useEffect(() => {
     setBoard((prev) => createBoardWithUpdates(prev, updates));
@@ -628,7 +728,24 @@ export function PrioritizationBoard({ initialUpdates, initialBoard }: Prioritiza
                   Save failed (saved locally)
                 </Typography>
               )}
+              {syncStatus === "conflict" && (
+                <Typography variant="caption" sx={{ color: "#f87171", fontWeight: 600 }}>
+                  Another member changed the board.
+                </Typography>
+              )}
             </Stack>
+            {syncStatus === "conflict" && (
+              <Alert
+                severity="error"
+                action={
+                  <Button color="inherit" size="small" onClick={handleReload}>
+                    Reload
+                  </Button>
+                }
+              >
+                Another member changed the board.
+              </Alert>
+            )}
             <Typography
               variant="body1"
               sx={{

@@ -12,6 +12,7 @@ export default async function PrioritizationPage() {
 
   let updates: UpdateRecord[] = [];
   let initialBoard: unknown = null;
+  let initialUpdatedAt: string | null = null;
   try {
     if (viewerEmail) {
       const [fetchedUpdates, fetchedBoard] = await Promise.all([
@@ -19,11 +20,18 @@ export default async function PrioritizationPage() {
         getPrioritizationBoard(),
       ]);
       updates = fetchedUpdates;
-      initialBoard = fetchedBoard;
+      initialBoard = fetchedBoard.data;
+      initialUpdatedAt = fetchedBoard.updatedAt;
     }
   } catch (error) {
     logger.error("Failed to load updates for prioritization", { error });
   }
 
-  return <PrioritizationBoard initialUpdates={updates} initialBoard={initialBoard} />;
+  return (
+    <PrioritizationBoard
+      initialUpdates={updates}
+      initialBoard={initialBoard}
+      initialUpdatedAt={initialUpdatedAt}
+    />
+  );
 }
